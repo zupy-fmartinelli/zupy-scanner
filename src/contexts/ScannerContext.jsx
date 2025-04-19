@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { queueOperation } from '../utils/offlineSync';
+import { getItem, setItem } from '../utils/storage';
 import { useAuth } from './AuthContext';
 import { useNetwork } from './NetworkContext';
 
@@ -21,6 +22,30 @@ export function ScannerProvider({ children }) {
 
   const { scannerData } = useAuth();
   const { isOnline } = useNetwork();
+  
+  // Carregar histórico de scan do armazenamento local ao inicializar
+  useEffect(() => {
+    const loadScanHistory = async () => {
+      try {
+        const savedHistory = await getItem('scan_history', []);
+        if (savedHistory && Array.isArray(savedHistory) && savedHistory.length > 0) {
+          console.log('Histórico de scan carregado do armazenamento local:', savedHistory.length, 'itens');
+          setScanHistory(savedHistory);
+        }
+        
+        // Recuperar o último scan ativo se existir
+        const savedCurrentScan = await getItem('current_scan', null);
+        if (savedCurrentScan) {
+          console.log('Último scan recuperado do armazenamento local');
+          setCurrentScan(savedCurrentScan);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar histórico de scan:', error);
+      }
+    };
+    
+    loadScanHistory();
+  }, []);
 
   /**
    * Process a scanned QR code
@@ -106,7 +131,12 @@ export function ScannerProvider({ children }) {
       }
       
       // Update scan history
-      setScanHistory(prev => [scan, ...prev].slice(0, 50)); // Keep last 50 scans
+      const updatedHistory = [scan, ...scanHistory].slice(0, 50); // Keep last 50 scans
+      setScanHistory(updatedHistory);
+      
+      // Persistir o histórico atualizado e o scan atual
+      setItem('scan_history', updatedHistory);
+      setItem('current_scan', scan);
       
       return scan;
     } catch (err) {
@@ -142,8 +172,10 @@ export function ScannerProvider({ children }) {
   /**
    * Clear scan history
    */
-  const clearScanHistory = () => {
+  const clearScanHistory = async () => {
     setScanHistory([]);
+    // Também limpar do armazenamento local
+    await setItem('scan_history', []);
   };
 
   // Context value

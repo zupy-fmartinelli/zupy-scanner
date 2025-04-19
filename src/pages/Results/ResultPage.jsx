@@ -24,15 +24,24 @@ const RFM_SEGMENTS = {
   "default": { emoji: "⭐", color: "#808080", class: "bg-secondary-subtle text-secondary" }
 };
 
-// Função para formatar código de cartão
+// Função para formatar código de cartão - adaptada para KSUID
 const formatCardCode = (cardId) => {
   if (!cardId) return "-";
-  // Remove caracteres não alfanuméricos
-  const clean = typeof cardId === 'string' ? cardId.replace(/[^a-z0-9]/gi, '') : String(cardId);
-  // Pega os últimos 8 caracteres, ou menos se o código for menor
-  const last8 = clean.slice(-8);
-  // Retorna no formato "ZP-XXXXXXXX"
-  return `ZP-${last8.toUpperCase()}`;
+  
+  // Se for string KSUID (formato padrão: 27 caracteres alfanuméricos)
+  if (typeof cardId === 'string' && cardId.length >= 20) {
+    // Exibir o KSUID completo para referência exata
+    return cardId.toUpperCase();
+  }
+  
+  // Para códigos numéricos simples
+  if (typeof cardId === 'number' || /^\d+$/.test(cardId)) {
+    return `ZP-${cardId}`;
+  }
+  
+  // Em outros casos - manter comportamento padronizado
+  const clean = typeof cardId === 'string' ? cardId : String(cardId);
+  return clean.toUpperCase();
 };
 
 function ResultPage() {

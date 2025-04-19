@@ -69,8 +69,26 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
     const qrData = processVideoFrame(video, canvas, canvasContext);
     
     if (qrData) {
-      // QR code detected
+      // QR code detected - mostrar feedback visual imediato
       setScanning(false);
+      
+      // Aplicar efeito visual de sucesso no canvas
+      const width = canvas.width;
+      const height = canvas.height;
+      canvasContext.fillStyle = 'rgba(40, 167, 69, 0.3)'; // Verde semitransparente
+      canvasContext.fillRect(0, 0, width, height);
+      
+      // Desenhar borda verde pulsante
+      canvasContext.strokeStyle = '#28a745';
+      canvasContext.lineWidth = 8;
+      canvasContext.strokeRect(10, 10, width - 20, height - 20);
+      
+      // Exibir ícone de sucesso no centro
+      canvasContext.fillStyle = '#28a745';
+      canvasContext.font = '48px bootstrap-icons';
+      canvasContext.textAlign = 'center';
+      canvasContext.textBaseline = 'middle';
+      canvasContext.fillText('✓', width / 2, height / 2);
       
       if (autoClose) {
         // Stop camera after successful scan
@@ -79,8 +97,11 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         }
       }
       
-      // Notify parent component
-      onQrScanned(qrData);
+      // Pequeno delay para mostrar o feedback visual antes de prosseguir
+      setTimeout(() => {
+        // Notify parent component
+        onQrScanned(qrData);
+      }, 500);
       
       if (!autoClose) {
         // Continue scanning

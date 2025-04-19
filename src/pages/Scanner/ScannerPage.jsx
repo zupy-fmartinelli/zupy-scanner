@@ -64,11 +64,30 @@ function ScannerPage() {
     setShowScanner(false);
     setScanningStatus('processing');
     
+    // Fornecer feedback visual imediato
+    toast.info('QR Code detectado! Processando...', {
+      autoClose: 1500,
+      position: "top-center",
+      hideProgressBar: false,
+    });
+    
     try {
-      await processScan(qrData);
+      const scanResult = await processScan(qrData);
+      console.log('Scan processado com sucesso:', scanResult);
+      
+      // Forçar redirecionamento para página de resultados
+      if (scanResult && scanResult.processed) {
+        // Pequeno timeout para dar tempo de atualizar o estado
+        setTimeout(() => {
+          navigate('/result');
+        }, 300);
+      } else if (!isOnline) {
+        toast.warning('Você está offline. O scan será processado quando estiver online.');
+        navigate('/result');
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to process QR code');
-      console.error('Process error:', error);
+      toast.error(error.message || 'Falha ao processar QR code');
+      console.error('Erro no processamento:', error);
       setScanningStatus('idle');
     }
   };
