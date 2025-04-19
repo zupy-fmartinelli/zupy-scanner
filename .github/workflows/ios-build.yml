@@ -26,6 +26,20 @@ jobs:
           npm install -g @capacitor/cli
           npx cap sync ios
 
+      - name: Check/Generate Podfile
+        run: |
+          if [ ! -f ios/Podfile ]; then
+            echo "Podfile not found in ios/. Generating one..."
+            cd ios
+            pod init
+            # Add any necessary Podfile configurations here if needed,
+            # although Capacitor sync usually handles this.
+            cd ..
+            echo "Podfile generated."
+          else
+            echo "Podfile found in ios/."
+          fi
+
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
