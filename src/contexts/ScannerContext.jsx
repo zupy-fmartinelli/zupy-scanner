@@ -54,11 +54,11 @@ export function ScannerProvider({ children }) {
       
       // Process scan
       if (isOnline) {
-        // Online processing
-        const result = await api.post('/api/scanner/process-scan', {
-          qrData: parsedData,
-          scannerId: scannerData?.id,
-          timestamp: scan.timestamp
+        // Online processing - corrigindo URL para a rota correta do backend
+        const result = await api.post('/scanner/api/v1/scan/', {
+          qr_code: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(parsedData),
+          scanner_id: scannerData?.id,
+          redeem: false
         });
         
         // Update scan with result
@@ -77,12 +77,12 @@ export function ScannerProvider({ children }) {
         // Queue for later synchronization
         const operationId = await queueOperation({
           type: 'scan',
-          endpoint: '/api/scanner/process-scan',
+          endpoint: '/scanner/api/v1/scan/',
           method: 'POST',
           data: {
-            qrData: parsedData,
-            scannerId: scannerData?.id,
-            timestamp: scan.timestamp
+            qr_code: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(parsedData),
+            scanner_id: scannerData?.id,
+            redeem: false
           }
         });
         
