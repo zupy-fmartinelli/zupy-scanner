@@ -148,28 +148,102 @@ function MainLayout({ title, children, activeMenu }) {
         <div className="container-fluid">
           <nav className="nav-bar">
             <button 
-              className={`nav-item ${activeMenu === 'scanner' ? 'active' : ''}`}
-              onClick={() => handleNavigation('/scanner')}
-            >
-              <i className="bi bi-qr-code-scan"></i>
-              <span>Scanner</span>
-            </button>
-            <button 
               className={`nav-item ${activeMenu === 'history' ? 'active' : ''}`}
               onClick={() => handleNavigation('/history')}
             >
               <i className="bi bi-clock-history"></i>
               <span>Histórico</span>
             </button>
+            
+            {/* Botão central de scanner com destaque */}
             <button 
-              className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
-              onClick={() => handleNavigation('/settings')}
+              className="nav-item-center"
+              onClick={() => handleNavigation('/scanner')}
             >
-              <i className="bi bi-gear"></i>
-              <span>Configurações</span>
+              <div className={`scan-button-circle ${activeMenu === 'scanner' ? 'active' : ''}`}>
+                <i className="bi bi-qr-code-scan"></i>
+              </div>
             </button>
+            
+            {/* Botão vazio para manter equilíbrio no layout (substitui Configurações) */}
+            <div className="nav-item invisible">
+              <i className="bi bi-clock-history"></i>
+              <span>Invisível</span>
+            </div>
           </nav>
         </div>
+        
+        <style jsx>{`
+          .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+          }
+          
+          .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: transparent;
+            border: none;
+            color: #adb5bd;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: color 0.2s;
+            flex: 1;
+            font-size: 0.85rem;
+          }
+          
+          .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+          }
+          
+          .nav-item.active {
+            color: white;
+          }
+          
+          .nav-item:hover {
+            color: white;
+          }
+          
+          .nav-item-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            transform: translateY(-20px);
+            position: relative;
+            z-index: 1030;
+            flex: 1;
+          }
+          
+          .scan-button-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--zupy-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+          }
+          
+          .scan-button-circle i {
+            font-size: 1.8rem;
+          }
+          
+          .scan-button-circle.active, 
+          .scan-button-circle:hover {
+            background-color: var(--zupy-light);
+            transform: scale(1.05);
+          }
+        `}</style>
       </footer>
       
       {/* Logout confirmation modal */}

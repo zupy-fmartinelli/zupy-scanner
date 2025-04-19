@@ -164,7 +164,7 @@ main {
 
 /* Cupom usado - Estilo de erro */
 .coupon-used {
-  background-color: rgba(220, 53, 69, 0.1) !important;
+  background-color: rgba(220, 53, 69, 0.15) !important;
   border-left: 4px solid #dc3545 !important;
 }
 
@@ -175,7 +175,20 @@ main {
 
 .coupon-used-icon {
   font-size: 2.5rem;
-  color: #dc3545;
+  color: #ff3545 !important; /* Vermelho mais vivo para melhor contraste */
+}
+
+/* Melhorar contraste para ícones em fundo escuro */
+.bi {
+  color: inherit;
+}
+
+.text-primary {
+  color: #7c50c7 !important; /* Roxo mais claro */
+}
+
+.text-purple, .text-violet {
+  color: #9c7dbb !important; /* Roxo mais claro ainda para melhor visibilidade */
 }
 
 /* Sobreescrever cores da navbar e footer */
