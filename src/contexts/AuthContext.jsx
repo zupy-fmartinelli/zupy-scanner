@@ -127,15 +127,32 @@ export function AuthProvider({ children }) {
       
       console.log("Starting authentication with QR code");
       
+      // Verifica se o conteúdo é uma URL com token
+      let processedData = qrCodeData;
+      try {
+        if (typeof qrCodeData === 'string' && qrCodeData.startsWith('http') && qrCodeData.includes('?token=')) {
+          console.log("QR data appears to be a URL with token parameter");
+          const url = new URL(qrCodeData);
+          const token = url.searchParams.get('token');
+          if (token) {
+            processedData = token;
+            console.log("Extracted token from URL parameter");
+          }
+        }
+      } catch (urlError) {
+        console.warn("Failed to parse URL from QR data:", urlError);
+        // Continue with original data
+      }
+      
       // QR code should contain a JWT or authentication data
       // Parse QR data
       let qrData;
       try {
-        qrData = JSON.parse(qrCodeData);
+        qrData = JSON.parse(processedData);
         console.log("QR data parsed as JSON:", { ...qrData, token: qrData.token ? "[REDACTED]" : undefined });
       } catch (e) {
         // If not JSON, assume it's a direct token or code
-        qrData = { token: qrCodeData };
+        qrData = { token: processedData };
         console.log("QR data not JSON, treating as token");
       }
       

@@ -131,11 +131,33 @@ function AuthPage() {
     try {
       setProcessingQR(true);
       
-      if (debugMode) {
-        addDebugLog(`QR data received: ${qrData.substring(0, 20)}...`);
+      // Verifica se o QR Code é uma URL com parâmetro token
+      let tokenToUse = qrData;
+      
+      try {
+        // Tenta identificar se o conteúdo é uma URL
+        if (qrData.startsWith('http') && qrData.includes('?token=')) {
+          // Extrai o token da URL
+          const url = new URL(qrData);
+          const token = url.searchParams.get('token');
+          
+          if (token) {
+            tokenToUse = token;
+            if (debugMode) {
+              addDebugLog(`Detected URL with token parameter. Extracted token.`);
+            }
+          }
+        }
+      } catch (urlError) {
+        console.error('Error parsing URL:', urlError);
+        // Continue with original QR data if URL parsing fails
       }
       
-      await authenticateWithQR(qrData);
+      if (debugMode) {
+        addDebugLog(`QR data processed: ${tokenToUse.substring(0, 20)}...`);
+      }
+      
+      await authenticateWithQR(tokenToUse);
       
       if (debugMode) {
         addDebugLog('Authentication successful');
