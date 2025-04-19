@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
         if (storedToken) {
           try {
             // Call API to validate token
-            const validationResult = await api.get('/api/v1/scanner/auth-token/');
+            const validationResult = await api.get('/scanner/api/v1/auth-token/');
             
             // Update user data if needed
             if (validationResult.user && 
@@ -98,16 +98,16 @@ export function AuthProvider({ children }) {
       
       // Get the API URL for debugging
       const apiUrl = await getApiUrl();
-      console.log(`Authenticating with backend at ${apiUrl}/api/v1/scanner/auth/`);
+      console.log(`Authenticating with backend at ${apiUrl}/scanner/api/v1/auth/`);
       
       // Authenticate with backend
       try {
         // Debug info - log full request details
-        console.log(`Sending authentication request to: ${apiUrl}/api/v1/scanner/auth/`);
+        console.log(`Sending authentication request to: ${apiUrl}/scanner/api/v1/auth/`);
         console.log('QR data type:', typeof qrData);
         console.log('QR data:', typeof qrData === 'string' ? qrData.substring(0, 30) + '...' : qrData);
         
-        const response = await api.post('/api/v1/scanner/auth/', qrData, false);
+        const response = await api.post('/scanner/api/v1/auth/', qrData, false);
         
         // Debug info - log successful response
         console.log('Authentication successful! Response:', response);
@@ -170,7 +170,7 @@ export function AuthProvider({ children }) {
       // Call logout API if we have a token
       if (authToken) {
         try {
-          await api.post('/api/v1/scanner/logout/');
+          await api.post('/scanner/api/v1/logout/');
         } catch (err) {
           // Continue logout process even if API call fails
           console.error("Logout API error:", err);

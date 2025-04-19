@@ -211,19 +211,19 @@ function AuthPage() {
                     <div className="d-flex gap-2 mb-3">
                       <button
                         className="btn btn-sm btn-outline-primary"
-                        onClick={() => testApiEndpoint('/api/v1/scanner/auth/')}
+                        onClick={() => testApiEndpoint('/scanner/api/v1/auth/')}
                       >
                         Auth
                       </button>
                       <button
                         className="btn btn-sm btn-outline-primary"
-                        onClick={() => testApiEndpoint('/api/v1/scanner/auth-token/')}
+                        onClick={() => testApiEndpoint('/scanner/api/v1/auth-token/')}
                       >
                         Auth Token
                       </button>
                       <button
                         className="btn btn-sm btn-outline-primary"
-                        onClick={() => testApiEndpoint('/api/v1/scanner/logout/')}
+                        onClick={() => testApiEndpoint('/scanner/api/v1/logout/')}
                       >
                         Logout
                       </button>

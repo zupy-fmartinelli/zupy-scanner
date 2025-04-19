@@ -280,7 +280,7 @@ function SettingsPage() {
                         <input 
                           type="text" 
                           className="form-control font-monospace small" 
-                          value="/api/v1/scanner/auth/" 
+                          value="/scanner/api/v1/auth/" 
                           readOnly 
                         />
                       </div>
@@ -293,7 +293,7 @@ function SettingsPage() {
                         <input 
                           type="text" 
                           className="form-control font-monospace small" 
-                          value="/api/v1/scanner/auth-token/" 
+                          value="/scanner/api/v1/auth-token/" 
                           readOnly 
                         />
                       </div>
@@ -306,7 +306,7 @@ function SettingsPage() {
                         <input 
                           type="text" 
                           className="form-control font-monospace small" 
-                          value="/api/v1/scanner/logout/" 
+                          value="/scanner/api/v1/logout/" 
                           readOnly 
                         />
                       </div>
