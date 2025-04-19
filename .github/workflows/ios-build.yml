@@ -21,9 +21,18 @@ jobs:
           npm install
           npm run build
 
-      - name: Sync Capacitor with iOS
+      - name: Add iOS platform if missing
         run: |
           npm install -g @capacitor/cli
+          if [ ! -d "ios" ]; then
+            echo "iOS directory not found. Adding iOS platform..."
+            npx cap add ios
+          else
+            echo "iOS directory already exists."
+          fi
+
+      - name: Sync Capacitor with iOS
+        run: |
           npx cap sync ios
 
       - name: Check/Generate Podfile
