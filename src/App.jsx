@@ -110,6 +110,7 @@ function AppRoutes() {
 function App() {
   // Register service worker for PWA
   useEffect(() => {
+    // Register service worker for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then(
@@ -122,6 +123,19 @@ function App() {
         );
       });
     }
+    
+    // Limpar resultado de scan anterior ao abrir o aplicativo
+    const clearPreviousScan = async () => {
+      try {
+        // Remover o scan atual do armazenamento local
+        localStorage.removeItem('zupy_scanner_current_scan');
+        console.log('Histórico de scan anterior limpo ao iniciar o app');
+      } catch (error) {
+        console.error('Erro ao limpar scan anterior:', error);
+      }
+    };
+    
+    clearPreviousScan();
   }, []);
 
   return (

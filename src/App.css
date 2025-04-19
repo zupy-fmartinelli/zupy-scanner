@@ -1,5 +1,53 @@
 /* App-specific styles */
 
+/* Variáveis de cores personalizadas */
+:root {
+  --zupy-primary: #5c2d91;
+  --zupy-dark: #3a1b5e;
+  --zupy-light: #9c7dbb;
+  --app-bg-dark: #212529;
+  --app-bg-light: #f4f4f8;
+  --app-bg-card: #e9ecef;
+  --app-text-dark: #343a40;
+}
+
+/* Estilos globais */
+body {
+  background-color: var(--app-bg-dark);
+  color: #f8f9fa;
+}
+
+/* Sobreescrever estilos de cards */
+.card {
+  background-color: var(--app-bg-card) !important;
+  border: none !important;
+}
+
+.card-body {
+  background-color: var(--app-bg-card) !important;
+}
+
+/* Cupom usado - Estilo de erro */
+.coupon-used {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  border-left: 4px solid #dc3545 !important;
+}
+
+.coupon-used .card-header {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.coupon-used-icon {
+  font-size: 2.5rem;
+  color: #dc3545;
+}
+
+/* Sobreescrever cores da navbar e footer */
+footer.bg-dark, header.bg-dark {
+  background-color: #191c20 !important;
+}
+
 /* Remove default styles */
 #root {
   width: 100%;

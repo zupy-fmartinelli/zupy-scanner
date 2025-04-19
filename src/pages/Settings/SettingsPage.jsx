@@ -121,88 +121,54 @@ function SettingsPage() {
               </div>
             </div>
             
-            {/* API settings */}
-            <div className="card mb-4 bg-white border-0 shadow-sm">
+            {/* Conexão com API */}
+            <div className="card mb-4 border-0 shadow-sm">
               <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="card-title mb-0">Configurações de API</h5>
+                <h5 className="card-title mb-3">Conexão de API</h5>
+                
+                <div className="mb-3">
+                  <div className="d-flex align-items-center mb-2">
+                    <span className={`badge me-2 ${isOnline ? 'bg-success' : 'bg-danger'}`}>
+                      {isOnline ? 'Conectado' : 'Desconectado'}
+                    </span>
+                    <span className="text-muted">Status da API</span>
+                  </div>
                   
-                  {!showApiUrlForm && (
-                    <button 
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => setShowApiUrlForm(true)}
-                    >
-                      <i className="bi bi-pencil-square me-1"></i>
-                      Editar
-                    </button>
-                  )}
+                  <div className="alert alert-secondary">
+                    <i className="bi bi-info-circle me-2"></i>
+                    <small>Endpoint: <span className="font-monospace">{apiUrl || 'https://api.zupy.com'}</span></small>
+                  </div>
                 </div>
                 
-                {showApiUrlForm ? (
-                  <form onSubmit={handleApiUrlSubmit}>
-                    <div className="mb-3">
-                      <label htmlFor="apiUrl" className="form-label">URL da API</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="apiUrl"
-                        value={apiUrl}
-                        onChange={(e) => setApiUrl(e.target.value)}
-                        placeholder="https://api.zupy.com"
-                      />
-                      <div className="form-text mb-2">
-                        A URL base da API sem a barra final.
-                      </div>
+                <button 
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    try {
+                      if (!isOnline) {
+                        toast.warning('Você está offline. Não é possível testar a conexão.');
+                        return;
+                      }
                       
-                      <div className="d-flex gap-2 mt-2">
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-secondary"
-                          onClick={() => setApiUrl("https://api.zupy.com")}
-                        >
-                          api.zupy.com
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-secondary"
-                          onClick={() => setApiUrl("https://api.zupy.com.br")}
-                        >
-                          api.zupy.com.br
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-secondary"
-                          onClick={() => setApiUrl("https://localhost:3000")}
-                        >
-                          localhost:3000
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="d-flex gap-2">
-                      <button 
-                        type="button" 
-                        className="btn btn-outline-secondary"
-                        onClick={() => setShowApiUrlForm(false)}
-                      >
-                        Cancelar
-                      </button>
-                      <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                      >
-                        Salvar
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="mb-0">
-                    <label className="form-label text-muted small">URL da API</label>
-                    <div className="form-control-plaintext font-monospace small text-break">
-                      {apiUrl || 'https://api.zupy.com'}
-                    </div>
-                  </div>
-                )}
+                      toast.info('Testando conexão com a API...');
+                      
+                      const response = await fetch(`${apiUrl}/scanner/api/v1/ping/`, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                      });
+                      
+                      if (response.ok) {
+                        toast.success('Conexão com a API estabelecida com sucesso!');
+                      } else {
+                        toast.error(`Erro ao conectar com a API: ${response.status} ${response.statusText}`);
+                      }
+                    } catch (error) {
+                      toast.error(`Falha ao conectar com a API: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="bi bi-arrow-repeat me-2"></i>
+                  Testar Conexão
+                </button>
               </div>
             </div>
             

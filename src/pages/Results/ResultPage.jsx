@@ -285,6 +285,29 @@ function ResultPage() {
     
     const result = currentScan.result || {};
     
+    // Verificar mensagens de erro comuns para cupons
+    if (result.message && (
+        result.message.includes('USED') || 
+        result.message.includes('EXPIRED') || 
+        result.message.includes('INVALID') ||
+        result.message.includes('usado') ||
+        result.message.includes('expirado') ||
+        result.message.includes('inválido')
+    )) {
+      return {
+        icon: 'bi-x-circle',
+        title: 'Cupom Não Disponível',
+        message: result.message.includes('USED') || result.message.includes('usado') 
+          ? 'Este cupom já foi utilizado e não pode ser resgatado novamente.'
+          : result.message.includes('EXPIRED') || result.message.includes('expirado')
+          ? 'Este cupom está expirado e não pode mais ser utilizado.'
+          : 'Este cupom é inválido ou não está disponível para uso.',
+        colorClass: 'text-danger',
+        bgClass: 'bg-danger-subtle',
+        type: 'coupon-used'
+      };
+    }
+    
     // For different result types
     if (isLoyaltyCard) {
       return {
@@ -299,6 +322,18 @@ function ResultPage() {
     }
     
     if (isCoupon) {
+      if (result.status === 'used' || result.status === 'USED' || 
+          (result.details && (result.details.status === 'used' || result.details.status === 'USED'))) {
+        return {
+          icon: 'bi-x-circle',
+          title: 'Cupom Já Utilizado',
+          message: 'Este cupom já foi utilizado anteriormente e não pode ser resgatado novamente.',
+          colorClass: 'text-danger',
+          bgClass: 'bg-danger-subtle',
+          type: 'coupon-used'
+        };
+      }
+      
       return {
         icon: 'bi-ticket-perforated',
         title: redeemed ? 'Cupom Resgatado' : 'Cupom Disponível',
@@ -328,9 +363,9 @@ function ResultPage() {
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             {/* Result header card */}
-            <div className={`card mb-4 border-0 shadow-sm ${resultStatus.bgClass}`}>
+            <div className={`card mb-4 border-0 shadow-sm ${resultStatus.bgClass} ${resultStatus.type || ''}`}>
               <div className="card-body text-center py-4">
-                <div className={`display-1 mb-3 ${resultStatus.colorClass}`}>
+                <div className={`display-1 mb-3 ${resultStatus.colorClass} ${resultStatus.type === 'coupon-used' ? 'coupon-used-icon' : ''}`}>
                   <i className={`bi ${resultStatus.icon}`}></i>
                 </div>
                 
@@ -345,6 +380,13 @@ function ResultPage() {
                     </small>
                   </div>
                 )}
+                
+                {resultStatus.type === 'coupon-used' && (
+                  <div className="alert alert-danger mb-0" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    Este cupom não pode ser resgatado.
+                  </div>
+                )}
               </div>
             </div>
             
@@ -352,7 +394,7 @@ function ResultPage() {
             
             {/* Form para adição de pontos - MOVIDO PARA O TOPO */}
             {!finalized && isLoyaltyCard && currentScan.result?.requires_input && currentScan.result?.input_type === 'points' && (
-              <div className="card bg-white border-0 shadow-sm mb-4 animate__animated animate__fadeIn animate__faster">
+              <div className="card border-0 shadow-sm mb-4 animate__animated animate__fadeIn animate__faster">
                 <div className="card-header bg-success text-white">
                   <h5 className="card-title mb-0">
                     <i className="bi bi-plus-circle me-2"></i>
@@ -430,7 +472,7 @@ function ResultPage() {
             
             {/* CUPOM - Card de resgate - NOVO! */}
             {isCoupon && canRedeem && !redeemed && (
-              <div className="card bg-white border-0 shadow-sm mb-4 animate__animated animate__pulse animate__slow animate__infinite">
+              <div className="card border-0 shadow-sm mb-4 animate__animated animate__pulse animate__slow animate__infinite">
                 <div className="card-header bg-warning text-dark">
                   <h5 className="card-title mb-0">
                     <i className="bi bi-ticket-perforated-fill me-2"></i>
@@ -481,7 +523,7 @@ function ResultPage() {
             
             {/* Cupom já resgatado - NOVO! */}
             {isCoupon && redeemed && (
-              <div className="card bg-white border-0 shadow-sm mb-4">
+              <div className="card border-0 shadow-sm mb-4">
                 <div className="card-header bg-success text-white">
                   <h5 className="card-title mb-0">
                     <i className="bi bi-check-circle-fill me-2"></i>
@@ -525,7 +567,7 @@ function ResultPage() {
                       <div>
                         <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
                         <span className={`badge ${rfmSegment.class} px-3 py-2 fs-6`}>
-                          {rfmSegment.emoji} {clientDetails.tier || 'Regular'}
+                          {rfmSegment.emoji} {clientDetails.rfm_segment || clientDetails.tier || 'Regular'}
                         </span>
                         {clientDetails.program_name && (
                           <div className="mt-2 text-muted small">
