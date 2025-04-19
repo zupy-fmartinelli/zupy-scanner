@@ -135,12 +135,12 @@ function MainLayout({ title, children, activeMenu }) {
       </header>
       
       {/* Main content */}
-      <main className="flex-grow-1 bg-light">
+      <main className="flex-grow-1 bg-light pb-5">
         {children}
       </main>
       
       {/* Footer navigation */}
-      <footer className="bg-dark text-white border-top shadow-lg">
+      <footer className="bg-dark text-white border-top shadow-lg fixed-bottom">
         <div className="container-fluid">
           <nav className="nav-bar">
             <button 

@@ -9,6 +9,7 @@
   --app-bg-darker: #1a1d20;
   --app-bg-light: #f4f4f8;
   --app-bg-card: #2c3034;
+  --app-bg-card-light: #353941;
   --app-text-light: #f8f9fa;
   --app-text-dark: #343a40;
 }
@@ -29,19 +30,20 @@ html {
 }
 
 .card {
-  background-color: var(--app-bg-dark) !important;
+  background-color: var(--app-bg-card-light) !important;
   color: var(--app-text-light) !important;
 }
 
 /* Sobreescrever estilos de cards */
 .card {
-  background-color: var(--app-bg-dark) !important;
+  background-color: var(--app-bg-card-light) !important;
   border: none !important;
   color: var(--app-text-light) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .card-body {
-  background-color: var(--app-bg-dark) !important;
+  background-color: var(--app-bg-card-light) !important;
   color: var(--app-text-light) !important;
 }
 
@@ -83,7 +85,8 @@ footer.bg-dark, header.bg-dark {
 
 /* Layout overrides */
 main {
-  padding-bottom: 70px; /* Space for navigation bar */
+  padding-bottom: 90px; /* Space for navigation bar */
+  min-height: calc(100vh - 56px); /* Full height minus header */
 }
 
 /* Auth page styles */

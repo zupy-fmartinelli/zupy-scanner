@@ -6,7 +6,7 @@ import { scanQRCode, checkPermissions, requestPermissions } from '../../utils/sc
 import { isNative } from '../../utils/platform';
 import { getApiUrl } from '../../utils/storage';
 import ScannerComponent from '../../components/scanner/ScannerComponent';
-import ZupyLogo from '../../assets/images/pwa-scanner.svg';
+import ZupyLogo from '../../assets/images/pwa-scanner.png';
 
 function AuthPage() {
   const { authenticateWithQR, loading, error } = useAuth();
@@ -17,6 +17,8 @@ function AuthPage() {
   const [debugMode, setDebugMode] = useState(false);
   const [apiUrl, setApiUrl] = useState('');
   const [debugLog, setDebugLog] = useState([]);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
   
   // Function for automatic authentication
   const handleTokenFromUrl = async (token) => {
@@ -60,6 +62,26 @@ function AuthPage() {
       }, 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // PWA installation prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent Chrome 76+ from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e);
+      // Show the install prompt banner if not running as installed app
+      if (!isNative() && !window.matchMedia('(display-mode: standalone)').matches) {
+        setShowInstallPrompt(true);
+      }
+    };
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
   
   // Add entry to debug log
@@ -162,6 +184,26 @@ function AuthPage() {
     }
   };
   
+  // Function to install the PWA
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    
+    // Show the installation prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    
+    // Clear the saved prompt since it can't be used twice
+    setDeferredPrompt(null);
+    
+    // Hide the install button
+    setShowInstallPrompt(false);
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100 bg-dark text-white align-items-center">
       <div className="container py-5">
@@ -170,8 +212,32 @@ function AuthPage() {
             <div className="text-center mb-5">
               <img src={ZupyLogo} alt="Zupy Scanner" className="img-fluid mb-4" style={{ maxWidth: '200px' }} />
               <h1 className="h2 mb-3">Scanner Zupy</h1>
-              <p className="lead mb-4">Escaneie o QR code para autenticar o scanner</p>
+              <p className="lead mb-4">Escaneie o QR Code de Autorização para autenticar este dispositivo</p>
             </div>
+            
+            {/* Installation prompt */}
+            {showInstallPrompt && (
+              <div className="alert alert-primary d-flex align-items-center mb-4" role="alert">
+                <i className="bi bi-download me-2 fs-4"></i>
+                <div className="flex-grow-1">
+                  <strong>Instale este aplicativo</strong>
+                  <p className="mb-2 small">Instale o Scanner Zupy para um melhor desempenho e acesso offline.</p>
+                  <button 
+                    className="btn btn-sm btn-primary" 
+                    onClick={handleInstallClick}
+                  >
+                    <i className="bi bi-plus-circle me-1"></i>
+                    Instalar Aplicativo
+                  </button>
+                </div>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowInstallPrompt(false)} 
+                  aria-label="Fechar"
+                ></button>
+              </div>
+            )}
             
             {error && (
               <div className="alert alert-danger mb-4" role="alert">
@@ -190,6 +256,10 @@ function AuthPage() {
               </div>
             ) : (
               <div className="text-center">
+                <div className="mb-3 alert alert-info">
+                  <i className="bi bi-info-circle-fill me-2"></i>
+                  Para autorizar este dispositivo, escaneie o QR Code de Autorização fornecido pelo administrador
+                </div>
                 <button 
                   className="btn btn-primary btn-lg px-5 py-3 mb-3"
                   onClick={handleStartScan}
@@ -201,7 +271,10 @@ function AuthPage() {
                       Processando...
                     </>
                   ) : (
-                    'Escanear QR Code'
+                    <>
+                      <i className="bi bi-qr-code-scan me-2"></i>
+                      Escanear QR Code de Autorização
+                    </>
                   )}
                 </button>
               </div>

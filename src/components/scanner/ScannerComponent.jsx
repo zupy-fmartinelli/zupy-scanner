@@ -116,7 +116,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   
   return (
     <div className="scanner-container position-relative">
-      <div className="position-relative">
+      <div className="position-relative scanner-frame">
         {/* Video element for camera feed */}
         <video 
           ref={videoRef}
@@ -178,6 +178,15 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
           overflow: hidden;
         }
         
+        .scanner-frame {
+          width: 100%;
+          max-width: 450px;
+          margin: 0 auto;
+          height: auto;
+          aspect-ratio: 4/3;
+          overflow: hidden;
+        }
+        
         .scanner-overlay {
           z-index: 10;
         }
@@ -188,6 +197,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
           border: 2px solid #5c2d91;
           border-radius: 20px;
           position: relative;
+          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
         }
         
         .scanner-target::before,
