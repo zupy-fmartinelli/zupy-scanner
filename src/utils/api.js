@@ -87,24 +87,30 @@ export const apiRequest = async ({
       return response.data;
     } else {
       // Use axios for web
-      const apiClient = createApiClient(token);
-      
-      // Set additional options for CORS
-      console.log('Web request headers:', {
-        Authorization: token ? `Bearer ${token}` : undefined,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      });
-      
-      response = await apiClient({
-        method,
+      // CORS Fix: Don't add Content-Type for preflight requests
+      const configs = {
         url,
+        method,
         data,
         withCredentials: false,
-        headers: {
-          'Accept': 'application/json'
+      };
+      
+      // Se não for uma requisição OPTIONS, vamos configurar os cabeçalhos padrão
+      // Para requisições OPTIONS, o browser gerencia os cabeçalhos automaticamente
+      if (method.toUpperCase() !== 'OPTIONS') {
+        const headers = { 'Accept': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
-      });
+        
+        console.log('Web request headers:', headers);
+        configs.headers = headers;
+      } else {
+        console.log('OPTIONS request - using browser default headers for CORS preflight');
+      }
+      
+      // Use axios diretamente em vez de apiClient para ter mais controle
+      response = await axios(configs);
       
       console.log('Web API response:', response);
       return response.data;
@@ -157,6 +163,46 @@ export const api = {
     
   post: (endpoint, data, requiresAuth = true) => 
     apiRequest({ method: 'POST', endpoint, data, requiresAuth }),
+    
+  postForm: async (endpoint, formData, requiresAuth = true) => {
+    // Versão especial para enviar dados como FormData em vez de JSON
+    const apiUrl = await getApiUrl();
+    const url = `${apiUrl}${endpoint}`;
+    
+    let token = null;
+    if (requiresAuth) {
+      token = await getAuthToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+    }
+    
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    try {
+      console.log(`API Form Request: POST ${url}`);
+      
+      const response = await axios.post(url, formData, {
+        headers,
+        withCredentials: false
+      });
+      
+      return response.data;
+    } catch (error) {
+      // Erro padrão como na função apiRequest
+      console.error('API Form Request failed:', error);
+      const standardError = {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || error.message || 'Unknown error',
+        data: error.response?.data,
+        originalError: error
+      };
+      throw standardError;
+    }
+  },
     
   put: (endpoint, data, requiresAuth = true) => 
     apiRequest({ method: 'PUT', endpoint, data, requiresAuth }),

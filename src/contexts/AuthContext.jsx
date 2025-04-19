@@ -107,7 +107,26 @@ export function AuthProvider({ children }) {
         console.log('QR data type:', typeof qrData);
         console.log('QR data:', typeof qrData === 'string' ? qrData.substring(0, 30) + '...' : qrData);
         
-        const response = await api.post('/scanner/api/v1/auth/', qrData, false);
+        // Criar um FormData para evitar problemas de CORS com Content-Type
+        const formData = new FormData();
+        if (typeof qrData === 'string') {
+          formData.append('token', qrData);
+        } else if (qrData && typeof qrData === 'object') {
+          for (const key in qrData) {
+            formData.append(key, qrData[key]);
+          }
+        }
+        
+        // Tente primeiro com FormData
+        let response;
+        try {
+          console.log('Trying authentication with FormData');
+          response = await api.postForm('/scanner/api/v1/auth/', formData, false);
+        } catch (formError) {
+          console.log('FormData authentication failed, trying with JSON:', formError);
+          // Se falhar, tente com JSON normal
+          response = await api.post('/scanner/api/v1/auth/', qrData, false);
+        }
         
         // Debug info - log successful response
         console.log('Authentication successful! Response:', response);
