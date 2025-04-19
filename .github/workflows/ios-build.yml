@@ -1,8 +1,7 @@
-# ios-build.yml
 name: Build iOS App for Zupy Scanner
 
 on:
-  workflow_dispatch:  # ou "push" se quiser build automático a cada commit
+  workflow_dispatch:  # permite rodar manualmente pelo GitHub
 
 jobs:
   build-ios:
@@ -22,34 +21,42 @@ jobs:
           npm install
           npm run build
 
-      - name: Install CocoaPods dependencies
+      - name: Sync Capacitor with iOS
         run: |
+          npm install -g @capacitor/cli
+          npx cap sync ios
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
           cd ios
           pod install
 
-      - name: Import certificate
+      - name: Import signing certificate
         uses: apple-actions/import-codesign-certs@v1
         with:
           p12-file-base64: ${{ secrets.IOS_CERTIFICATE_P12 }}
           p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           provisioning-profile-base64: ${{ secrets.IOS_PROFILE }}
 
-      - name: Build IPA
+      - name: Build iOS archive
         run: |
           xcodebuild -workspace ios/App.xcworkspace \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \
-            -archivePath $PWD/build/App.xcarchive \
+            -archivePath $PWD/build/ZupyScanner.xcarchive \
             archive
 
+      - name: Export IPA
+        run: |
           xcodebuild -exportArchive \
-            -archivePath $PWD/build/App.xcarchive \
-            -exportOptionsPlist ios/exportOptions.plist \
-            -exportPath $PWD/build
+            -archivePath $PWD/build/ZupyScanner.xcarchive \
+            -exportPath $PWD/build \
+            -exportOptionsPlist ios/exportOptions.plist
 
-      - name: Upload IPA artifact
+      - name: Upload IPA as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: zupy-scanner-app
+          name: zupy-scanner-ipa
           path: build/*.ipa
