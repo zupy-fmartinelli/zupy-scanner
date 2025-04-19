@@ -1,7 +1,7 @@
 name: Build iOS App for Zupy Scanner
 
 on:
-  workflow_dispatch:  # permite rodar manualmente pelo GitHub
+  workflow_dispatch:  # Permite rodar manualmente no GitHub
 
 jobs:
   build-ios:
@@ -55,8 +55,13 @@ jobs:
             -exportPath $PWD/build \
             -exportOptionsPlist ios/exportOptions.plist
 
+      - name: List contents of build folder
+        run: |
+          echo "Arquivos encontrados na pasta build:"
+          ls -la build/
+
       - name: Upload IPA as artifact
         uses: actions/upload-artifact@v3
         with:
           name: zupy-scanner-ipa
-          path: build/*.ipa
+          path: build/**/*.ipa
