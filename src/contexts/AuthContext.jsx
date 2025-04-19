@@ -39,55 +39,69 @@ export function AuthProvider({ children }) {
         // Validate token if exists
         if (storedToken) {
           try {
-            // Get stored device_id
-            const deviceId = await getItem('device_id');
+            // Get stored device_id (ou cria um novo se não existir)
+            let deviceId = await getItem('device_id');
             if (!deviceId) {
-              console.warn("No device ID found for token validation");
-              throw new Error("No device ID found");
+              console.warn("No device ID found for token validation, generating a new one");
+              deviceId = `device_${Math.random().toString(36).substring(2, 10)}`;
+              await setItem('device_id', deviceId);
             }
             
             if (!storedScannerData || !storedScannerData.id) {
-              console.warn("No scanner data found for token validation");
-              throw new Error("No scanner data found");
-            }
-            
-            // Call API to validate token using the auth-token endpoint
-            const validationResult = await api.post('/scanner/api/v1/auth-token/', {
-              scanner_id: storedScannerData.id,
-              device_id: deviceId
-            }, false); // Don't require auth for this call
-            
-            // Handle validation response
-            if (validationResult && validationResult.token) {
-              // Update token if needed
-              if (validationResult.token !== storedToken) {
-                setAuthToken(validationResult.token);
-                await setItem(AUTH_TOKEN_KEY, validationResult.token);
+              console.warn("No scanner data found for token validation, trying simplified validation");
+              // Se não temos dados do scanner, tentamos uma validação básica
+              const isTokenValid = storedToken && storedToken.length > 50; // Verificação básica
+              if (!isTokenValid) {
+                throw new Error("Invalid token format");
               }
-              
-              // Check for scanner details in the response
-              if (validationResult.scanner_id) {
-                const updatedScanner = {
-                  id: validationResult.scanner_id,
-                  name: validationResult.scanner_name || storedScannerData.name,
-                  company: storedScannerData.company
-                };
+            } else {
+              // Validação completa com API apenas se temos todos os dados necessários
+              console.log("Validating token with API...");
+              try {
+                // Call API to validate token using the auth-token endpoint
+                const validationResult = await api.post('/scanner/api/v1/auth-token/', {
+                  scanner_id: storedScannerData.id,
+                  device_id: deviceId
+                }, false); // Don't require auth for this call
                 
-                if (JSON.stringify(updatedScanner) !== JSON.stringify(storedScannerData)) {
-                  setScannerData(updatedScanner);
-                  await setItem(SCANNER_DATA_KEY, updatedScanner);
+                // Handle validation response
+                if (validationResult && validationResult.token) {
+                  // Update token if needed
+                  if (validationResult.token !== storedToken) {
+                    setAuthToken(validationResult.token);
+                    await setItem(AUTH_TOKEN_KEY, validationResult.token);
+                  }
+                  
+                  // Check for scanner details in the response
+                  if (validationResult.scanner_id) {
+                    const updatedScanner = {
+                      id: validationResult.scanner_id,
+                      name: validationResult.scanner_name || storedScannerData.name,
+                      company: storedScannerData.company
+                    };
+                    
+                    if (JSON.stringify(updatedScanner) !== JSON.stringify(storedScannerData)) {
+                      setScannerData(updatedScanner);
+                      await setItem(SCANNER_DATA_KEY, updatedScanner);
+                    }
+                  }
+                }
+              } catch (validationError) {
+                console.error("API token validation failed:", validationError);
+                // If it's a 401/403 error, logout. Otherwise keep the current token
+                if (validationError.status === 401 || validationError.status === 403) {
+                  console.warn("Invalid token detected by API, logging out");
+                  await logout();
+                } else {
+                  console.warn("Error with API validation, but keeping current session:", validationError);
                 }
               }
             }
           } catch (error) {
-            console.error("Token validation failed:", error);
-            // If it's a 401/403 error, logout. Otherwise keep the current token
-            if (error.status === 401 || error.status === 403) {
-              console.warn("Invalid token detected, logging out");
-              await logout();
-            } else {
-              console.warn("Error validating token, but keeping current session:", error);
-            }
+            console.error("Initial token validation failed:", error);
+            // Apenas loga o erro, mas não faz logout se for apenas falta de dados
+            // Isso evita logout desnecessário quando o app está apenas sendo inicializado
+            console.warn("Token validation issue, but will try to continue session:", error);
           }
         }
       } catch (err) {
@@ -285,7 +299,7 @@ export function AuthProvider({ children }) {
    * @returns {boolean} Whether user is authenticated
    */
   const isAuthenticated = () => {
-    return !!authToken;
+    return !!authToken && !!scannerData;
   };
 
   // Context value
