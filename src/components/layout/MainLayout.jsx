@@ -14,8 +14,8 @@ import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
  */
 function MainLayout({ title, children, activeMenu }) {
   const navigate = useNavigate();
-  const { userData, logout } = useAuth();
-  const { isOnline, syncData, isSyncing } = useNetwork();
+  const { userData, scannerData, logout } = useAuth();
+  const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const handleNavigation = (path) => {
@@ -52,23 +52,35 @@ function MainLayout({ title, children, activeMenu }) {
             />
             <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
             
+            {/* Status indicators */}
+            <div className="d-flex align-items-center me-2">
+              {/* Online status */}
+              <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+              
+              {/* Pending operations */}
+              {pendingCount > 0 && (
+                <span className="badge bg-warning me-2">
+                  <i className="bi bi-clock-history me-1"></i>
+                  {pendingCount}
+                </span>
+              )}
+            </div>
+            
             {/* Sync button */}
-            {!isOnline ? (
-              <span className="badge bg-danger me-2">Offline</span>
-            ) : (
-              <button 
-                className="btn btn-sm btn-outline-light me-2"
-                onClick={handleSync}
-                disabled={isSyncing}
-              >
-                {isSyncing ? (
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                ) : (
-                  <i className="bi bi-arrow-repeat"></i>
-                )}
-                <span className="visually-hidden">Sincronizar</span>
-              </button>
-            )}
+            <button 
+              className="btn btn-sm btn-outline-light me-2"
+              onClick={handleSync}
+              disabled={isSyncing || !isOnline}
+            >
+              {isSyncing ? (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              ) : (
+                <i className="bi bi-arrow-repeat"></i>
+              )}
+              <span className="visually-hidden">Sincronizar</span>
+            </button>
             
             {/* User menu */}
             <div className="dropdown">
@@ -85,6 +97,18 @@ function MainLayout({ title, children, activeMenu }) {
                 </span>
               </button>
               <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                {/* Operator info */}
+                <li className="px-3 py-2 text-muted small">
+                  <div className="mb-2">
+                    <strong>Operador:</strong> {userData?.name || 'Não identificado'}
+                  </div>
+                  {scannerData?.name && (
+                    <div>
+                      <strong>Scanner:</strong> {scannerData.name}
+                    </div>
+                  )}
+                </li>
+                <li><hr className="dropdown-divider my-1" /></li>
                 <li>
                   <button 
                     className="dropdown-item" 

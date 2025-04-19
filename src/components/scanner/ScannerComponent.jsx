@@ -140,7 +140,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         </div>
       </div>
       
-      {/* Close button */}
+      {/* Close button - top right corner */}
       <button 
         className="btn btn-dark position-absolute top-0 end-0 m-2"
         onClick={onClose}
@@ -149,14 +149,25 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         <i className="bi bi-x-lg"></i>
       </button>
       
+      {/* Big close button - bottom center */}
+      <div className="position-absolute bottom-0 start-0 w-100 p-2 text-center">
+        <button 
+          className="btn btn-danger btn-lg px-5"
+          onClick={onClose}
+        >
+          <i className="bi bi-x-circle-fill me-2"></i>
+          Fechar Scanner
+        </button>
+      </div>
+      
       {/* Status text */}
-      <div className="text-center p-2">
+      <div className="text-center p-2 mt-2 mb-5">
         {error ? (
-          <p className="text-danger mb-0">{error}</p>
+          <p className="text-danger mb-0 fs-5">{error}</p>
         ) : scanning ? (
-          <p className="text-light mb-0">Aponte para um QR code</p>
+          <p className="text-light mb-0 fs-5">Aponte para um QR code</p>
         ) : (
-          <p className="text-light mb-0">Scanner iniciando...</p>
+          <p className="text-light mb-0 fs-5">Scanner iniciando...</p>
         )}
       </div>
       

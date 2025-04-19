@@ -101,31 +101,6 @@ function ScannerPage() {
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            {/* Scanner info */}
-            <div className="card bg-dark text-white mb-4 border-0 shadow">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="card-title mb-0">
-                    {scannerData?.name || 'Scanner Zupy'}
-                  </h5>
-                  <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'}`}>
-                    {isOnline ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-                <p className="card-text text-muted">
-                  {userData?.name ? `Operador: ${userData.name}` : 'Scanner autenticado'}
-                </p>
-                
-                {pendingCount > 0 && (
-                  <div className="alert alert-warning mb-0 mt-3 py-2" role="alert">
-                    <small>
-                      <i className="bi bi-exclamation-triangle me-2"></i>
-                      {pendingCount} {pendingCount === 1 ? 'operação pendente' : 'operações pendentes'} de sincronização
-                    </small>
-                  </div>
-                )}
-              </div>
-            </div>
             
             {/* Scanner */}
             {showScanner ? (

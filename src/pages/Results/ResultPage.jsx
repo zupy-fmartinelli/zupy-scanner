@@ -520,64 +520,136 @@ function ResultPage() {
                 
                 {expandedSection === 'client' && (
                   <div className="card-body">
-                    <div className="d-flex justify-content-between align-items-center mb-3">
+                    {/* Cabeçalho com nome e segmento */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
                       <div>
-                        <h5 className="mb-1">{clientDetails.client_name || '-'}</h5>
-                        <span className={`badge ${rfmSegment.class} px-2 py-1`}>
+                        <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
+                        <span className={`badge ${rfmSegment.class} px-3 py-2 fs-6`}>
                           {rfmSegment.emoji} {clientDetails.tier || 'Regular'}
                         </span>
+                        {clientDetails.program_name && (
+                          <div className="mt-2 text-muted small">
+                            <i className="bi bi-shop me-1"></i>
+                            {clientDetails.program_name}
+                          </div>
+                        )}
                       </div>
+                      
+                      {/* Pontos - destaque */}
                       <div className="text-center">
-                        <div className="fs-6 text-muted">Pontos</div>
-                        <div className="fs-3 fw-bold">{clientDetails.points || 0}</div>
+                        <div className="fs-1 fw-bold text-primary">{clientDetails.points || 0}</div>
+                        <div className="fs-6 text-muted">Pontos Disponíveis</div>
                       </div>
                     </div>
                     
-                    <div className="card bg-light mb-3">
-                      <div className="card-body p-2">
-                        <div className="d-flex justify-content-between">
+                    {/* Estatísticas - cartões */}
+                    <div className="row g-2 mb-4">
+                      {clientDetails.total_earned && (
+                        <div className="col-4">
+                          <div className="card bg-light h-100">
+                            <div className="card-body p-2 text-center">
+                              <div className="fs-4 fw-bold text-success">{clientDetails.total_earned}</div>
+                              <div className="fs-7 text-muted">Total Ganhos</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {clientDetails.total_spent && (
+                        <div className="col-4">
+                          <div className="card bg-light h-100">
+                            <div className="card-body p-2 text-center">
+                              <div className="fs-4 fw-bold text-danger">{clientDetails.total_spent}</div>
+                              <div className="fs-7 text-muted">Total Gastos</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {clientDetails.rewards_redeemed !== undefined && (
+                        <div className="col-4">
+                          <div className="card bg-light h-100">
+                            <div className="card-body p-2 text-center">
+                              <div className="fs-4 fw-bold text-warning">{clientDetails.rewards_redeemed || 0}</div>
+                              <div className="fs-7 text-muted">Prêmios Resgatados</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Código do cartão com destaque */}
+                    <div className="card bg-light mb-4">
+                      <div className="card-body p-3">
+                        <div className="d-flex justify-content-between align-items-center">
                           <span className="text-muted">Código do Cartão:</span>
-                          <span className="badge bg-secondary">{formatCardCode(clientDetails.card_id)}</span>
+                          <span className="badge bg-dark px-3 py-2 fs-6">{formatCardCode(clientDetails.card_id)}</span>
                         </div>
                       </div>
                     </div>
+                    
+                    <h5 className="border-bottom pb-2 mb-3">Informações do Cliente</h5>
+                    
+                    {/* Informações pessoais */}
+                    <div className="row g-3">
+                      <div className="col-6">
+                        <div className="mb-3">
+                          <i className="bi bi-person-fill text-primary me-2"></i>
+                          <strong>Nome:</strong><br />
+                          <span>{clientDetails.client_name || '-'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="col-6">
+                        <div className="mb-3">
+                          <i className="bi bi-envelope text-info me-2"></i>
+                          <strong>Email:</strong><br />
+                          <span>{clientDetails.email || '-'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="col-6">
+                        <div className="mb-3">
+                          <i className="bi bi-phone text-success me-2"></i>
+                          <strong>WhatsApp:</strong><br />
+                          <span>{clientDetails.whatsapp || '-'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="col-6">
+                        <div className="mb-3">
+                          <i className="bi bi-calendar-event text-warning me-2"></i>
+                          <strong>Aniversário:</strong><br />
+                          <span>{clientDetails.birth_date || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h5 className="border-bottom pb-2 mb-3 mt-4">Resumo do Cliente</h5>
                     
                     <div className="row g-3">
                       <div className="col-6">
-                        <div className="mb-2">
-                          <i className="bi bi-phone text-primary me-2"></i>
-                          <strong>WhatsApp:</strong><br />
-                          <span className="small">{clientDetails.whatsapp || '-'}</span>
+                        <div className="mb-3">
+                          <i className="bi bi-calendar-check text-primary me-2"></i>
+                          <strong>Membro Desde:</strong><br />
+                          <span>{formatDate(clientDetails.member_since) || '-'}</span>
                         </div>
                       </div>
+                      
                       <div className="col-6">
-                        <div className="mb-2">
-                          <i className="bi bi-calendar-event text-success me-2"></i>
-                          <strong>Aniversário:</strong><br />
-                          <span className="small">{clientDetails.birth_date || '-'}</span>
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="mb-2">
+                        <div className="mb-3">
                           <i className="bi bi-clock-history text-info me-2"></i>
                           <strong>Última Visita:</strong><br />
-                          <span className="small">{formatDate(clientDetails.last_visit)}</span>
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="mb-2">
-                          <i className="bi bi-award text-warning me-2"></i>
-                          <strong>Prêmios Resgatados:</strong><br />
-                          <span className="small">{clientDetails.rewards_redeemed || 0}</span>
+                          <span>{formatDate(clientDetails.last_visit) || '-'}</span>
                         </div>
                       </div>
                     </div>
                     
                     {clientDetails.notes && (
-                      <div className="mt-3">
+                      <div className="mt-4 p-3 bg-light rounded">
                         <i className="bi bi-sticky text-secondary me-2"></i>
                         <strong>Observações:</strong><br />
-                        <span className="small">{clientDetails.notes}</span>
+                        <p className="mt-2 mb-0">{clientDetails.notes}</p>
                       </div>
                     )}
                   </div>
@@ -685,17 +757,9 @@ function ResultPage() {
               )}
             </div>
 
-            <div className="d-flex justify-content-center gap-3 mt-4">
+            <div className="d-flex justify-content-center mt-4 mb-3">
               <button 
-                className="btn btn-outline-secondary"
-                onClick={handleBackClick}
-              >
-                <i className="bi bi-arrow-left me-2"></i>
-                Voltar
-              </button>
-              
-              <button 
-                className="btn btn-primary"
+                className="btn btn-primary btn-lg px-5 py-3"
                 onClick={handleNewScanClick}
               >
                 <i className="bi bi-qr-code-scan me-2"></i>
