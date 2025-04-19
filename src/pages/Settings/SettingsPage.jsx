@@ -150,8 +150,32 @@ function SettingsPage() {
                         onChange={(e) => setApiUrl(e.target.value)}
                         placeholder="https://api.zupy.com"
                       />
-                      <div className="form-text">
+                      <div className="form-text mb-2">
                         A URL base da API sem a barra final.
+                      </div>
+                      
+                      <div className="d-flex gap-2 mt-2">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setApiUrl("https://api.zupy.com")}
+                        >
+                          api.zupy.com
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setApiUrl("https://api.zupy.com.br")}
+                        >
+                          api.zupy.com.br
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setApiUrl("https://localhost:3000")}
+                        >
+                          localhost:3000
+                        </button>
                       </div>
                     </div>
                     
@@ -231,6 +255,82 @@ function SettingsPage() {
               </div>
             </div>
             
+            {/* API Debug */}
+            <div className="card mb-4 bg-white border-0 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title mb-3">Depuração de API</h5>
+                
+                <button 
+                  className="btn btn-sm btn-outline-secondary"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#apiDebug"
+                >
+                  Mostrar Endpoints
+                </button>
+                
+                <div className="collapse mt-3" id="apiDebug">
+                  <div className="card card-body bg-light">
+                    <h6 className="mb-3">Endpoints do Scanner</h6>
+                    
+                    <div className="mb-3">
+                      <label className="form-label text-muted small">Autenticação (POST)</label>
+                      <div className="input-group mb-1">
+                        <span className="input-group-text font-monospace small">{apiUrl}</span>
+                        <input 
+                          type="text" 
+                          className="form-control font-monospace small" 
+                          value="/api/v1/scanner/auth/" 
+                          readOnly 
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <label className="form-label text-muted small">Validação de Token (GET)</label>
+                      <div className="input-group mb-1">
+                        <span className="input-group-text font-monospace small">{apiUrl}</span>
+                        <input 
+                          type="text" 
+                          className="form-control font-monospace small" 
+                          value="/api/v1/scanner/auth-token/" 
+                          readOnly 
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <label className="form-label text-muted small">Logout (POST)</label>
+                      <div className="input-group mb-1">
+                        <span className="input-group-text font-monospace small">{apiUrl}</span>
+                        <input 
+                          type="text" 
+                          className="form-control font-monospace small" 
+                          value="/api/v1/scanner/logout/" 
+                          readOnly 
+                        />
+                      </div>
+                    </div>
+                    
+                    <button 
+                      className="btn btn-sm btn-primary"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`${apiUrl}/api/v1/scanner/auth/`, {method: 'OPTIONS'});
+                          const status = response.status;
+                          toast.info(`Endpoint respondeu com status: ${status}`);
+                        } catch (error) {
+                          toast.error(`Erro ao testar endpoint: ${error.message}`);
+                        }
+                      }}
+                    >
+                      Testar Conectividade (OPTIONS)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* App info */}
             <div className="card mb-4 bg-white border-0 shadow-sm">
               <div className="card-body">

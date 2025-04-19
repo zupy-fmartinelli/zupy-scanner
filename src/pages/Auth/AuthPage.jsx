@@ -1,17 +1,47 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { scanQRCode, checkPermissions, requestPermissions } from '../../utils/scanner';
 import { isNative } from '../../utils/platform';
+import { getApiUrl } from '../../utils/storage';
 import ScannerComponent from '../../components/scanner/ScannerComponent';
 import ZupyLogo from '../../assets/images/pwa-scanner.svg';
 
 function AuthPage() {
   const { authenticateWithQR, loading, error } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showScanner, setShowScanner] = useState(false);
   const [processingQR, setProcessingQR] = useState(false);
+  const [debugMode, setDebugMode] = useState(false);
+  const [apiUrl, setApiUrl] = useState('');
+  const [debugLog, setDebugLog] = useState([]);
+  
+  // Check for debug mode in URL params
+  useEffect(() => {
+    const debug = searchParams.get('debug') === 'true';
+    setDebugMode(debug);
+    
+    if (debug) {
+      addDebugLog('Debug mode activated');
+      
+      // Load API URL for debugging
+      const loadApiUrl = async () => {
+        const url = await getApiUrl();
+        setApiUrl(url);
+        addDebugLog(`API URL: ${url}`);
+      };
+      
+      loadApiUrl();
+    }
+  }, [searchParams]);
+  
+  // Add entry to debug log
+  const addDebugLog = (message) => {
+    const timestamp = new Date().toISOString().substr(11, 8);
+    setDebugLog(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
   
   const handleStartScan = async () => {
     try {
@@ -53,13 +83,57 @@ function AuthPage() {
   const handleAuth = async (qrData) => {
     try {
       setProcessingQR(true);
+      
+      if (debugMode) {
+        addDebugLog(`QR data received: ${qrData.substring(0, 20)}...`);
+      }
+      
       await authenticateWithQR(qrData);
+      
+      if (debugMode) {
+        addDebugLog('Authentication successful');
+      }
+      
       navigate('/scanner');
     } catch (error) {
       toast.error(error.message || 'Authentication failed');
       console.error('Auth error:', error);
+      
+      if (debugMode) {
+        addDebugLog(`Authentication failed: ${error.message}`);
+        if (error.status) {
+          addDebugLog(`Status code: ${error.status}`);
+        }
+      }
     } finally {
       setProcessingQR(false);
+    }
+  };
+  
+  const testApiEndpoint = async (endpoint) => {
+    if (!debugMode) return;
+    
+    try {
+      addDebugLog(`Testing endpoint: ${apiUrl}${endpoint}`);
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
+        method: 'OPTIONS',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      const status = response.status;
+      addDebugLog(`Response status: ${status}`);
+      
+      if (status >= 200 && status < 300) {
+        toast.success(`Endpoint ${endpoint} is accessible`);
+      } else {
+        toast.warning(`Endpoint ${endpoint} returned status ${status}`);
+      }
+    } catch (error) {
+      addDebugLog(`Error: ${error.message}`);
+      toast.error(`Failed to access ${endpoint}: ${error.message}`);
     }
   };
   
@@ -105,6 +179,73 @@ function AuthPage() {
                     'Escanear QR Code'
                   )}
                 </button>
+              </div>
+            )}
+            
+            {debugMode && (
+              <div className="card bg-dark border-secondary mt-4">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <h5 className="m-0">Modo de Depuração</h5>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => setDebugLog([])}
+                  >
+                    Limpar Log
+                  </button>
+                </div>
+                <div className="card-body">
+                  <div className="mb-3">
+                    <label className="form-label">API URL</label>
+                    <div className="input-group mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={apiUrl}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="form-label">Testar Endpoints</label>
+                    <div className="d-flex gap-2 mb-3">
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => testApiEndpoint('/api/v1/scanner/auth/')}
+                      >
+                        Auth
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => testApiEndpoint('/api/v1/scanner/auth-token/')}
+                      >
+                        Auth Token
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => testApiEndpoint('/api/v1/scanner/logout/')}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-0">
+                    <label className="form-label">Log de Depuração</label>
+                    <div
+                      className="bg-dark border border-secondary p-3 small font-monospace"
+                      style={{ height: '200px', overflowY: 'auto', whiteSpace: 'pre-wrap' }}
+                    >
+                      {debugLog.length === 0 ? (
+                        <span className="text-muted">Nenhuma entrada de log</span>
+                      ) : (
+                        debugLog.map((entry, index) => (
+                          <div key={index}>{entry}</div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
             

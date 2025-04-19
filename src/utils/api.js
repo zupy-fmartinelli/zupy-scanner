@@ -59,6 +59,11 @@ export const apiRequest = async ({
   }
   
   try {
+    console.log(`API Request: ${method} ${url}`);
+    console.log('Request data:', data);
+    
+    let response;
+    
     if (isNative()) {
       // Use Capacitor HTTP plugin for native apps
       const headers = { 
@@ -69,20 +74,29 @@ export const apiRequest = async ({
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const response = await CapacitorHttp.request({
+      console.log('Native request headers:', headers);
+      
+      response = await CapacitorHttp.request({
         method,
         url,
         headers,
         data,
       });
       
+      console.log('Native API response:', response);
       return response.data;
     } else {
       // Use axios for web
       const apiClient = createApiClient(token);
       
       // Set additional options for CORS
-      const response = await apiClient({
+      console.log('Web request headers:', {
+        Authorization: token ? `Bearer ${token}` : undefined,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      });
+      
+      response = await apiClient({
         method,
         url,
         data,
@@ -92,22 +106,44 @@ export const apiRequest = async ({
         }
       });
       
+      console.log('Web API response:', response);
       return response.data;
     }
   } catch (error) {
+    // Log detailed error information
+    console.error('API Request failed:', error);
+    
+    if (error.response) {
+      console.error('Response error data:', error.response.data);
+      console.error('Response status:', error.response.status);
+      console.error('Response headers:', error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received, request:', error.request);
+    } else {
+      // Something happened in setting up the request
+      console.error('Request setup error:', error.message);
+    }
+    
     // Standardize error handling between Capacitor HTTP and Axios
     if (isNative()) {
-      throw {
+      const standardError = {
         status: error.status || 500,
         message: error.message || 'Unknown error',
-        data: error.data
+        data: error.data,
+        originalError: error
       };
+      console.error('Standardized native error:', standardError);
+      throw standardError;
     } else {
-      throw {
-        status: error.response?.status || 500,
+      const standardError = {
+        status: error.response?.status || error.status || 500,
         message: error.response?.data?.message || error.message || 'Unknown error',
-        data: error.response?.data
+        data: error.response?.data || error.data,
+        originalError: error
       };
+      console.error('Standardized web error:', standardError);
+      throw standardError;
     }
   }
 };
