@@ -61,7 +61,10 @@ export const apiRequest = async ({
   try {
     if (isNative()) {
       // Use Capacitor HTTP plugin for native apps
-      const headers = { 'Content-Type': 'application/json' };
+      const headers = { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
@@ -78,10 +81,15 @@ export const apiRequest = async ({
       // Use axios for web
       const apiClient = createApiClient(token);
       
+      // Set additional options for CORS
       const response = await apiClient({
         method,
         url,
         data,
+        withCredentials: false,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
       
       return response.data;

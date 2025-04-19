@@ -82,35 +82,69 @@ export function AuthProvider({ children }) {
       setError(null);
       setLoading(true);
       
+      console.log("Starting authentication with QR code");
+      
       // QR code should contain a JWT or authentication data
       // Parse QR data
       let qrData;
       try {
         qrData = JSON.parse(qrCodeData);
+        console.log("QR data parsed as JSON:", { ...qrData, token: qrData.token ? "[REDACTED]" : undefined });
       } catch (e) {
         // If not JSON, assume it's a direct token or code
         qrData = { token: qrCodeData };
+        console.log("QR data not JSON, treating as token");
       }
       
+      // Get the API URL for debugging
+      const apiUrl = await getApiUrl();
+      console.log(`Authenticating with backend at ${apiUrl}/api/scanner/auth`);
+      
       // Authenticate with backend
-      const response = await api.post('/api/scanner/auth', qrData, false);
-      
-      const { token, user, scanner } = response;
-      
-      // Save auth data
-      await setItem(AUTH_TOKEN_KEY, token);
-      await setItem(USER_DATA_KEY, user);
-      await setItem(SCANNER_DATA_KEY, scanner);
-      
-      // Update state
-      setAuthToken(token);
-      setUserData(user);
-      setScannerData(scanner);
-      
-      return response;
+      try {
+        const response = await api.post('/api/scanner/auth', qrData, false);
+        
+        const { token, user, scanner } = response;
+        
+        console.log("Authentication successful", { 
+          userReceived: !!user, 
+          scannerReceived: !!scanner,
+          tokenReceived: !!token
+        });
+        
+        // Save auth data
+        await setItem(AUTH_TOKEN_KEY, token);
+        await setItem(USER_DATA_KEY, user);
+        await setItem(SCANNER_DATA_KEY, scanner);
+        
+        // Update state
+        setAuthToken(token);
+        setUserData(user);
+        setScannerData(scanner);
+        
+        return response;
+      } catch (apiError) {
+        console.error("API call error:", apiError);
+        
+        // Fornecer mensagem de erro mais descritiva
+        let errorMessage = 'Falha na autenticação';
+        
+        if (apiError.status === 0 || apiError.status === 'ERR_NETWORK') {
+          errorMessage = 'Erro de conexão. Verifique sua conexão de internet e se o servidor está acessível.';
+        } else if (apiError.status === 401 || apiError.status === 403) {
+          errorMessage = 'QR code inválido ou expirado.';
+        } else if (apiError.status === 400) {
+          errorMessage = 'Dados de autenticação incorretos.';
+        } else if (apiError.status >= 500) {
+          errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
+        }
+        
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     } catch (err) {
       console.error("Authentication error:", err);
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Falha na autenticação');
       throw err;
     } finally {
       setLoading(false);
