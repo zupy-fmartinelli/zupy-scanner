@@ -49,6 +49,7 @@ function AppRoutes() {
     <Router>
       <Suspense fallback={<Loading />}>
         <Routes>
+          {/* Rota de autenticação - suporta tanto escaneamento manual quanto autenticação via token na URL */}
           <Route 
             path="/auth" 
             element={isAuthenticated() ? <Navigate to="/scanner" replace /> : <AuthPage />} 

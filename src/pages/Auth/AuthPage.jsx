@@ -18,11 +18,24 @@ function AuthPage() {
   const [apiUrl, setApiUrl] = useState('');
   const [debugLog, setDebugLog] = useState([]);
   
+  // Function for automatic authentication
+  const handleTokenFromUrl = async (token) => {
+    if (!token) return;
+    
+    if (debugMode) {
+      addDebugLog(`Processing token from URL: ${token.substring(0, 20)}...`);
+    }
+    
+    // Proceed with authentication
+    await handleAuth(token);
+  };
+  
   // Check for debug mode in URL params
   useEffect(() => {
     const debug = searchParams.get('debug') === 'true';
     setDebugMode(debug);
     
+    // Debug logging
     if (debug) {
       addDebugLog('Debug mode activated');
       
@@ -36,6 +49,18 @@ function AuthPage() {
       loadApiUrl();
     }
   }, [searchParams]);
+  
+  // Handle token from URL if present (only runs once on component mount)
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      // Slight delay to ensure other states are initialized
+      setTimeout(() => {
+        handleTokenFromUrl(token);
+      }, 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Add entry to debug log
   const addDebugLog = (message) => {
