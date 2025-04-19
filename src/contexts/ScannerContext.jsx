@@ -25,12 +25,15 @@ export function ScannerProvider({ children }) {
   /**
    * Process a scanned QR code
    * @param {string} qrCodeData - The scanned QR code data
+   * @param {boolean} redeem - Whether to redeem the coupon if applicable
    * @returns {Promise<Object>} Scan result
    */
-  const processScan = async (qrCodeData) => {
+  const processScan = async (qrCodeData, redeem = false) => {
     try {
       setError(null);
       setIsProcessing(true);
+      
+      console.log(`Processando scan${redeem ? ' com resgate' : ''} para QR code`);
       
       // Parse QR code data
       let parsedData;
@@ -43,7 +46,7 @@ export function ScannerProvider({ children }) {
       
       // Create scan record
       const scan = {
-        qrData: parsedData,
+        qrData: qrCodeData, // Armazenar o QR original para permitir re-scan com redeem=true
         scannerId: scannerData?.id,
         timestamp: new Date().toISOString(),
         processed: false,
@@ -54,12 +57,15 @@ export function ScannerProvider({ children }) {
       
       // Process scan
       if (isOnline) {
+        console.log(`Enviando scan para API com redeem=${redeem}`);
         // Online processing - corrigindo URL para a rota correta do backend
         const result = await api.post('/scanner/api/v1/scan/', {
           qr_code: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(parsedData),
           scanner_id: scannerData?.id,
-          redeem: false
+          redeem: redeem // Usando o parâmetro redeem para controlar resgate
         });
+        
+        console.log('Resposta da API de scan:', result);
         
         // Update scan with result
         scan.processed = true;
@@ -68,7 +74,7 @@ export function ScannerProvider({ children }) {
         
         // Record activity
         setLastActivity({
-          type: 'scan',
+          type: redeem ? 'redeem' : 'scan',
           data: result,
           timestamp: new Date().toISOString()
         });
@@ -82,7 +88,7 @@ export function ScannerProvider({ children }) {
           data: {
             qr_code: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(parsedData),
             scanner_id: scannerData?.id,
-            redeem: false
+            redeem: redeem // Usando o parâmetro redeem para controlar resgate
           }
         });
         
@@ -93,7 +99,7 @@ export function ScannerProvider({ children }) {
         
         // Record activity
         setLastActivity({
-          type: 'scan',
+          type: redeem ? 'redeem' : 'scan',
           data: { message: 'Scan queued for processing', operationId },
           timestamp: new Date().toISOString()
         });
