@@ -136,14 +136,16 @@ function PwaInstallPrompt() {
       <style jsx>{`
         .pwa-install-prompt {
           position: fixed;
-          bottom: 70px; /* Acima do menu de navegação */
-          left: 0;
-          right: 0;
+          bottom: 80px; /* Acima do menu de navegação */
+          left: 10px;
+          right: 10px;
           background-color: var(--app-bg-card-light);
           color: var(--app-text-light);
           padding: 12px 16px;
-          z-index: 1000;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          z-index: 1030; /* Maior que o rodapé (1020) */
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
           animation: slide-up 0.3s ease-out;
         }
         

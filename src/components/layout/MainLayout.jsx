@@ -136,7 +136,7 @@ function MainLayout({ title, children, activeMenu }) {
       </header>
       
       {/* Main content */}
-      <main className="flex-grow-1 bg-light pb-5">
+      <main className="flex-grow-1 bg-dark text-white pb-5">
         {children}
       </main>
       
@@ -144,7 +144,7 @@ function MainLayout({ title, children, activeMenu }) {
       <PwaInstallPrompt />
       
       {/* Footer navigation */}
-      <footer className="bg-dark text-white border-top shadow-lg fixed-bottom">
+      <footer className="bg-dark text-white border-top shadow-lg fixed-bottom" style={{ zIndex: 1020 }}>
         <div className="container-fluid">
           <nav className="nav-bar">
             <button 

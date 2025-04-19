@@ -42,8 +42,25 @@ html {
 }
 
 /* Definir cores de fundo para elementos principais */
-.container, .container-fluid, main, #root {
+.container, .container-fluid, #root {
   background-color: var(--app-bg-darker) !important;
+}
+
+main {
+  background-color: var(--app-bg-darker) !important;
+  color: var(--app-text-light) !important;
+}
+
+/* Redefinir cores do Bootstrap */
+.bg-light {
+  background-color: var(--app-bg-darker) !important;
+}
+
+/* Lista de elementos para manter tema escuro */
+.list-group-item {
+  background-color: var(--app-bg-card) !important;
+  color: var(--app-text-light) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Melhorar espaçamento vertical */

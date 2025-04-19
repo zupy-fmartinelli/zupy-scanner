@@ -464,8 +464,9 @@ function ResultPage() {
                       </div>
                       
                       {clientDetails.operator_max_points && (
-                        <div className="form-text text-end">
-                          Máximo: {clientDetails.operator_max_points} pontos
+                        <div className="form-text text-end text-light bg-dark p-2 rounded mt-2">
+                          <i className="bi bi-info-circle me-1"></i>
+                          Máximo: <strong>{clientDetails.operator_max_points} pontos</strong>
                         </div>
                       )}
                     </div>
@@ -487,6 +488,34 @@ function ResultPage() {
                         </>
                       )}
                     </button>
+                    
+                    {/* Próxima recompensa direto na área de pontos */}
+                    {currentScan.result?.details?.next_reward_gap && currentScan.result.details.next_reward_gap.name && (
+                      <div className="alert alert-info mt-3 mb-0">
+                        <div className="d-flex align-items-center">
+                          <i className="bi bi-gift-fill me-2 fs-4"></i>
+                          <div className="flex-grow-1">
+                            <strong>Próxima Recompensa:</strong> {currentScan.result.details.next_reward_gap.name}<br />
+                            <div className="progress mt-2 mb-1" style={{ height: '10px' }}>
+                              <div 
+                                className="progress-bar bg-success" 
+                                role="progressbar" 
+                                style={{ 
+                                  width: `${Math.max(5, 100 - ((currentScan.result.details.next_reward_gap.missing_points / currentScan.result.details.next_reward_gap.points_required) * 100))}%` 
+                                }}
+                                aria-valuenow="25" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"
+                              ></div>
+                            </div>
+                            <small>
+                              Faltam <strong>{currentScan.result.details.next_reward_gap.missing_points}</strong> pontos 
+                              (de {currentScan.result.details.next_reward_gap.points_required})
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </form>
                 </div>
               </div>
@@ -601,8 +630,8 @@ function ResultPage() {
                       
                       {/* Pontos - destaque */}
                       <div className="text-center">
-                        <div className="fs-1 fw-bold text-primary">{clientDetails.points || 0}</div>
-                        <div className="fs-6 text-muted">Pontos Disponíveis</div>
+                        <div className="badge bg-info fs-2 fw-bold p-2 px-3">{clientDetails.points || 0}</div>
+                        <div className="fs-6 text-light mt-1">Pontos Disponíveis</div>
                       </div>
                     </div>
                     
@@ -657,34 +686,58 @@ function ResultPage() {
                     {/* Informações pessoais */}
                     <div className="row g-3">
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-person-fill text-primary me-2"></i>
-                          <strong>Nome:</strong><br />
-                          <span>{clientDetails.client_name || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-primary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-person-fill text-white"></i>
+                              </div>
+                              <strong>Nome</strong>
+                            </div>
+                            <div className="ps-4 text-light">{clientDetails.client_name || '-'}</div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-envelope text-info me-2"></i>
-                          <strong>Email:</strong><br />
-                          <span>{clientDetails.email || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-info p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-envelope text-white"></i>
+                              </div>
+                              <strong>Email</strong>
+                            </div>
+                            <div className="ps-4 text-light">{clientDetails.email || '-'}</div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-phone text-success me-2"></i>
-                          <strong>WhatsApp:</strong><br />
-                          <span>{clientDetails.whatsapp || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-success p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-phone text-white"></i>
+                              </div>
+                              <strong>WhatsApp</strong>
+                            </div>
+                            <div className="ps-4 text-light">{clientDetails.whatsapp || '-'}</div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-calendar-event text-warning me-2"></i>
-                          <strong>Aniversário:</strong><br />
-                          <span>{clientDetails.birth_date || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-warning p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-calendar-event text-white"></i>
+                              </div>
+                              <strong>Aniversário</strong>
+                            </div>
+                            <div className="ps-4 text-light">{clientDetails.birth_date || '-'}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -693,27 +746,47 @@ function ResultPage() {
                     
                     <div className="row g-3">
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-calendar-check text-primary me-2"></i>
-                          <strong>Membro Desde:</strong><br />
-                          <span>{formatDate(clientDetails.member_since) || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-primary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-calendar-check text-white"></i>
+                              </div>
+                              <strong>Membro Desde</strong>
+                            </div>
+                            <div className="ps-4 text-light">{formatDate(clientDetails.member_since) || '-'}</div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="col-6">
-                        <div className="mb-3">
-                          <i className="bi bi-clock-history text-info me-2"></i>
-                          <strong>Última Visita:</strong><br />
-                          <span>{formatDate(clientDetails.last_visit) || '-'}</span>
+                        <div className="card bg-dark mb-2">
+                          <div className="card-body p-2">
+                            <div className="d-flex align-items-center mb-1">
+                              <div className="rounded-circle bg-info p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                                <i className="bi bi-clock-history text-white"></i>
+                              </div>
+                              <strong>Última Visita</strong>
+                            </div>
+                            <div className="ps-4 text-light">{formatDate(clientDetails.last_visit) || '-'}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
                     {clientDetails.notes && (
-                      <div className="mt-4 p-3 bg-light rounded">
-                        <i className="bi bi-sticky text-secondary me-2"></i>
-                        <strong>Observações:</strong><br />
-                        <p className="mt-2 mb-0">{clientDetails.notes}</p>
+                      <div className="card bg-dark mt-4">
+                        <div className="card-header">
+                          <div className="d-flex align-items-center">
+                            <div className="rounded-circle bg-secondary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
+                              <i className="bi bi-sticky-fill text-white"></i>
+                            </div>
+                            <strong>Observações</strong>
+                          </div>
+                        </div>
+                        <div className="card-body">
+                          <p className="mb-0 text-light">{clientDetails.notes}</p>
+                        </div>
                       </div>
                     )}
                   </div>
