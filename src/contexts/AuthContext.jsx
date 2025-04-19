@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getItem, setItem, removeItem } from '../utils/storage';
+import { getItem, setItem, removeItem, getApiUrl } from '../utils/storage';
 import { api } from '../utils/api';
 
 // Create context
