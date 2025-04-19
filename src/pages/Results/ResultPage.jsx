@@ -292,11 +292,13 @@ function ResultPage() {
         result.message.includes('INVALID') ||
         result.message.includes('usado') ||
         result.message.includes('expirado') ||
-        result.message.includes('inválido')
+        result.message.includes('inválido') ||
+        result.error === 'INVALID_COUPON' ||
+        result.success === false
     )) {
       return {
-        icon: 'bi-x-circle',
-        title: 'Cupom Não Disponível',
+        icon: 'bi-x-circle-fill',
+        title: 'CUPOM JÁ UTILIZADO!',
         message: result.message.includes('USED') || result.message.includes('usado') 
           ? 'Este cupom já foi utilizado e não pode ser resgatado novamente.'
           : result.message.includes('EXPIRED') || result.message.includes('expirado')
@@ -322,11 +324,11 @@ function ResultPage() {
     }
     
     if (isCoupon) {
-      if (result.status === 'used' || result.status === 'USED' || 
+      if (result.status === 'used' || result.status === 'USED' || result.success === false ||
           (result.details && (result.details.status === 'used' || result.details.status === 'USED'))) {
         return {
-          icon: 'bi-x-circle',
-          title: 'Cupom Já Utilizado',
+          icon: 'bi-x-circle-fill',
+          title: 'CUPOM JÁ UTILIZADO!',
           message: 'Este cupom já foi utilizado anteriormente e não pode ser resgatado novamente.',
           colorClass: 'text-danger',
           bgClass: 'bg-danger-subtle',

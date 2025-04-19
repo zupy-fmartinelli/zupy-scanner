@@ -6,25 +6,52 @@
   --zupy-dark: #3a1b5e;
   --zupy-light: #9c7dbb;
   --app-bg-dark: #212529;
+  --app-bg-darker: #1a1d20;
   --app-bg-light: #f4f4f8;
-  --app-bg-card: #e9ecef;
+  --app-bg-card: #2c3034;
+  --app-text-light: #f8f9fa;
   --app-text-dark: #343a40;
 }
 
 /* Estilos globais */
 body {
-  background-color: var(--app-bg-dark);
-  color: #f8f9fa;
+  background-color: var(--app-bg-darker) !important;
+  color: var(--app-text-light) !important;
+}
+
+html {
+  background-color: var(--app-bg-darker) !important;
+}
+
+/* Definir cores de fundo para elementos principais */
+.container, .container-fluid, main, #root {
+  background-color: var(--app-bg-darker) !important;
+}
+
+.card {
+  background-color: var(--app-bg-dark) !important;
+  color: var(--app-text-light) !important;
 }
 
 /* Sobreescrever estilos de cards */
 .card {
-  background-color: var(--app-bg-card) !important;
+  background-color: var(--app-bg-dark) !important;
   border: none !important;
+  color: var(--app-text-light) !important;
 }
 
 .card-body {
-  background-color: var(--app-bg-card) !important;
+  background-color: var(--app-bg-dark) !important;
+  color: var(--app-text-light) !important;
+}
+
+/* Ajustar cores de texto para melhor contraste */
+.text-muted {
+  color: #adb5bd !important;
+}
+
+.form-control-plaintext {
+  color: var(--app-text-light) !important;
 }
 
 /* Cupom usado - Estilo de erro */
