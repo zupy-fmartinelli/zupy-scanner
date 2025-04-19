@@ -1,7 +1,7 @@
 name: Build iOS App for Zupy Scanner
 
 on:
-  workflow_dispatch:  # Permite rodar manualmente no GitHub
+  workflow_dispatch:  # Executa manualmente pelo GitHub
 
 jobs:
   build-ios:
@@ -21,38 +21,24 @@ jobs:
           npm install
           npm run build
 
-      - name: Add iOS platform if missing
-        run: |
-          npm install -g @capacitor/cli
-          if [ ! -d "ios" ]; then
-            echo "iOS directory not found. Adding iOS platform..."
-            npx cap add ios
-          else
-            echo "iOS directory already exists."
-          fi
-
       - name: Sync Capacitor with iOS
         run: |
+          npm install -g @capacitor/cli
           npx cap sync ios
 
-      - name: Check/Generate Podfile
+      - name: Validate Xcode project
         run: |
-          if [ ! -f ios/Podfile ]; then
-            echo "Podfile not found in ios/. Generating one..."
-            cd ios
-            pod init
-            # Add any necessary Podfile configurations here if needed,
-            # although Capacitor sync usually handles this.
-            cd ..
-            echo "Podfile generated."
+          if [ ! -f ios/App/App.xcodeproj/project.pbxproj ]; then
+            echo "❌ Erro: projeto Xcode não encontrado em ios/App/"
+            exit 1
           else
-            echo "Podfile found in ios/."
+            echo "✅ Projeto Xcode encontrado!"
           fi
 
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
-          cd ios
+          cd ios/App
           pod install
 
       - name: Import signing certificate
@@ -64,7 +50,7 @@ jobs:
 
       - name: Build iOS archive
         run: |
-          xcodebuild -workspace ios/App.xcworkspace \
+          xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \
