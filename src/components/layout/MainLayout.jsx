@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNetwork } from '../../contexts/NetworkContext';
+import PwaInstallPrompt from '../pwa/PwaInstallPrompt';
 import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
 
 /**
@@ -138,6 +139,9 @@ function MainLayout({ title, children, activeMenu }) {
       <main className="flex-grow-1 bg-light pb-5">
         {children}
       </main>
+      
+      {/* PWA Installation Prompt */}
+      <PwaInstallPrompt />
       
       {/* Footer navigation */}
       <footer className="bg-dark text-white border-top shadow-lg fixed-bottom">

@@ -285,6 +285,19 @@ function ResultPage() {
     
     const result = currentScan.result || {};
     
+    // Erro específico: cartão pertence a outra empresa
+    if (result.error === 'COMPANY_MISMATCH' || 
+        (result.message && result.message.includes('outra empresa'))) {
+      return {
+        icon: 'bi-building-exclamation',
+        title: 'EMPRESA INCORRETA',
+        message: 'Este cartão pertence a outra empresa e não pode ser processado neste scanner.',
+        colorClass: 'text-danger',
+        bgClass: 'bg-danger-subtle',
+        type: 'company-mismatch'
+      };
+    }
+    
     // Verificar mensagens de erro comuns para cupons
     if (result.message && (
         result.message.includes('USED') || 
@@ -387,6 +400,13 @@ function ResultPage() {
                   <div className="alert alert-danger mb-0" role="alert">
                     <i className="bi bi-exclamation-triangle-fill me-2"></i>
                     Este cupom não pode ser resgatado.
+                  </div>
+                )}
+                
+                {resultStatus.type === 'company-mismatch' && (
+                  <div className="alert alert-danger mb-0" role="alert">
+                    <i className="bi bi-building-exclamation me-2"></i>
+                    Este cartão pertence a outra empresa. Verifique se está usando o scanner correto.
                   </div>
                 )}
               </div>

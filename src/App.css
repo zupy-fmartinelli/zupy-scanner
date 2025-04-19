@@ -2,22 +2,39 @@
 
 /* Variáveis de cores personalizadas */
 :root {
+  /* Cores corporativas */
   --zupy-primary: #5c2d91;
   --zupy-dark: #3a1b5e;
   --zupy-light: #9c7dbb;
+  --zupy-lighter: #d5c8e6;
+  
+  /* Cores de fundo - melhor contraste */
   --app-bg-dark: #212529;
   --app-bg-darker: #1a1d20;
   --app-bg-light: #f4f4f8;
-  --app-bg-card: #2c3034;
-  --app-bg-card-light: #353941;
+  
+  /* Cores para cards - melhor hierarquia visual */
+  --app-bg-card: #2c3034;  /* Card mais escuro */
+  --app-bg-card-light: #3f444d;  /* Card mais claro para contraste */
+  --app-bg-card-accent: #353941;  /* Card com destaque sutil */
+  
+  /* Cores de texto */
   --app-text-light: #f8f9fa;
   --app-text-dark: #343a40;
+  
+  /* Cores semânticas */
+  --app-success: #28a745;
+  --app-warning: #ffc107;
+  --app-danger: #dc3545;
+  --app-info: #17a2b8;
 }
 
 /* Estilos globais */
 body {
   background-color: var(--app-bg-darker) !important;
   color: var(--app-text-light) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+  line-height: 1.6 !important;
 }
 
 html {
@@ -29,22 +46,94 @@ html {
   background-color: var(--app-bg-darker) !important;
 }
 
-.card {
-  background-color: var(--app-bg-card-light) !important;
-  color: var(--app-text-light) !important;
+/* Melhorar espaçamento vertical */
+.py-4 {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
 }
 
-/* Sobreescrever estilos de cards */
+/* Estilos para badges e tags */
+.badge {
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+  padding: 0.35em 0.65em !important;
+}
+
+/* Melhorar estilos de botões */
+.btn {
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+}
+
+.btn-primary {
+  background-color: var(--zupy-primary) !important;
+  border-color: var(--zupy-primary) !important;
+}
+
+/* Sobreescrever estilos de cards - esquema de cores melhorado */
 .card {
   background-color: var(--app-bg-card-light) !important;
   border: none !important;
   color: var(--app-text-light) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  margin-bottom: 16px !important;
 }
 
 .card-body {
   background-color: var(--app-bg-card-light) !important;
   color: var(--app-text-light) !important;
+}
+
+/* Estilo para cards com destaque */
+.card.bg-primary {
+  background-color: var(--zupy-primary) !important;
+}
+
+.card.bg-success-subtle {
+  background-color: rgba(40, 167, 69, 0.15) !important;
+  border-left: 4px solid var(--app-success) !important;
+}
+
+.card.bg-danger-subtle {
+  background-color: rgba(220, 53, 69, 0.15) !important;
+  border-left: 4px solid var(--app-danger) !important;
+}
+
+.card.bg-warning-subtle {
+  background-color: rgba(255, 193, 7, 0.15) !important;
+  border-left: 4px solid var(--app-warning) !important;
+}
+
+.card.bg-primary-subtle {
+  background-color: rgba(92, 45, 145, 0.15) !important;
+  border-left: 4px solid var(--zupy-primary) !important;
+}
+
+/* Estilo para headers de cartões */
+.card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 12px 16px !important;
+}
+
+.card-header.bg-dark {
+  background-color: var(--app-bg-dark) !important;
+}
+
+.card-header.bg-primary {
+  background-color: var(--zupy-primary) !important;
+}
+
+.card-header.bg-success {
+  background-color: var(--app-success) !important;
+}
+
+.card-header.bg-warning {
+  background-color: var(--app-warning) !important;
+}
+
+.card-header.bg-danger {
+  background-color: var(--app-danger) !important;
 }
 
 /* Ajustar cores de texto para melhor contraste */
