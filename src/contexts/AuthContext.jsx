@@ -39,26 +39,55 @@ export function AuthProvider({ children }) {
         // Validate token if exists
         if (storedToken) {
           try {
-            // Call API to validate token
-            const validationResult = await api.get('/scanner/api/v1/auth-token/');
-            
-            // Update user data if needed
-            if (validationResult.user && 
-                JSON.stringify(validationResult.user) !== JSON.stringify(storedUserData)) {
-              setUserData(validationResult.user);
-              await setItem(USER_DATA_KEY, validationResult.user);
+            // Get stored device_id
+            const deviceId = await getItem('device_id');
+            if (!deviceId) {
+              console.warn("No device ID found for token validation");
+              throw new Error("No device ID found");
             }
             
-            // Update scanner data if needed
-            if (validationResult.scanner && 
-                JSON.stringify(validationResult.scanner) !== JSON.stringify(storedScannerData)) {
-              setScannerData(validationResult.scanner);
-              await setItem(SCANNER_DATA_KEY, validationResult.scanner);
+            if (!storedScannerData || !storedScannerData.id) {
+              console.warn("No scanner data found for token validation");
+              throw new Error("No scanner data found");
+            }
+            
+            // Call API to validate token using the auth-token endpoint
+            const validationResult = await api.post('/scanner/api/v1/auth-token/', {
+              scanner_id: storedScannerData.id,
+              device_id: deviceId
+            }, false); // Don't require auth for this call
+            
+            // Handle validation response
+            if (validationResult && validationResult.token) {
+              // Update token if needed
+              if (validationResult.token !== storedToken) {
+                setAuthToken(validationResult.token);
+                await setItem(AUTH_TOKEN_KEY, validationResult.token);
+              }
+              
+              // Check for scanner details in the response
+              if (validationResult.scanner_id) {
+                const updatedScanner = {
+                  id: validationResult.scanner_id,
+                  name: validationResult.scanner_name || storedScannerData.name,
+                  company: storedScannerData.company
+                };
+                
+                if (JSON.stringify(updatedScanner) !== JSON.stringify(storedScannerData)) {
+                  setScannerData(updatedScanner);
+                  await setItem(SCANNER_DATA_KEY, updatedScanner);
+                }
+              }
             }
           } catch (error) {
             console.error("Token validation failed:", error);
-            // Clear invalid token
-            await logout();
+            // If it's a 401/403 error, logout. Otherwise keep the current token
+            if (error.status === 401 || error.status === 403) {
+              console.warn("Invalid token detected, logging out");
+              await logout();
+            } else {
+              console.warn("Error validating token, but keeping current session:", error);
+            }
           }
         }
       } catch (err) {
@@ -107,34 +136,72 @@ export function AuthProvider({ children }) {
         console.log('QR data type:', typeof qrData);
         console.log('QR data:', typeof qrData === 'string' ? qrData.substring(0, 30) + '...' : qrData);
         
-        // Criar um FormData para evitar problemas de CORS com Content-Type
-        const formData = new FormData();
-        if (typeof qrData === 'string') {
-          formData.append('token', qrData);
-        } else if (qrData && typeof qrData === 'object') {
-          for (const key in qrData) {
-            formData.append(key, qrData[key]);
-          }
-        }
+        // Generate a device ID if not available
+        // In a production app, this should be a persistent unique identifier
+        const deviceId = await getItem('device_id') || `device_${Math.random().toString(36).substring(2, 10)}`;
+        // Store the device ID for future use
+        await setItem('device_id', deviceId);
         
-        // Tente primeiro com FormData
+        // Prepare auth data according to the expected format
+        // The backend expects 'authorization_token' and 'device_id' fields
+        const authData = {
+          authorization_token: typeof qrData === 'string' ? qrData : qrData.token,
+          device_id: deviceId
+        };
+        
+        console.log('Sending auth data:', { ...authData, authorization_token: 'REDACTED' });
+        
+        // Try with JSON first, as that's what the backend expects
         let response;
         try {
+          console.log('Trying authentication with JSON payload');
+          response = await api.post('/scanner/api/v1/auth/', authData, false);
+        } catch (jsonError) {
+          console.log('JSON authentication failed, trying with FormData:', jsonError);
+          
+          // Fallback to FormData if JSON fails
+          const formData = new FormData();
+          formData.append('authorization_token', authData.authorization_token);
+          formData.append('device_id', authData.device_id);
+          
           console.log('Trying authentication with FormData');
           response = await api.postForm('/scanner/api/v1/auth/', formData, false);
-        } catch (formError) {
-          console.log('FormData authentication failed, trying with JSON:', formError);
-          // Se falhar, tente com JSON normal
-          response = await api.post('/scanner/api/v1/auth/', qrData, false);
         }
         
         // Debug info - log successful response
         console.log('Authentication successful! Response:', response);
         
-        const { token, user, scanner } = response;
+        // The backend response format is different from what we expected
+        // ScannerAuthView returns: { scanner_token, scanner_id, scanner_name, company_id, company_name }
+        const { 
+          scanner_token: token, 
+          scanner_id,
+          scanner_name,
+          company_id,
+          company_name 
+        } = response;
+        
+        // Create scanner data object from response
+        const scanner = {
+          id: scanner_id,
+          name: scanner_name,
+          company: {
+            id: company_id,
+            name: company_name
+          }
+        };
+        
+        // The backend does not return user data directly in this authentication flow
+        // but we need to store some basic user info
+        const user = {
+          id: 'scanner_operator',
+          name: 'Scanner Operator',
+          role: 'operator',
+          scanner_id: scanner_id
+        };
         
         console.log("Authentication successful", { 
-          userReceived: !!user, 
+          userCreated: !!user, 
           scannerReceived: !!scanner,
           tokenReceived: !!token
         });

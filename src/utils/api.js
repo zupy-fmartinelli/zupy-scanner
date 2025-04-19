@@ -70,8 +70,29 @@ export const apiRequest = async ({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       };
+      
       if (token) {
+        // Use Bearer token for authorization
         headers['Authorization'] = `Bearer ${token}`;
+        
+        // For scanner endpoints, add device identification headers
+        if (endpoint.includes('/scanner/api/v1/') && endpoint !== '/scanner/api/v1/auth/') {
+          try {
+            // Get device ID from storage (using getItem might not work in native context)
+            const deviceId = await getItem('device_id');
+            if (deviceId) {
+              headers['X-Device-ID'] = deviceId;
+            }
+            
+            // Get scanner ID from storage
+            const scannerData = await getItem('scanner_data');
+            if (scannerData && scannerData.id) {
+              headers['X-Scanner-ID'] = scannerData.id;
+            }
+          } catch (err) {
+            console.warn('Could not add device identification headers:', err);
+          }
+        }
       }
       
       console.log('Native request headers:', headers);
@@ -98,9 +119,32 @@ export const apiRequest = async ({
       // Se não for uma requisição OPTIONS, vamos configurar os cabeçalhos padrão
       // Para requisições OPTIONS, o browser gerencia os cabeçalhos automaticamente
       if (method.toUpperCase() !== 'OPTIONS') {
-        const headers = { 'Accept': 'application/json' };
+        const headers = { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/json' 
+        };
+        
         if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+          // Check if it's a scanner token (scanner tokens from auth/token endpoint)
+          // Scanner tokens should be used as-is in the Authorization header
+          if (endpoint.includes('/scanner/api/v1/') && endpoint !== '/scanner/api/v1/auth/') {
+            headers['Authorization'] = `Bearer ${token}`;
+            
+            // Add additional headers that might be expected by the scanner API
+            // Some scanner endpoints might expect these headers for device identification
+            const deviceId = localStorage.getItem('device_id');
+            if (deviceId) {
+              headers['X-Device-ID'] = deviceId;
+            }
+            
+            const scannerId = JSON.parse(localStorage.getItem('scanner_data') || '{}').id;
+            if (scannerId) {
+              headers['X-Scanner-ID'] = scannerId;
+            }
+          } else {
+            // Standard authorization for other endpoints
+            headers['Authorization'] = `Bearer ${token}`;
+          }
         }
         
         console.log('Web request headers:', headers);
@@ -180,6 +224,23 @@ export const api = {
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      
+      // For scanner endpoints, add device identification headers
+      if (endpoint.includes('/scanner/api/v1/') && endpoint !== '/scanner/api/v1/auth/') {
+        try {
+          const deviceId = localStorage.getItem('device_id');
+          if (deviceId) {
+            headers['X-Device-ID'] = deviceId;
+          }
+          
+          const scannerData = JSON.parse(localStorage.getItem('scanner_data') || '{}');
+          if (scannerData && scannerData.id) {
+            headers['X-Scanner-ID'] = scannerData.id;
+          }
+        } catch (err) {
+          console.warn('Could not add device identification headers for form post:', err);
+        }
+      }
     }
     
     try {
