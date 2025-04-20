@@ -7,6 +7,9 @@
 
 # Cordova plugins for Capacitor
 # capacitor-cordova-ios-plugins
+certificados
+Certificados/*
+Certificados
 
 # Generated Config files
 # App/App/capacitor.config.json
