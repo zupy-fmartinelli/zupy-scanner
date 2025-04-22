@@ -165,20 +165,24 @@ function MainLayout({ title, children, activeMenu }) {
               </div>
             </button>
             
-            {/* Botão vazio para manter equilíbrio no layout (substitui Configurações) */}
-            <div className="nav-item invisible">
-              <i className="bi bi-clock-history"></i>
-              <span>Invisível</span>
-            </div>
+            {/* Botão Configurações */}
+            <button 
+              className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
+              onClick={() => handleNavigation('/settings')}
+            >
+              <i className="bi bi-gear"></i>
+              <span>Configurações</span>
+            </button>
           </nav>
         </div>
         
+        {/* Estilos CSS ajustados para rodapé mais compacto */}
         <style jsx>{`
           .nav-bar {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 8px 0;
+            padding: 4px 0; /* Reduzido padding vertical */
           }
           
           .nav-item {
@@ -188,16 +192,16 @@ function MainLayout({ title, children, activeMenu }) {
             background: transparent;
             border: none;
             color: #adb5bd;
-            padding: 8px 16px;
+            padding: 6px 12px; /* Reduzido padding */
             cursor: pointer;
             transition: color 0.2s;
             flex: 1;
-            font-size: 0.85rem;
+            font-size: 0.75rem; /* Reduzido tamanho da fonte */
           }
           
           .nav-item i {
-            font-size: 1.3rem;
-            margin-bottom: 4px;
+            font-size: 1.2rem; /* Reduzido tamanho do ícone */
+            margin-bottom: 3px; /* Ajustado margem */
           }
           
           .nav-item.active {
@@ -215,27 +219,27 @@ function MainLayout({ title, children, activeMenu }) {
             background: transparent;
             border: none;
             padding: 0;
-            transform: translateY(-20px);
+            transform: translateY(-15px); /* Reduzido deslocamento */
             position: relative;
             z-index: 1030;
             flex: 1;
           }
           
           .scan-button-circle {
-            width: 60px;
-            height: 60px;
+            width: 55px; /* Reduzido tamanho */
+            height: 55px; /* Reduzido tamanho */
             border-radius: 50%;
             background-color: var(--zupy-primary);
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Ajustado sombra */
             transition: all 0.3s ease;
           }
           
           .scan-button-circle i {
-            font-size: 1.8rem;
+            font-size: 1.6rem; /* Reduzido tamanho do ícone */
           }
           
           .scan-button-circle.active, 

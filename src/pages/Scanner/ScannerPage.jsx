@@ -16,7 +16,7 @@ function ScannerPage() {
   const { isOnline, pendingCount } = useNetwork();
   
   const [showScanner, setShowScanner] = useState(false);
-  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing
+  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing, initializing
   
   // Navigate to result page when scan is processed
   useEffect(() => {
@@ -24,6 +24,17 @@ function ScannerPage() {
       navigate('/result');
     }
   }, [currentScan, navigate]);
+  
+  // Start scanner automatically on mount
+  useEffect(() => {
+    // Only start if not already scanning or processing
+    if (scanningStatus === 'idle') {
+      console.log("ScannerPage mounted, attempting to start scan automatically.");
+      setScanningStatus('initializing'); // Indicate initialization
+      handleStartScan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array ensures this runs only once on mount
   
   const handleStartScan = async () => {
     try {

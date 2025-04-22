@@ -417,9 +417,10 @@ function ResultPage() {
             {/* Form para adição de pontos - MOVIDO PARA O TOPO */}
             {!finalized && isLoyaltyCard && currentScan.result?.requires_input && currentScan.result?.input_type === 'points' && (
               <div className="card border-0 shadow-sm mb-4 animate__animated animate__fadeIn animate__faster">
-                <div className="card-header bg-success text-white">
+                {/* Alterado bg-success para bg-secondary e ícone */}
+                <div className="card-header bg-secondary text-white">
                   <h5 className="card-title mb-0">
-                    <i className="bi bi-plus-circle me-2"></i>
+                    <i className="bi bi-pencil-square me-2"></i> 
                     Adicionar Pontos
                   </h5>
                 </div>
