@@ -4,8 +4,8 @@ Aplicativo Scanner PWA/Nativo para leitura de QR codes do sistema Zupy.
 
 ## Visão Geral
 
-O Scanner Zupy é um aplicativo progressivo (PWA) e nativo (via Capacitor) para leitura de QR codes de fidelidade e cupons. 
-O aplicativo é projetado para ser usado pelos estabelecimentos para validar cupons promocionais e registrar atividades 
+O Scanner Zupy é um aplicativo progressivo (PWA) e nativo (via Capacitor) para leitura de QR codes de fidelidade e cupons.
+O aplicativo é projetado para ser usado pelos estabelecimentos para validar cupons promocionais e registrar atividades
 de fidelidade dos clientes.
 
 ### Principais Funcionalidades
@@ -123,4 +123,13 @@ zupy-scanner/
 
 ## Licença
 
-Proprietário - Zupy Sistemas Ltda.
+Proprietário - Zupy Inc.
+
+🛸 Feito com Tecnologia 👽
+
+|          (__)
+|          (oo)
+|    /------\/
+|   / |    ||
+|  *  /\---/\
+|     ~~   ~~'
