@@ -127,9 +127,15 @@ Proprietário - Zupy Inc.
 
 🛸 Feito com Tecnologia 👽
 
+```
+```
+
 |          (__)
 |          (oo)
 |    /------\/
 |   / |    ||
 |  *  /\---/\
 |     ~~   ~~'
+
+```
+```
