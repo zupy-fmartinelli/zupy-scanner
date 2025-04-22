@@ -150,9 +150,10 @@ function MainLayout({ title, children, activeMenu }) {
             <button 
               className={`nav-item ${activeMenu === 'history' ? 'active' : ''}`}
               onClick={() => handleNavigation('/history')}
+              aria-label="Histórico" // Add aria-label for accessibility
             >
               <i className="bi bi-clock-history"></i>
-              <span>Histórico</span>
+              {/* <span>Histórico</span> REMOVED */}
             </button>
             
             {/* Botão central de scanner com destaque */}
@@ -169,9 +170,10 @@ function MainLayout({ title, children, activeMenu }) {
             <button 
               className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
               onClick={() => handleNavigation('/settings')}
+              aria-label="Configurações" // Add aria-label for accessibility
             >
               <i className="bi bi-gear"></i>
-              <span>Configurações</span>
+              {/* <span>Configurações</span> REMOVED */}
             </button>
           </nav>
         </div>
@@ -196,12 +198,12 @@ function MainLayout({ title, children, activeMenu }) {
             cursor: pointer;
             transition: color 0.2s;
             flex: 1;
-            font-size: 0.75rem; /* Reduzido tamanho da fonte */
+            /* font-size: 0.75rem; */ /* Font size not needed if text is removed */
           }
           
           .nav-item i {
-            font-size: 1.2rem; /* Reduzido tamanho do ícone */
-            margin-bottom: 3px; /* Ajustado margem */
+            font-size: 1.5rem; /* Aumentar um pouco o ícone lateral sem texto */
+            /* margin-bottom: 3px; */ /* Margin not needed if text is removed */
           }
           
           .nav-item.active {
@@ -219,33 +221,34 @@ function MainLayout({ title, children, activeMenu }) {
             background: transparent;
             border: none;
             padding: 0;
-            transform: translateY(-15px); /* Reduzido deslocamento */
+            transform: translateY(-25px); /* Aumentado deslocamento para "sair" mais */
             position: relative;
             z-index: 1030;
             flex: 1;
           }
           
           .scan-button-circle {
-            width: 55px; /* Reduzido tamanho */
-            height: 55px; /* Reduzido tamanho */
+            width: 70px; /* Aumentado tamanho */
+            height: 70px; /* Aumentado tamanho */
             border-radius: 50%;
-            background-color: var(--zupy-primary);
+            background-color: var(--bs-success); /* Mudado para verde Bootstrap */
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Ajustado sombra */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Aumentado sombra */
             transition: all 0.3s ease;
+            border: 3px solid var(--bs-dark); /* Adiciona borda para destacar do fundo */
           }
           
           .scan-button-circle i {
-            font-size: 1.6rem; /* Reduzido tamanho do ícone */
+            font-size: 2.2rem; /* Aumentado tamanho do ícone */
           }
           
           .scan-button-circle.active, 
           .scan-button-circle:hover {
-            background-color: var(--zupy-light);
-            transform: scale(1.05);
+            background-color: #157347; /* Verde mais escuro no hover */
+            transform: scale(1.08) translateY(-2px); /* Efeito de hover mais pronunciado */
           }
         `}</style>
       </footer>

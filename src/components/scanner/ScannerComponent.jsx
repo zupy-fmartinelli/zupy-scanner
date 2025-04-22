@@ -131,20 +131,40 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
           className="position-absolute top-0 start-0 w-100 h-100"
         />
         
-        {/* Scanner overlay */}
-        <div className="scanner-overlay d-flex flex-column justify-content-center align-items-center position-absolute top-0 start-0 w-100 h-100">
-          <div className="scanner-target"></div>
+        {/* Canvas for processing and QR overlay */}
+        <canvas 
+          ref={canvasRef}
+          className="position-absolute top-0 start-0 w-100 h-100"
+          style={{ zIndex: 5 }} // Canvas below overlay
+        />
+        
+        {/* Scanner overlay - Updated Structure */}
+        <div className="scanner-overlay position-absolute top-0 start-0 w-100 h-100">
+          {/* Masking elements */}
+          <div className="mask mask-top"></div>
+          <div className="mask mask-bottom"></div>
+          <div className="mask mask-left"></div>
+          <div className="mask mask-right"></div>
+          
+          {/* Corner elements */}
+          <div className="scanner-corner corner-tl"></div>
+          <div className="scanner-corner corner-tr"></div>
+          <div className="scanner-corner corner-bl"></div>
+          <div className="scanner-corner corner-br"></div>
+          
+          {/* Laser */}
           {scanning && (
             <div className="scanner-laser"></div>
           )}
         </div>
       </div>
       
-      {/* Close button - top right corner */}
+      {/* Close button - top right corner - Adjusted margin */}
       <button 
-        className="btn btn-dark position-absolute top-0 end-0 m-2"
+        className="btn btn-dark position-absolute top-0 end-0 m-3" // Increased margin
         onClick={onClose}
         aria-label="Close scanner"
+        style={{ zIndex: 20 }} // Ensure button is above overlay
       >
         <i className="bi bi-x-lg"></i>
       </button>
@@ -171,78 +191,132 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         )}
       </div>
       
+      {/* Updated Styles */}
       <style jsx>{`
         .scanner-container {
           background-color: #000;
           border-radius: 8px;
           overflow: hidden;
+          padding-bottom: 100px; /* Ensure space below status text for bottom button */
         }
         
         .scanner-frame {
           width: 100%;
-          max-width: 450px;
-          margin: 0 auto;
-          height: auto;
-          aspect-ratio: 4/3;
-          overflow: hidden;
+          max-width: 450px; /* Limit max width */
+          margin: 0 auto; /* Center frame */
+          aspect-ratio: 1 / 1; /* Make frame square for easier positioning */
+          overflow: hidden; /* Clip video to frame */
         }
         
         .scanner-overlay {
-          z-index: 10;
+          z-index: 10; /* Overlay above video */
+          pointer-events: none; /* Allow clicks to pass through overlay if needed */
+        }
+
+        /* Define the central scanning area (e.g., 80% width, square) */
+        :root {
+          --scan-area-size: 80%; 
+          --scan-area-top: calc((100% - var(--scan-area-size)) / 2);
+          --scan-area-left: calc((100% - var(--scan-area-size)) / 2);
+          --corner-size: 30px;
+          --corner-thickness: 5px;
+          --corner-color: rgba(255, 255, 255, 0.9);
         }
         
-        .scanner-target {
-          width: 200px;
-          height: 200px;
-          border: 2px solid #5c2d91;
-          border-radius: 20px;
-          position: relative;
-          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-        }
-        
-        .scanner-target::before,
-        .scanner-target::after {
-          content: '';
+        .mask {
           position: absolute;
-          width: 30px;
-          height: 30px;
-          border-color: #5c2d91;
+          background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent mask */
+          z-index: 15;
+        }
+        .mask-top {
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: var(--scan-area-top);
+        }
+        .mask-bottom {
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: var(--scan-area-top); /* Same as top */
+        }
+        .mask-left {
+          top: var(--scan-area-top);
+          left: 0;
+          width: var(--scan-area-left);
+          height: var(--scan-area-size);
+        }
+        .mask-right {
+          top: var(--scan-area-top);
+          right: 0;
+          width: var(--scan-area-left); /* Same as left */
+          height: var(--scan-area-size);
+        }
+
+        .scanner-corner {
+          position: absolute;
+          width: var(--corner-size);
+          height: var(--corner-size);
+          border-color: var(--corner-color);
           border-style: solid;
+          z-index: 20; /* Corners above mask */
         }
-        
-        .scanner-target::before {
-          top: -2px;
-          left: -2px;
-          border-width: 4px 0 0 4px;
-          border-radius: 10px 0 0 0;
+        .corner-tl {
+          top: var(--scan-area-top);
+          left: var(--scan-area-left);
+          border-width: var(--corner-thickness) 0 0 var(--corner-thickness);
         }
-        
-        .scanner-target::after {
-          bottom: -2px;
-          right: -2px;
-          border-width: 0 4px 4px 0;
-          border-radius: 0 0 10px 0;
+        .corner-tr {
+          top: var(--scan-area-top);
+          right: var(--scan-area-left); /* Use left offset for right position */
+          border-width: var(--corner-thickness) var(--corner-thickness) 0 0;
+        }
+        .corner-bl {
+          bottom: var(--scan-area-top); /* Use top offset for bottom position */
+          left: var(--scan-area-left);
+          border-width: 0 0 var(--corner-thickness) var(--corner-thickness);
+        }
+        .corner-br {
+          bottom: var(--scan-area-top); /* Use top offset for bottom position */
+          right: var(--scan-area-left); /* Use left offset for right position */
+          border-width: 0 var(--corner-thickness) var(--corner-thickness) 0;
         }
         
         .scanner-laser {
-          height: 2px;
-          width: 100%;
-          background-color: #ff3366;
           position: absolute;
-          top: 50%;
-          animation: laser-animation 2s infinite;
-          box-shadow: 0 0 5px #ff3366;
+          z-index: 18; /* Laser below corners but above mask */
+          left: var(--scan-area-left);
+          width: var(--scan-area-size);
+          height: 3px; /* Laser thickness */
+          background-color: #ff0000; /* Red laser */
+          box-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000;
+          border-radius: 2px;
+          /* Animation starts from the top of the scan area */
+          /* Animation starts from the top of the scan area */
+          top: var(--scan-area-top); 
+          animation: laser-animation 2.5s infinite ease-in-out;
         }
         
+        /* Corrected Laser Animation */
         @keyframes laser-animation {
           0% {
-            transform: translateY(-50px);
+            top: var(--scan-area-top);
+            opacity: 0.8;
           }
           50% {
-            transform: translateY(50px);
+            /* Move to the bottom edge of the scan area */
+            top: calc(var(--scan-area-top) + var(--scan-area-size) - 3px); /* Subtract laser height */
+            opacity: 0.8;
+          }
+          51% {
+             opacity: 0; /* Disappear briefly */
+          }
+          55% {
+             opacity: 0; /* Stay disappeared */
           }
           100% {
-            transform: translateY(-50px);
+            top: var(--scan-area-top);
+            opacity: 0.8;
           }
         }
       `}</style>
