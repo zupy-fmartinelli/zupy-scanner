@@ -159,15 +159,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         </div>
       </div>
       
-      {/* Close button - top right corner - Adjusted margin */}
-      <button 
-        className="btn btn-dark position-absolute top-0 end-0 m-3" // Increased margin
-        onClick={onClose}
-        aria-label="Close scanner"
-        style={{ zIndex: 20 }} // Ensure button is above overlay
-      >
-        <i className="bi bi-x-lg"></i>
-      </button>
+
       
       {/* Big close button - bottom center */}
       <div className="position-absolute bottom-0 start-0 w-100 p-2 text-center">

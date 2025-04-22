@@ -234,7 +234,7 @@ function AuthPage() {
             <div className="text-center mb-5">
               <img src={ZupyLogo} alt="Zupy Scanner" className="img-fluid mb-4" style={{ maxWidth: '200px' }} />
               <h1 className="h2 mb-3">Scanner Zupy</h1>
-              <p className="lead mb-4">Escaneie o QR Code de Autorização para autenticar este dispositivo</p>
+              <p className="lead mb-4">Para autenticar este dispositivo, escaneie o QR Code fornecido pelo administrador do programa Zupy.</p>
             </div>
             
             {/* Installation prompt */}
@@ -268,20 +268,16 @@ function AuthPage() {
             )}
             
             {showScanner ? (
-              <div className="card bg-dark border-secondary mb-4">
-                <div className="card-body p-0">
-                  <ScannerComponent 
-                    onQrScanned={handleQRScanned}
-                    onClose={() => setShowScanner(false)}
-                  />
-                </div>
+              <div className="scanner-fullscreen">
+                <ScannerComponent 
+                  onQrScanned={handleQRScanned}
+                  onClose={() => setShowScanner(false)}
+                />
+
               </div>
             ) : (
               <div className="text-center">
-                <div className="mb-3 alert alert-info">
-                  <i className="bi bi-info-circle-fill me-2"></i>
-                  Para autorizar este dispositivo, escaneie o QR Code de Autorização fornecido pelo administrador
-                </div>
+
                 <button 
                   className="btn btn-primary btn-lg px-5 py-3 mb-3"
                   onClick={handleStartScan}
@@ -370,7 +366,8 @@ function AuthPage() {
             )}
             
             <div className="text-center text-muted mt-4">
-              <small>Versão 1.0.0</small>
+              <small>Versão 1.0.0</small><br />
+              <small><a href="https://zupy.com" target="_blank" rel="noopener noreferrer" className="text-muted text-decoration-none">zupy.com</a></small>
             </div>
           </div>
         </div>
