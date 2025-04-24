@@ -6,6 +6,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../utils/api';
 import { toast } from 'react-toastify';
 import MainLayout from '../../components/layout/MainLayout';
+import ActionDrawer from '../../components/actions/ActionDrawer';
+import Visor from '../../components/visor/CameraVisor';
+import ScannerDisplay from '../../components/scanner/ScannerDisplay';
+import ClientDetails from '../../components/client/ClientDetails';
+import ClientInfoAccordion from '../../components/client/ClientInfoAccordion';
+import RewardsAccordion from '../../components/client/RewardsAccordion';
 
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
@@ -55,7 +61,21 @@ function ResultPage() {
   const [finalized, setFinalized] = useState(false);
   const [redeemed, setRedeemed] = useState(false);
   const [expandedSection, setExpandedSection] = useState('details'); // 'details', 'rewards', 'client'
-  
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState(null); // 'pontos' ou 'resgate'
+
+  // Abre automaticamente o drawer ao montar a página, se necessário
+  useEffect(() => {
+    if (!currentScan || !currentScan.result) return;
+    if (!finalized && currentScan.result.scan_type === 'loyalty_card' && currentScan.result?.requires_input && currentScan.result?.input_type === 'points') {
+      setDrawerType('pontos');
+      setDrawerOpen(true);
+    } else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
+      setDrawerType('resgate');
+      setDrawerOpen(true);
+    }
+    // eslint-disable-next-line
+  }, [finalized, currentScan, redeemed]);
   // Calcula o segmento RFM - Implementado como useCallback para evitar recriações
   const getRfmSegment = useCallback((rfm) => {
     if (!rfm) return RFM_SEGMENTS.default;
@@ -374,204 +394,108 @@ function ResultPage() {
   
   return (
     <MainLayout title="Resultado" activeMenu="scanner">
+      {/* Visor fixo no topo, igual scanner */}
+      <div className="mb-4">
+        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : 'idle'}>
+
+          <div className="d-flex align-items-center h-100 px-4 py-3">
+            {/* Foto do cliente */}
+            {clientDetails.photo_url ? (
+              <img src={clientDetails.photo_url} alt="Foto" style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',marginRight:16,border:'2px solid #444'}} />
+            ) : (
+              <div style={{width:56,height:56,borderRadius:'50%',background:'#222',marginRight:16,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <i className="bi bi-person fs-2 text-secondary" />
+              </div>
+            )}
+            <div style={{flex:1}}>
+              <div className="fw-bold fs-5 mb-1">{clientDetails.client_name || '-'}</div>
+              <div className="d-flex align-items-center mb-1">
+                <div className="small text-light">Cartão: <span className="fw-semibold">{formatCardCode(clientDetails.card_number)}</span></div>
+                {isLoyaltyCard && (
+                  <span className="badge bg-success ms-2" style={{fontSize:13,letterSpacing:1}}>Cartão válido</span>
+                )}
+              </div>
+              <div className="small text-light">Última visita: <span className="fw-semibold">{formatDate(clientDetails.last_visit)}</span></div>
+            </div>
+            {/* Segmento RFM e pontos */}
+            <div className="text-end ms-3">
+              <span className={`badge ${rfmSegment.class || 'bg-secondary'} px-2 py-1 mb-1`}>
+                {rfmSegment.emoji || '👤'} {rfmSegment.label || 'Segmento'}
+              </span>
+              <div className="fw-bold fs-6 text-success">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
+            </div>
+          </div>
+          {/* Aviso de prêmios disponíveis */}
+          {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
+            <div className="alert alert-success d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
+              <i className="bi bi-gift-fill me-2"></i>
+              Prêmios disponíveis para resgate!
+            </div>
+          )}
+          {/* Pontos para próxima recompensa */}
+          {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+            <div className="alert alert-info d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
+              <i className="bi bi-trophy-fill me-2"></i>
+              Faltam <b>{clientDetails.next_reward_gap.missing_points}</b> pontos para <b>{clientDetails.next_reward_gap.name}</b> ({clientDetails.next_reward_gap.points_required} pts)
+            </div>
+          )}
+        </Visor>
+      </div>
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            {/* Result header card */}
-            <div className={`card mb-4 border-0 shadow-sm ${resultStatus.bgClass} ${resultStatus.type || ''}`}>
-              <div className="card-body text-center py-4">
-                <div className={`display-1 mb-3 ${resultStatus.colorClass} ${resultStatus.type === 'coupon-used' ? 'coupon-used-icon' : ''}`}>
-                  <i className={`bi ${resultStatus.icon}`}></i>
-                </div>
-                
-                <h2 className="h3 mb-3">{resultStatus.title}</h2>
-                <p className="lead mb-3">{resultStatus.message}</p>
-                
-                {!isOnline && !currentScan.processed && (
-                  <div className="alert alert-warning mb-3" role="alert">
-                    <small>
-                      <i className="bi bi-wifi-off me-2"></i>
-                      Você está offline. Este scan será sincronizado quando você estiver online novamente.
-                    </small>
-                  </div>
-                )}
-                
-                {resultStatus.type === 'coupon-used' && (
-                  <div className="alert alert-danger mb-0" role="alert">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    Este cupom não pode ser resgatado.
-                  </div>
-                )}
-                
-                {resultStatus.type === 'company-mismatch' && (
-                  <div className="alert alert-danger mb-0" role="alert">
-                    <i className="bi bi-building-exclamation me-2"></i>
-                    Este cartão pertence a outra empresa. Verifique se está usando o scanner correto.
-                  </div>
-                )}
-              </div>
+            {/* Bloco superior fixo: visor/result */}
+            <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
+            
+
+            {/* Accordion de informações do cliente */}
+            <ClientInfoAccordion
+              clientDetails={clientDetails}
+              rfmSegment={rfmSegment}
+              expanded={expandedSection === 'client'}
+              onToggle={() => setExpandedSection(expandedSection === 'client' ? null : 'client')}
+            />
+
+            {/* Accordion de prêmios disponíveis */}
+            <RewardsAccordion
+              rewards={clientDetails.rewards}
+              expanded={expandedSection === 'rewards'}
+              onToggle={() => setExpandedSection(expandedSection === 'rewards' ? null : 'rewards')}
+            />
+
+            <ActionDrawer
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              type={drawerType}
+              onSubmit={drawerType === 'pontos' ? (e) => {
+                handlePointsSubmit(e);
+                setDrawerOpen(false);
+              } : (e) => {
+                handleRedeemCoupon(e);
+                setDrawerOpen(false);
+              }}
+              loading={drawerType === 'pontos' ? isSubmitting : isRedeeming}
+              clientDetails={clientDetails}
+              points={points}
+              setPoints={setPoints}
+              maxPoints={clientDetails.operator_max_points || 100}
+            />
+
+            {/* Aqui pode seguir com acordeões, histórico, botões, etc, SEM JSX solto. */}
+            {/* Exemplo de botão para novo scan: */}
+            <div className="d-flex justify-content-center mt-4 mb-3">
+              <button 
+                className="btn btn-primary btn-lg px-5 py-3"
+                onClick={handleNewScanClick}
+              >
+                <i className="bi bi-qr-code-scan me-2"></i>
+                Novo Scan
+              </button>
             </div>
+            {/* Adicione outros blocos ou acordeões aqui, sempre dentro de um elemento pai válido */}
+             
+            {/* Card de resgate removido: agora é feito via drawer */}
             
-            {/* AÇÕES PRIORITÁRIAS - Colocadas no topo para maior destaque */}
-            
-            {/* Form para adição de pontos - MOVIDO PARA O TOPO */}
-            {!finalized && isLoyaltyCard && currentScan.result?.requires_input && currentScan.result?.input_type === 'points' && (
-              <div className="card border-0 shadow-sm mb-4 animate__animated animate__fadeIn animate__faster">
-                {/* Alterado bg-success para bg-secondary e ícone */}
-                <div className="card-header bg-secondary text-white">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-pencil-square me-2"></i> 
-                    Adicionar Pontos
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <form onSubmit={handlePointsSubmit}>
-                    <div className="mb-3">
-                      {clientDetails.client_name && (
-                        <div className="alert alert-info mb-3">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <strong>{clientDetails.client_name}</strong>
-                              <br />
-                              <small>Pontos atuais: {clientDetails.points || 0}</small>
-                            </div>
-                            <span className={`badge ${rfmSegment.class} px-2 py-1`}>
-                              {rfmSegment.emoji} {clientDetails.tier || 'Regular'}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <label htmlFor="pointsInput" className="form-label">
-                        Quantidade de pontos
-                      </label>
-                      <div className="input-group input-group-lg mb-2">
-                        <span className="input-group-text bg-secondary text-white">
-                          <i className="bi bi-coin me-1"></i>
-                        </span>
-                        <input
-                          type="number"
-                          className="form-control form-control-lg"
-                          id="pointsInput"
-                          min="1"
-                          max={clientDetails.operator_max_points || 100}
-                          value={points}
-                          onChange={(e) => setPoints(e.target.value)}
-                          required
-                          disabled={isSubmitting}
-                          style={{ fontSize: '1.5rem', height: '60px' }}
-                        />
-                        <span className="input-group-text">pontos</span>
-                      </div>
-                      
-                      {clientDetails.operator_max_points && (
-                        <div className="form-text text-end text-light bg-dark p-2 rounded mt-2">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Máximo: <strong>{clientDetails.operator_max_points} pontos</strong>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <button 
-                      type="submit" 
-                      className="btn btn-success btn-lg w-100" 
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Processando...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-plus-circle me-2"></i>
-                          Adicionar Pontos
-                        </>
-                      )}
-                    </button>
-                    
-                    {/* Próxima recompensa direto na área de pontos */}
-                    {currentScan.result?.details?.next_reward_gap && currentScan.result.details.next_reward_gap.name && (
-                      <div className="alert alert-info mt-3 mb-0">
-                        <div className="d-flex align-items-center">
-                          <i className="bi bi-gift-fill me-2 fs-4"></i>
-                          <div className="flex-grow-1">
-                            <strong>Próxima Recompensa:</strong> {currentScan.result.details.next_reward_gap.name}<br />
-                            <div className="progress mt-2 mb-1" style={{ height: '10px' }}>
-                              <div 
-                                className="progress-bar bg-success" 
-                                role="progressbar" 
-                                style={{ 
-                                  width: `${Math.max(5, 100 - ((currentScan.result.details.next_reward_gap.missing_points / currentScan.result.details.next_reward_gap.points_required) * 100))}%` 
-                                }}
-                                aria-valuenow="25" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small>
-                              Faltam <strong>{currentScan.result.details.next_reward_gap.missing_points}</strong> pontos 
-                              (de {currentScan.result.details.next_reward_gap.points_required})
-                            </small>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </form>
-                </div>
-              </div>
-            )}
-            
-            {/* CUPOM - Card de resgate - NOVO! */}
-            {isCoupon && canRedeem && !redeemed && (
-              <div className="card border-0 shadow-sm mb-4 animate__animated animate__pulse animate__slow animate__infinite">
-                <div className="card-header bg-warning text-dark">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-ticket-perforated-fill me-2"></i>
-                    Cupom Disponível para Resgate
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <div className="alert alert-info mb-3">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>{clientDetails.client_name || 'Cliente'}</strong>
-                        <br />
-                        <small>Cupom: {clientDetails.title || 'Disponível para resgate'}</small>
-                      </div>
-                      {clientDetails.expiry_date && (
-                        <span className="badge bg-secondary px-2 py-1">
-                          Exp: {new Date(clientDetails.expiry_date).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="text-center mb-3">
-                    <h4>{clientDetails.title || currentScan.result?.details?.title}</h4>
-                    <p className="text-muted">{clientDetails.description || currentScan.result?.details?.description}</p>
-                  </div>
-                  
-                  <button 
-                    className="btn btn-warning btn-lg w-100" 
-                    onClick={handleRedeemCoupon}
-                    disabled={isRedeeming}
-                  >
-                    {isRedeeming ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Processando...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-check-circle-fill me-2"></i>
-                        Resgatar Cupom Agora
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
             
             {/* Cupom já resgatado - NOVO! */}
             {isCoupon && redeemed && (

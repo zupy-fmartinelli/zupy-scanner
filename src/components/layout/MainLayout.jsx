@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNetwork } from '../../contexts/NetworkContext';
+import { useScanner } from '../../contexts/ScannerContext';
 import PwaInstallPrompt from '../pwa/PwaInstallPrompt';
 import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
 
@@ -13,15 +14,35 @@ import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
  * @param {React.ReactNode} props.children - Page content
  * @param {string} props.activeMenu - Active menu item
  */
-function MainLayout({ title, children, activeMenu }) {
+function MainLayout({ title, children, activeMenu, visor }) {
   const navigate = useNavigate();
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  
+
+  // Altura dinâmica do visor
+  const visorRef = useRef(null);
+  const [visorHeight, setVisorHeight] = useState(0);
+  useLayoutEffect(() => {
+    if (visorRef.current) {
+      setVisorHeight(visorRef.current.offsetHeight);
+    }
+  }, [visor]);
+
   const handleNavigation = (path) => {
     navigate(path);
   };
+
+  // Sempre força novo scan ao clicar no botão central
+  const { clearCurrentScan } = useScanner();
+  const handleGoToScanner = () => {
+    if (typeof clearCurrentScan === 'function') {
+      clearCurrentScan();
+    }
+    navigate('/scanner');
+  };
+
+
   
   const handleSync = async () => {
     const result = await syncData();
@@ -38,53 +59,49 @@ function MainLayout({ title, children, activeMenu }) {
     await logout();
     navigate('/auth');
   };
-  
+
   return (
-    <div className="d-flex flex-column min-vh-100 bg-light">
-      {/* Header */}
-      <header className="bg-dark text-white shadow-sm">
-        <div className="container-fluid">
-          <div className="d-flex align-items-center py-2">
-            <img 
-              src={ZupyLogo} 
-              alt="Zupy" 
-              className="me-2"
-              style={{ height: '32px' }}
-            />
-            <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
-            
-            {/* Status indicators */}
-            <div className="d-flex align-items-center me-2">
-              {/* Online status */}
-              <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
-              
-              {/* Pending operations */}
-              {pendingCount > 0 && (
-                <span className="badge bg-warning me-2">
-                  <i className="bi bi-clock-history me-1"></i>
-                  {pendingCount}
+    <div className="zupy-layout-root" style={{ background: '#23252b', height: '100vh', overflow: 'hidden' }}>
+      {/* Visor customizado, se fornecido */}
+      {visor ? (
+        <div className="zupy-visor-area" ref={visorRef}>{visor}</div>
+      ) : (
+        <header className="zupy-header bg-dark text-white shadow-sm">
+          <div className="container-fluid">
+            <div className="d-flex align-items-center py-2">
+              <img 
+                src={ZupyLogo} 
+                alt="Zupy" 
+                className="me-2"
+                style={{ height: '32px' }}
+              />
+              <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
+              {/* Status indicators */}
+              <div className="d-flex align-items-center me-2">
+                {/* Online status */}
+                <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
+                  {isOnline ? 'Online' : 'Offline'}
                 </span>
-              )}
-            </div>
-            
-            {/* Sync button */}
-            <button 
-              className="btn btn-sm btn-outline-light me-2"
-              onClick={handleSync}
-              disabled={isSyncing || !isOnline}
-            >
-              {isSyncing ? (
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              ) : (
-                <i className="bi bi-arrow-repeat"></i>
-              )}
-              <span className="visually-hidden">Sincronizar</span>
-            </button>
-            
-            {/* User menu */}
-            <div className="dropdown">
+                {/* Pending operations */}
+                {pendingCount > 0 && (
+                  <span className="badge bg-warning me-2">
+                    <i className="bi bi-clock-history me-1"></i>
+                    {pendingCount}
+                  </span>
+                )}
+              </div>
+              {/* Sync button */}
+              <button 
+                className="btn btn-sm btn-outline-light me-2"
+                onClick={handleSync}
+                disabled={isSyncing || !isOnline}
+              >
+                {isSyncing ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  <i className="bi bi-arrow-repeat"></i>
+                )}
+              </button>
               <button 
                 className="btn btn-sm btn-dark dropdown-toggle" 
                 type="button" 
@@ -132,61 +149,67 @@ function MainLayout({ title, children, activeMenu }) {
               </ul>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
       
-      {/* Main content */}
-      <main className="flex-grow-1 bg-dark text-white pb-5">
+      {/* Bloco central rolável */}
+      <main
+        className="zupy-scrollable-content"
+        style={{
+          paddingTop: visorHeight,
+          height: `calc(100vh - ${visorHeight}px)`,
+          overflowY: 'auto',
+          background: '#23252b',
+        }}
+      >
         {children}
       </main>
       
       {/* PWA Installation Prompt */}
       <PwaInstallPrompt />
       
-      {/* Footer navigation */}
-      <footer className="bg-dark text-white border-top shadow-lg fixed-bottom" style={{ zIndex: 1020 }}>
+      {/* Rodapé fixo */}
+      <footer className="zupy-footer bg-dark text-white border-top shadow-lg">
         <div className="container-fluid">
           <nav className="nav-bar">
             <button 
               className={`nav-item ${activeMenu === 'history' ? 'active' : ''}`}
               onClick={() => handleNavigation('/history')}
-              aria-label="Histórico" // Add aria-label for accessibility
+              aria-label="Histórico"
             >
               <i className="bi bi-clock-history"></i>
-              {/* <span>Histórico</span> REMOVED */}
             </button>
-            
-            {/* Botão central de scanner com destaque */}
             <button 
               className="nav-item-center"
-              onClick={() => handleNavigation('/scanner')}
+              onClick={handleGoToScanner}
+              aria-label="Início"
             >
-              <div className={`scan-button-circle ${activeMenu === 'scanner' ? 'active' : ''}`}>
+              <div className={`scan-button-premium-dark ${activeMenu === 'scanner' ? 'active' : ''}`}>
                 <i className="bi bi-qr-code-scan"></i>
               </div>
             </button>
-            
-            {/* Botão Configurações */}
             <button 
               className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
               onClick={() => handleNavigation('/settings')}
-              aria-label="Configurações" // Add aria-label for accessibility
+              aria-label="Configurações"
             >
               <i className="bi bi-gear"></i>
-              {/* <span>Configurações</span> REMOVED */}
             </button>
           </nav>
         </div>
-        
-        {/* Estilos CSS ajustados para rodapé mais compacto */}
         <style jsx>{`
+          .zupy-footer {
+            box-shadow: 0 -6px 30px 0 #0e273a77, 0 -1px 8px #000a !important;
+            background: linear-gradient(180deg, #23252b 80%, #181a20 100%) !important;
+            border-top: 1.5px solid #232c3a !important;
+            position: relative;
+          }
           .nav-bar {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            padding: 4px 0; /* Reduzido padding vertical */
+            padding: 8px 0 4px 0;
           }
-          
           .nav-item {
             display: flex;
             flex-direction: column;
@@ -194,26 +217,19 @@ function MainLayout({ title, children, activeMenu }) {
             background: transparent;
             border: none;
             color: #adb5bd;
-            padding: 6px 12px; /* Reduzido padding */
+            padding: 6px 10px;
             cursor: pointer;
             transition: color 0.2s;
-            flex: 1;
-            /* font-size: 0.75rem; */ /* Font size not needed if text is removed */
+            font-size: 1.3rem;
+            z-index: 2;
           }
-          
-          .nav-item i {
-            font-size: 1.5rem; /* Aumentar um pouco o ícone lateral sem texto */
-            /* margin-bottom: 3px; */ /* Margin not needed if text is removed */
-          }
-          
-          .nav-item.active {
-            color: white;
-          }
-          
+          .nav-item.active,
           .nav-item:hover {
-            color: white;
+            color: #fff;
           }
-          
+          .nav-item i {
+            font-size: 1.4rem;
+          }
           .nav-item-center {
             display: flex;
             justify-content: center;
@@ -221,34 +237,53 @@ function MainLayout({ title, children, activeMenu }) {
             background: transparent;
             border: none;
             padding: 0;
-            transform: translateY(-25px); /* Aumentado deslocamento para "sair" mais */
             position: relative;
-            z-index: 1030;
-            flex: 1;
+            z-index: 3;
+            flex: none;
           }
-          
-          .scan-button-circle {
-            width: 70px; /* Aumentado tamanho */
-            height: 70px; /* Aumentado tamanho */
+          .scan-button-premium-dark {
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
-            background-color: var(--bs-success); /* Mudado para verde Bootstrap */
+            background: #191c20;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Aumentado sombra */
-            transition: all 0.3s ease;
-            border: 3px solid var(--bs-dark); /* Adiciona borda para destacar do fundo */
+            color: #fff;
+            border: 3px solid #25d2ff;
+            box-shadow: 0 2px 18px #000a; /* Sombra escura apenas */
+            transition: all 0.22s cubic-bezier(.4,0,.2,1);
+            margin: 0 8px;
           }
-          
-          .scan-button-circle i {
-            font-size: 2.2rem; /* Aumentado tamanho do ícone */
+          .scan-button-premium-dark:active,
+          .scan-button-premium-dark:focus-visible {
+            box-shadow: 0 0 18px 4px #25d2ffcc, 0 4px 24px #000d;
+            border-color: #25d2ff;
+            background: #181a20;
           }
-          
-          .scan-button-circle.active, 
-          .scan-button-circle:hover {
-            background-color: #157347; /* Verde mais escuro no hover */
-            transform: scale(1.08) translateY(-2px); /* Efeito de hover mais pronunciado */
+          .scan-button-premium-dark i {
+            font-size: 2.3rem;
+            color: #fff;
+            filter: drop-shadow(0 0 2px #25d2ff99);
+          }
+          .scan-button-premium-dark.active, 
+          .scan-button-premium-dark:hover {
+            border-color: #25d2ff;
+            background: #181a20;
+          }
+          @media (max-width: 480px) {
+            .scan-button-premium-dark {
+              width: 54px;
+              height: 54px;
+              border-width: 2px;
+            }
+            .scan-button-premium-dark i {
+              font-size: 1.7rem;
+            }
+            .nav-item {
+              font-size: 1.1rem;
+              padding: 4px 6px;
+            }
           }
         `}</style>
       </footer>
@@ -334,6 +369,33 @@ function MainLayout({ title, children, activeMenu }) {
         
         .nav-item:hover {
           color: white;
+        }
+      `}</style>
+      {/* Estilos globais para layout fixo/rolável */}
+      <style jsx>{`
+        .zupy-layout-root {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          background: #f8f9fa;
+        }
+        .zupy-header {
+          position: sticky;
+          top: 0;
+          z-index: 1050;
+        }
+        .zupy-footer {
+          position: sticky;
+          bottom: 0;
+          z-index: 1050;
+        }
+        .zupy-scrollable-content {
+          flex: 1 1 auto;
+          overflow-y: auto;
+          padding-bottom: 80px; /* espaço para rodapé */
+          padding-top: 12px; /* espaço para header */
+          background: #212529;
+          color: #fff;
         }
       `}</style>
     </div>

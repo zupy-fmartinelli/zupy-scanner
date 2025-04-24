@@ -6,8 +6,10 @@ import { useScanner } from '../../contexts/ScannerContext';
 import { useNetwork } from '../../contexts/NetworkContext';
 import { scanQRCode, checkPermissions, requestPermissions } from '../../utils/scanner';
 import { isNative } from '../../utils/platform';
-import ScannerComponent from '../../components/scanner/ScannerComponent';
+import ScannerCamera from '../../components/scanner/ScannerCamera';
 import MainLayout from '../../components/layout/MainLayout';
+import Visor from '../../components/visor/CameraVisor';
+import ScannerDisplay from '../../components/scanner/ScannerDisplay';
 
 function ScannerPage() {
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ function ScannerPage() {
   const { isOnline, pendingCount } = useNetwork();
   
   const [showScanner, setShowScanner] = useState(false);
-  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing, initializing
+  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing
   
   // Navigate to result page when scan is processed
   useEffect(() => {
@@ -30,13 +32,14 @@ function ScannerPage() {
     // Only start if not already scanning or processing
     if (scanningStatus === 'idle') {
       console.log("ScannerPage mounted, attempting to start scan automatically.");
-      setScanningStatus('initializing'); // Indicate initialization
       handleStartScan();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
   
   const handleStartScan = async () => {
+    setShowScanner(true);
+    setScanningStatus('scanning');
     try {
       if (isNative()) {
         // Check and request camera permissions for native apps
@@ -76,11 +79,7 @@ function ScannerPage() {
     setScanningStatus('processing');
     
     // Fornecer feedback visual imediato
-    toast.info('QR Code detectado! Processando...', {
-      autoClose: 1500,
-      position: "top-center",
-      hideProgressBar: false,
-    });
+    // Mensagem visual será exibida no visor, não toast.
     
     try {
       const scanResult = await processScan(qrData);
@@ -108,80 +107,51 @@ function ScannerPage() {
   };
   
   return (
-    <MainLayout title="Scanner" activeMenu="scanner">
+    <MainLayout
+      title="Scanner"
+      activeMenu="scanner"
+      visor={
+        <Visor
+            mode={scanningStatus}
+            onToggleScanner={() => {
+              if (showScanner) {
+                setShowScanner(false);
+                setScanningStatus('idle');
+              } else {
+                setShowScanner(true);
+                setScanningStatus('scanning');
+              }
+            }}
+          >
+             {/* Exibe display de informações completas se houver scan */}
+            {scanningStatus === 'processing' && (!currentScan || !currentScan.result) ? (
+              <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100" style={{minHeight:120}}>
+                <div className="spinner-border text-warning mb-3" role="status" />
+                <div className="fw-bold text-warning fs-5">QR Code detectado! Processando...</div>
+              </div>
+            ) : currentScan && (currentScan.result || currentScan.processed) ? (
+              <ScannerDisplay
+                currentScan={currentScan}
+                clientDetails={currentScan.clientDetails || {}}
+                rfmSegment={currentScan.rfmSegment || {}}
+                reward={currentScan.reward || {}}
+                coupon={currentScan.coupon || {}}
+              />
+            ) : (
+              showScanner && scanningStatus === 'scanning' && (
+                <ScannerCamera onQrScanned={handleQRScanned} />
+              )
+            )}
+          </Visor>
+      }
+    >
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             
-            {/* Scanner */}
-            {showScanner ? (
-              <div className="card bg-dark border-0 mb-4 shadow">
-                <div className="card-body p-0">
-                  <ScannerComponent 
-                    onQrScanned={handleQRScanned}
-                    onClose={() => {
-                      setShowScanner(false);
-                      setScanningStatus('idle');
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-5 my-4 bg-dark rounded shadow-sm">
-                <div className="d-flex flex-column align-items-center">
-                  <div className="scanner-icon-circle mb-4">
-                    <i className="bi bi-qr-code-scan fs-1"></i>
-                  </div>
-                  
-                  <h2 className="h4 mb-4 text-white">Escaneie um QR Code</h2>
-                  
-                  <button 
-                    className="btn btn-primary btn-lg px-5 py-3 mb-3"
-                    onClick={handleStartScan}
-                    disabled={isProcessing || scanningStatus !== 'idle'}
-                  >
-                    {scanningStatus === 'processing' || isProcessing ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Processando...
-                      </>
-                    ) : scanningStatus === 'scanning' ? (
-                      <>
-                        <span className="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
-                        Escaneando...
-                      </>
-                    ) : (
-                      'Iniciar Scanner'
-                    )}
-                  </button>
-                  
-                  <button 
-                    className="btn btn-outline-light"
-                    onClick={handleHistoryClick}
-                    disabled={isProcessing}
-                  >
-                    <i className="bi bi-clock-history me-2"></i>
-                    Histórico de scans
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
-      
-      <style jsx>{`
-        .scanner-icon-circle {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background-color: #5c2d91;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-        }
-      `}</style>
     </MainLayout>
   );
 }

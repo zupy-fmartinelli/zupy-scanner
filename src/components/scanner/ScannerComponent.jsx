@@ -115,75 +115,30 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   };
   
   return (
-    <div className="scanner-container position-relative">
-      <div className="position-relative scanner-frame">
-        {/* Video element for camera feed */}
-        <video 
+    <div className="scanner-container position-relative" style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden', background: '#23252b', margin: 0, padding: 0 }}>
+      <div className="position-relative scanner-frame" style={{ width: '100%', height: '100%', margin: 0, padding: 0 }}>
+        <video
           ref={videoRef}
-          className="w-100 rounded"
-          playsInline 
+          className="scanner-video"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: 20, objectFit: 'cover', display: 'block', margin: 0, padding: 0 }}
+          playsInline
           muted
-        />
-        
-        {/* Canvas for processing and QR overlay */}
+          autoPlay
+        />  
         <canvas 
           ref={canvasRef}
           className="position-absolute top-0 start-0 w-100 h-100"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: 20, pointerEvents: 'none', margin: 0, padding: 0 }}
         />
         
-        {/* Canvas for processing and QR overlay */}
-        <canvas 
-          ref={canvasRef}
-          className="position-absolute top-0 start-0 w-100 h-100"
-          style={{ zIndex: 5 }} // Canvas below overlay
-        />
-        
-        {/* Scanner overlay - Updated Structure */}
-        <div className="scanner-overlay position-absolute top-0 start-0 w-100 h-100">
-          {/* Masking elements */}
-          <div className="mask mask-top"></div>
-          <div className="mask mask-bottom"></div>
-          <div className="mask mask-left"></div>
-          <div className="mask mask-right"></div>
-          
-          {/* Corner elements */}
-          <div className="scanner-corner corner-tl"></div>
-          <div className="scanner-corner corner-tr"></div>
-          <div className="scanner-corner corner-bl"></div>
-          <div className="scanner-corner corner-br"></div>
-          
-          {/* Laser */}
-          {scanning && (
-            <div className="scanner-laser"></div>
-          )}
-        </div>
-      </div>
-      
-
-      
-      {/* Big close button - bottom center */}
-      <div className="position-absolute bottom-0 start-0 w-100 p-2 text-center">
-        <button 
-          className="btn btn-danger btn-lg px-5"
-          onClick={onClose}
-        >
-          <i className="bi bi-x-circle-fill me-2"></i>
-          Fechar Scanner
-        </button>
-      </div>
-      
-      {/* Status text */}
-      <div className="text-center p-2 mt-2 mb-5">
-        {error ? (
-          <p className="text-danger mb-0 fs-5">{error}</p>
-        ) : scanning ? (
-          <p className="text-light mb-0 fs-5">Aponte para um QR code</p>
-        ) : (
-          <p className="text-light mb-0 fs-5">Scanner iniciando...</p>
+        {/* Laser (opcional) */}
+        {scanning && (
+          <div className="scanner-laser" style={{position: 'absolute', zIndex: 18, left: 0, right: 0, top: '48%', width: '100%', height: 3, background: '#ff0000', boxShadow: '0 0 8px #ff0000, 0 0 12px #ff0000', borderRadius: 2}}></div>
         )}
       </div>
       
-      {/* Updated Styles */}
+      {/* Status text */}
+      
       <style jsx>{`
         .scanner-container {
           background-color: #000;
