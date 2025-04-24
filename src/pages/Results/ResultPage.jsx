@@ -7,6 +7,7 @@ import { api } from '../../utils/api';
 import { toast } from 'react-toastify';
 import MainLayout from '../../components/layout/MainLayout';
 import ActionDrawer from '../../components/actions/ActionDrawer';
+import Visor from '../../components/visor/CameraVisor';
 import ScannerDisplay from '../../components/scanner/ScannerDisplay';
 import ClientDetails from '../../components/client/ClientDetails';
 import ClientInfoAccordion from '../../components/client/ClientInfoAccordion';
@@ -393,12 +394,59 @@ function ResultPage() {
   
   return (
     <MainLayout title="Resultado" activeMenu="scanner">
+      {/* Visor fixo no topo, igual scanner */}
+      <div className="mb-4">
+        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : 'idle'}>
+
+          <div className="d-flex align-items-center h-100 px-4 py-3">
+            {/* Foto do cliente */}
+            {clientDetails.photo_url ? (
+              <img src={clientDetails.photo_url} alt="Foto" style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',marginRight:16,border:'2px solid #444'}} />
+            ) : (
+              <div style={{width:56,height:56,borderRadius:'50%',background:'#222',marginRight:16,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <i className="bi bi-person fs-2 text-secondary" />
+              </div>
+            )}
+            <div style={{flex:1}}>
+              <div className="fw-bold fs-5 mb-1">{clientDetails.client_name || '-'}</div>
+              <div className="d-flex align-items-center mb-1">
+                <div className="small text-light">Cartão: <span className="fw-semibold">{formatCardCode(clientDetails.card_number)}</span></div>
+                {isLoyaltyCard && (
+                  <span className="badge bg-success ms-2" style={{fontSize:13,letterSpacing:1}}>Cartão válido</span>
+                )}
+              </div>
+              <div className="small text-light">Última visita: <span className="fw-semibold">{formatDate(clientDetails.last_visit)}</span></div>
+            </div>
+            {/* Segmento RFM e pontos */}
+            <div className="text-end ms-3">
+              <span className={`badge ${rfmSegment.class || 'bg-secondary'} px-2 py-1 mb-1`}>
+                {rfmSegment.emoji || '👤'} {rfmSegment.label || 'Segmento'}
+              </span>
+              <div className="fw-bold fs-6 text-success">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
+            </div>
+          </div>
+          {/* Aviso de prêmios disponíveis */}
+          {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
+            <div className="alert alert-success d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
+              <i className="bi bi-gift-fill me-2"></i>
+              Prêmios disponíveis para resgate!
+            </div>
+          )}
+          {/* Pontos para próxima recompensa */}
+          {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+            <div className="alert alert-info d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
+              <i className="bi bi-trophy-fill me-2"></i>
+              Faltam <b>{clientDetails.next_reward_gap.missing_points}</b> pontos para <b>{clientDetails.next_reward_gap.name}</b> ({clientDetails.next_reward_gap.points_required} pts)
+            </div>
+          )}
+        </Visor>
+      </div>
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             {/* Bloco superior fixo: visor/result */}
             <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
-            <ClientDetails clientDetails={clientDetails} currentScan={currentScan} />
+            
 
             {/* Accordion de informações do cliente */}
             <ClientInfoAccordion
