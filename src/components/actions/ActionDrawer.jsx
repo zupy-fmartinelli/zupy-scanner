@@ -26,25 +26,26 @@ function ActionDrawer({
   if (!open) return null;
   return (
     <div className="zupy-action-drawer-overlay">
-      <div className="zupy-action-drawer">
-        <button className="btn-close position-absolute end-0 top-0 m-3" onClick={onClose} aria-label="Fechar"></button>
+      <div className="zupy-action-drawer bg-dark text-white">
+        <button className="btn-close btn-close-white position-absolute end-0 top-0 m-3" onClick={onClose} aria-label="Fechar"></button>
         {type === 'pontos' && (
           <form onSubmit={onSubmit}>
-            <h5 className="mb-3">Adicionar Pontos</h5>
+            <h5 className="mb-3 text-white">Adicionar Pontos</h5>
             <div className="mb-2">
-              <label htmlFor="drawerPointsInput" className="form-label">Quantidade de pontos</label>
+              <label htmlFor="drawerPointsInput" className="form-label text-white">Quantidade de pontos</label>
               <input
                 id="drawerPointsInput"
                 type="number"
                 min={1}
                 max={maxPoints}
-                className="form-control form-control-lg"
+                className="form-control form-control-lg bg-secondary text-white border-0"
                 value={points}
                 onChange={e => setPoints(Number(e.target.value))}
                 disabled={loading}
                 required
+                style={{ background: '#343a40', color: '#fff' }}
               />
-              <div className="form-text text-end">Máximo: <strong>{maxPoints}</strong></div>
+              <div className="form-text text-end text-light">Máximo: <strong>{maxPoints}</strong></div>
             </div>
             <button type="submit" className="btn btn-success w-100" disabled={loading}>
               {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-plus-circle me-2"></i>}
@@ -54,10 +55,10 @@ function ActionDrawer({
         )}
         {type === 'resgate' && (
           <div>
-            <h5 className="mb-3">Resgatar Cupom</h5>
+            <h5 className="mb-3 text-white">Resgatar Cupom</h5>
             <div className="mb-2">
-              <strong>{clientDetails.title || 'Cupom'}</strong>
-              <div>{clientDetails.description}</div>
+              <strong className="text-white">{clientDetails.title || 'Cupom'}</strong>
+              <div className="text-light">{clientDetails.description}</div>
             </div>
             <button className="btn btn-warning w-100" onClick={onSubmit} disabled={loading}>
               {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-check-circle-fill me-2"></i>}
@@ -79,12 +80,16 @@ function ActionDrawer({
         .zupy-action-drawer {
           width: 100%;
           max-width: 480px;
-          background: #fff;
+          background: #212529;
           border-radius: 16px 16px 0 0;
           box-shadow: 0 -4px 24px rgba(0,0,0,0.25);
           padding: 32px 24px 24px 24px;
           position: relative;
           animation: drawerUp 0.25s cubic-bezier(0.4,0,0.2,1);
+        }
+        .form-control:disabled, .form-control[readonly] {
+          background-color: #343a40;
+          color: #fff;
         }
         @keyframes drawerUp {
           from { transform: translateY(100%); }

@@ -58,6 +58,19 @@ function ResultPage() {
   const [expandedSection, setExpandedSection] = useState('details'); // 'details', 'rewards', 'client'
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState(null); // 'pontos' ou 'resgate'
+
+  // Abre automaticamente o drawer ao montar a página, se necessário
+  useEffect(() => {
+    if (!currentScan || !currentScan.result) return;
+    if (!finalized && currentScan.result.scan_type === 'loyalty_card' && currentScan.result?.requires_input && currentScan.result?.input_type === 'points') {
+      setDrawerType('pontos');
+      setDrawerOpen(true);
+    } else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
+      setDrawerType('resgate');
+      setDrawerOpen(true);
+    }
+    // eslint-disable-next-line
+  }, [finalized, currentScan, redeemed]);
   // Calcula o segmento RFM - Implementado como useCallback para evitar recriações
   const getRfmSegment = useCallback((rfm) => {
     if (!rfm) return RFM_SEGMENTS.default;
@@ -416,34 +429,19 @@ function ResultPage() {
             
             {/* AÇÕES PRIORITÁRIAS - Colocadas no topo para maior destaque */}
             
-            {/* Botão flutuante para abrir o drawer de pontos */}
-            {!finalized && isLoyaltyCard && currentScan.result?.requires_input && currentScan.result?.input_type === 'points' && (
-              <button
-                className="btn btn-success btn-lg rounded-circle position-fixed zupy-fab"
-                style={{ right: 24, bottom: 96, zIndex: 2001 }}
-                onClick={() => { setDrawerType('pontos'); setDrawerOpen(true); }}
-                aria-label="Adicionar Pontos"
-              >
-                <i className="bi bi-plus-circle fs-2"></i>
-              </button>
-            )}
-            {/* Botão flutuante para abrir o drawer de resgate */}
-            {isCoupon && canRedeem && !redeemed && (
-              <button
-                className="btn btn-warning btn-lg rounded-circle position-fixed zupy-fab"
-                style={{ right: 24, bottom: 96, zIndex: 2001 }}
-                onClick={() => { setDrawerType('resgate'); setDrawerOpen(true); }}
-                aria-label="Resgatar Cupom"
-              >
-                <i className="bi bi-ticket-perforated-fill fs-2"></i>
-              </button>
-            )}
+
             {/* Drawer de ações */}
             <ActionDrawer
               open={drawerOpen}
               onClose={() => setDrawerOpen(false)}
               type={drawerType}
-              onSubmit={drawerType === 'pontos' ? handlePointsSubmit : handleRedeemCoupon}
+              onSubmit={drawerType === 'pontos' ? (e) => {
+                handlePointsSubmit(e);
+                setDrawerOpen(false);
+              } : (e) => {
+                handleRedeemCoupon(e);
+                setDrawerOpen(false);
+              }}
               loading={drawerType === 'pontos' ? isSubmitting : isRedeeming}
               clientDetails={clientDetails}
               points={points}
