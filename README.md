@@ -121,6 +121,11 @@ zupy-scanner/
 - Validação de QR codes
 - Sem armazenamento local de dados sensíveis
 
+## Versões
+
+24 de Abril de 2025 - Alterado para fazer um Scanner Bolitão com ar Prêmium e interface mais simples para os usuários Att Fabinho
+
+
 ## Licença
 
 Proprietário - Zupy Inc.
