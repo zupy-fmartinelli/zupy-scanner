@@ -19,61 +19,64 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png'],
-      manifest: {
-        name: 'Scanner Zupy',
-        short_name: 'Scanner',
-        description: 'Escaneie QR codes para cartões de fidelidade e cupons',
-        theme_color: '#5c2d91', // Manter a cor do tema
-        background_color: '#212529', // Manter a cor de fundo
-        display: 'standalone',
-        icons: [ // Atualizado para usar os novos ícones pwa-icon-*
-          {
-            src: 'icons/pwa-icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/pwa-icon-256x256.png',
-            sizes: '256x256',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/pwa-icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/pwa-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable' // Importante para ícones adaptáveis
-          }
-          // O apple-touch-icon será pego automaticamente pelo navegador a partir dos ícones fornecidos,
-          // geralmente o de 192x192 ou o maior disponível.
-        ]
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.zupy\.com\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 24 horas
+    plugins: [
+      react(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png', 'sounds/*.mp3'],
+        manifest: {
+          name: 'Scanner Zupy',
+          short_name: 'Scanner',
+          description: 'Escaneie QR codes para cartões de fidelidade e cupons',
+          theme_color: '#5c2d91', // Manter a cor do tema
+          background_color: '#212529', // Manter a cor de fundo
+          display: 'standalone',
+          icons: [ // Atualizado para usar os novos ícones pwa-icon-*
+            {
+              src: 'icons/pwa-icon-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'icons/pwa-icon-256x256.png',
+              sizes: '256x256',
+              type: 'image/png'
+            },
+            {
+              src: 'icons/pwa-icon-384x384.png',
+              sizes: '384x384',
+              type: 'image/png'
+            },
+            {
+              src: 'icons/pwa-icon-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable' // Importante para ícones adaptáveis
+            }
+          ]
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/api\.zupy\.com\/api\//,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24, // 24 horas
+                },
               },
             },
-          },
-        ],
+          ],
+        },
+      }),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, './src'),
       },
-    }),
-  ],
+    },
   }
 });

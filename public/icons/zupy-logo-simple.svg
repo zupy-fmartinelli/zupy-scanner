@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <title>Zupy Logo Simple</title>
+  <g fill="#FFFFFF">
+    <path d="M6 10a1 1 0 011-1h18a1 1 0 010 2H7a1 1 0 01-1-1z"/>
+    <path d="M8 21a1 1 0 01-.8-1.6l16-20a1 1 0 011.6 1.2l-16 20A1 1 0 018 21z"/>
+    <path d="M6 21a1 1 0 010-2h18a1 1 0 010 2H6z"/>
+  </g>
+</svg>

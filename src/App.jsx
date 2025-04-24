@@ -10,19 +10,24 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NetworkProvider } from './contexts/NetworkContext';
 import { ScannerProvider } from './contexts/ScannerContext';
 
-// Lazy-loaded components
+// Lazy-loaded components (original)
 const AuthPage = lazy(() => import('./pages/Auth/AuthPage'));
-const ScannerPage = lazy(() => import('./pages/Scanner/ScannerPage'));
-const ResultPage = lazy(() => import('./pages/Results/ResultPage'));
 const HistoryPage = lazy(() => import('./pages/History/HistoryPage'));
 const SettingsPage = lazy(() => import('./pages/Settings/SettingsPage'));
 const OfflinePage = lazy(() => import('./pages/Offline/OfflinePage'));
 
+// New device-styled components
+const ScannerPageDevice = lazy(() => import('./pages/Scanner/ScannerPageDevice'));
+const ResultPageDevice = lazy(() => import('./pages/Results/ResultPageDevice'));
+
 // Loading component
 const Loading = () => (
-  <div className="d-flex justify-content-center align-items-center vh-100">
-    <div className="spinner-border text-primary" role="status">
-      <span className="visually-hidden">Loading...</span>
+  <div className="flex justify-center items-center min-h-screen bg-device-bg">
+    <div className="relative">
+      <div className="w-12 h-12 rounded-full border-2 border-zupy-primary border-t-transparent animate-spin"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full bg-zupy-primary"></div>
+      </div>
     </div>
   </div>
 );
@@ -49,16 +54,18 @@ function AppRoutes() {
     <Router>
       <Suspense fallback={<Loading />}>
         <Routes>
-          {/* Rota de autenticação - suporta tanto escaneamento manual quanto autenticação via token na URL */}
+          {/* Rota de autenticação */}
           <Route 
             path="/auth" 
             element={isAuthenticated() ? <Navigate to="/scanner" replace /> : <AuthPage />} 
           />
+          
+          {/* Rotas com novo design de dispositivo */}
           <Route 
             path="/scanner" 
             element={
               <ProtectedRoute>
-                <ScannerPage />
+                <ScannerPageDevice />
               </ProtectedRoute>
             } 
           />
@@ -66,10 +73,12 @@ function AppRoutes() {
             path="/result" 
             element={
               <ProtectedRoute>
-                <ResultPage />
+                <ResultPageDevice />
               </ProtectedRoute>
             } 
           />
+          
+          {/* Rotas que ainda usam o design antigo */}
           <Route 
             path="/history" 
             element={
@@ -91,18 +100,7 @@ function AppRoutes() {
         </Routes>
       </Suspense>
       
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      {/* Toast container substituído pelos toasts personalizados do dispositivo */}
     </Router>
   );
 }
