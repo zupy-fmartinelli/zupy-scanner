@@ -7,6 +7,8 @@ import { api } from '../../utils/api';
 import { toast } from 'react-toastify';
 import MainLayout from '../../components/layout/MainLayout';
 import ActionDrawer from '../../components/actions/ActionDrawer';
+import ScannerDisplay from '../../components/scanner/ScannerDisplay';
+import ClientDetails from '../../components/client/ClientDetails';
 
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
@@ -392,45 +394,10 @@ function ResultPage() {
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            {/* Result header card */}
-            <div className={`card mb-4 border-0 shadow-sm ${resultStatus.bgClass} ${resultStatus.type || ''}`}>
-              <div className="card-body text-center py-4">
-                <div className={`display-1 mb-3 ${resultStatus.colorClass} ${resultStatus.type === 'coupon-used' ? 'coupon-used-icon' : ''}`}>
-                  <i className={`bi ${resultStatus.icon}`}></i>
-                </div>
-                
-                <h2 className="h3 mb-3">{resultStatus.title}</h2>
-                <p className="lead mb-3">{resultStatus.message}</p>
-                
-                {!isOnline && !currentScan.processed && (
-                  <div className="alert alert-warning mb-3" role="alert">
-                    <small>
-                      <i className="bi bi-wifi-off me-2"></i>
-                      Você está offline. Este scan será sincronizado quando você estiver online novamente.
-                    </small>
-                  </div>
-                )}
-                
-                {resultStatus.type === 'coupon-used' && (
-                  <div className="alert alert-danger mb-0" role="alert">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    Este cupom não pode ser resgatado.
-                  </div>
-                )}
-                
-                {resultStatus.type === 'company-mismatch' && (
-                  <div className="alert alert-danger mb-0" role="alert">
-                    <i className="bi bi-building-exclamation me-2"></i>
-                    Este cartão pertence a outra empresa. Verifique se está usando o scanner correto.
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* AÇÕES PRIORITÁRIAS - Colocadas no topo para maior destaque */}
-            
+            {/* Bloco superior fixo: visor/result */}
+            <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
+            <ClientDetails clientDetails={clientDetails} currentScan={currentScan} />
 
-            {/* Drawer de ações */}
             <ActionDrawer
               open={drawerOpen}
               onClose={() => setDrawerOpen(false)}
@@ -449,7 +416,19 @@ function ResultPage() {
               maxPoints={clientDetails.operator_max_points || 100}
             />
 
-            
+            {/* Aqui pode seguir com acordeões, histórico, botões, etc, SEM JSX solto. */}
+            {/* Exemplo de botão para novo scan: */}
+            <div className="d-flex justify-content-center mt-4 mb-3">
+              <button 
+                className="btn btn-primary btn-lg px-5 py-3"
+                onClick={handleNewScanClick}
+              >
+                <i className="bi bi-qr-code-scan me-2"></i>
+                Novo Scan
+              </button>
+            </div>
+            {/* Adicione outros blocos ou acordeões aqui, sempre dentro de um elemento pai válido */}
+             
             {/* Card de resgate removido: agora é feito via drawer */}
             
             
@@ -790,26 +769,5 @@ function ResultPage() {
     </MainLayout>
   );
 }
-
-// Estilo para o botão flutuante (FAB)
-<style jsx>{`
-  .zupy-fab {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    border-radius: 50%;
-    padding: 0;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .zupy-fab:active {
-    background: #198754;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  }
-`}</style>
 
 export default ResultPage;
