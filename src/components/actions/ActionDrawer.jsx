@@ -55,18 +55,57 @@ function ActionDrawer({
   </form>
 )}
         {type === 'resgate' && (
-          <div>
-            <h5 className="mb-3 text-white">Resgatar Cupom</h5>
-            <div className="mb-2">
-              <strong className="text-white">{clientDetails.title || 'Cupom'}</strong>
-              <div className="text-light">{clientDetails.description}</div>
-            </div>
-            <button className="btn btn-warning w-100" onClick={onSubmit} disabled={loading}>
-              {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-check-circle-fill me-2"></i>}
-              Resgatar Cupom Agora
-            </button>
-          </div>
-        )}
+  <div>
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <h5 className="mb-0 text-white">Resgatar Cupom</h5>
+      {clientDetails.valid !== false ? (
+        <span className="badge bg-success d-flex align-items-center px-2 py-1 ms-2" style={{fontSize:'1em'}}>
+          <i className="bi bi-patch-check-fill me-1" style={{fontSize:'1.1em'}}></i> Válido
+        </span>
+      ) : (
+        <span className="badge bg-danger d-flex align-items-center px-2 py-1 ms-2" style={{fontSize:'1em'}}>
+          <i className="bi bi-x-circle-fill me-1" style={{fontSize:'1.1em'}}></i> Inválido
+        </span>
+      )}
+    </div>
+    <div className="mb-2">
+      <strong className="text-white">{clientDetails.title || 'Cupom'}</strong>
+      <div className="text-light">{clientDetails.description}</div>
+      {clientDetails.expiration && (
+        <div className="mt-2">
+          <span className="text-light" style={{fontSize:'0.98em'}}>
+            Válido até {new Date(clientDetails.expiration).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'})}
+          </span>
+        </div>
+      )}
+    </div>
+    <div className="d-flex align-items-center gap-2 mt-3">
+      {(() => {
+        let code = clientDetails.code || clientDetails.coupon_code;
+        if (!code && clientDetails.barcode_value) {
+          // Exemplo: 'zuppy://coupon/1497f7a420c39eea0741c071128/CP-1497F7A4'
+          const match = String(clientDetails.barcode_value).match(/\/([A-Z]{2}-[A-Z0-9]+)/i);
+          if (match) code = match[1];
+        }
+        if (!code && clientDetails.coupon_id) {
+          // Se vier só o id, pode ignorar (não é código visível)
+          code = null;
+        }
+        if (!code) return null;
+        return (
+          <span className="badge bg-dark text-white px-3 py-2 me-2" style={{fontSize:'1em',letterSpacing:'1px',fontWeight:600,borderRadius:'8px'}}>
+            {String(code).toUpperCase()}
+          </span>
+        );
+      })()}
+
+      <button className="btn btn-warning flex-grow-1 d-flex align-items-center justify-content-center" onClick={onSubmit} disabled={loading}>
+        {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="bi bi-check-circle-fill me-2"></i>}
+        Resgatar Cupom Agora
+      </button>
+    </div>
+  </div>
+)}
       </div>
       <style jsx>{`
         .zupy-action-drawer-slider {
