@@ -40,9 +40,9 @@ function MainLayout({ title, children, activeMenu }) {
   };
   
   return (
-    <div className="d-flex flex-column min-vh-100 bg-light">
-      {/* Header */}
-      <header className="bg-dark text-white shadow-sm">
+    <div className="zupy-layout-root">
+      {/* Header fixo */}
+      <header className="zupy-header bg-dark text-white shadow-sm">
         <div className="container-fluid">
           <div className="d-flex align-items-center py-2">
             <img 
@@ -135,28 +135,25 @@ function MainLayout({ title, children, activeMenu }) {
         </div>
       </header>
       
-      {/* Main content */}
-      <main className="flex-grow-1 bg-dark text-white pb-5">
+      {/* Bloco central rolável */}
+      <main className="zupy-scrollable-content">
         {children}
       </main>
       
       {/* PWA Installation Prompt */}
       <PwaInstallPrompt />
       
-      {/* Footer navigation */}
-      <footer className="bg-dark text-white border-top shadow-lg fixed-bottom" style={{ zIndex: 1020 }}>
+      {/* Rodapé fixo */}
+      <footer className="zupy-footer bg-dark text-white border-top shadow-lg">
         <div className="container-fluid">
           <nav className="nav-bar">
             <button 
               className={`nav-item ${activeMenu === 'history' ? 'active' : ''}`}
               onClick={() => handleNavigation('/history')}
-              aria-label="Histórico" // Add aria-label for accessibility
+              aria-label="Histórico"
             >
               <i className="bi bi-clock-history"></i>
-              {/* <span>Histórico</span> REMOVED */}
             </button>
-            
-            {/* Botão central de scanner com destaque */}
             <button 
               className="nav-item-center"
               onClick={() => handleNavigation('/scanner')}
@@ -165,15 +162,12 @@ function MainLayout({ title, children, activeMenu }) {
                 <i className="bi bi-qr-code-scan"></i>
               </div>
             </button>
-            
-            {/* Botão Configurações */}
             <button 
               className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
               onClick={() => handleNavigation('/settings')}
-              aria-label="Configurações" // Add aria-label for accessibility
+              aria-label="Configurações"
             >
               <i className="bi bi-gear"></i>
-              {/* <span>Configurações</span> REMOVED */}
             </button>
           </nav>
         </div>
@@ -334,6 +328,33 @@ function MainLayout({ title, children, activeMenu }) {
         
         .nav-item:hover {
           color: white;
+        }
+      `}</style>
+      {/* Estilos globais para layout fixo/rolável */}
+      <style jsx>{`
+        .zupy-layout-root {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          background: #f8f9fa;
+        }
+        .zupy-header {
+          position: sticky;
+          top: 0;
+          z-index: 1050;
+        }
+        .zupy-footer {
+          position: sticky;
+          bottom: 0;
+          z-index: 1050;
+        }
+        .zupy-scrollable-content {
+          flex: 1 1 auto;
+          overflow-y: auto;
+          padding-bottom: 80px; /* espaço para rodapé */
+          padding-top: 12px; /* espaço para header */
+          background: #212529;
+          color: #fff;
         }
       `}</style>
     </div>
