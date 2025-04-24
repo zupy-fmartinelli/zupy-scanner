@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../utils/api';
 import { toast } from 'react-toastify';
 import MainLayout from '../../components/layout/MainLayout';
+import ActionDrawer from '../../components/actions/ActionDrawer';
 
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
@@ -55,7 +56,8 @@ function ResultPage() {
   const [finalized, setFinalized] = useState(false);
   const [redeemed, setRedeemed] = useState(false);
   const [expandedSection, setExpandedSection] = useState('details'); // 'details', 'rewards', 'client'
-  
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState(null); // 'pontos' ou 'resgate'
   // Calcula o segmento RFM - Implementado como useCallback para evitar recriações
   const getRfmSegment = useCallback((rfm) => {
     if (!rfm) return RFM_SEGMENTS.default;
@@ -414,164 +416,44 @@ function ResultPage() {
             
             {/* AÇÕES PRIORITÁRIAS - Colocadas no topo para maior destaque */}
             
-            {/* Form para adição de pontos - MOVIDO PARA O TOPO */}
+            {/* Botão flutuante para abrir o drawer de pontos */}
             {!finalized && isLoyaltyCard && currentScan.result?.requires_input && currentScan.result?.input_type === 'points' && (
-              <div className="card border-0 shadow-sm mb-4 animate__animated animate__fadeIn animate__faster">
-                {/* Alterado bg-success para bg-secondary e ícone */}
-                <div className="card-header bg-secondary text-white">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-pencil-square me-2"></i> 
-                    Adicionar Pontos
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <form onSubmit={handlePointsSubmit}>
-                    <div className="mb-3">
-                      {clientDetails.client_name && (
-                        <div className="alert alert-info mb-3">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <strong>{clientDetails.client_name}</strong>
-                              <br />
-                              <small>Pontos atuais: {clientDetails.points || 0}</small>
-                            </div>
-                            <span className={`badge ${rfmSegment.class} px-2 py-1`}>
-                              {rfmSegment.emoji} {clientDetails.tier || 'Regular'}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <label htmlFor="pointsInput" className="form-label">
-                        Quantidade de pontos
-                      </label>
-                      <div className="input-group input-group-lg mb-2">
-                        <span className="input-group-text bg-secondary text-white">
-                          <i className="bi bi-coin me-1"></i>
-                        </span>
-                        <input
-                          type="number"
-                          className="form-control form-control-lg"
-                          id="pointsInput"
-                          min="1"
-                          max={clientDetails.operator_max_points || 100}
-                          value={points}
-                          onChange={(e) => setPoints(e.target.value)}
-                          required
-                          disabled={isSubmitting}
-                          style={{ fontSize: '1.5rem', height: '60px' }}
-                        />
-                        <span className="input-group-text">pontos</span>
-                      </div>
-                      
-                      {clientDetails.operator_max_points && (
-                        <div className="form-text text-end text-light bg-dark p-2 rounded mt-2">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Máximo: <strong>{clientDetails.operator_max_points} pontos</strong>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <button 
-                      type="submit" 
-                      className="btn btn-success btn-lg w-100" 
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Processando...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-plus-circle me-2"></i>
-                          Adicionar Pontos
-                        </>
-                      )}
-                    </button>
-                    
-                    {/* Próxima recompensa direto na área de pontos */}
-                    {currentScan.result?.details?.next_reward_gap && currentScan.result.details.next_reward_gap.name && (
-                      <div className="alert alert-info mt-3 mb-0">
-                        <div className="d-flex align-items-center">
-                          <i className="bi bi-gift-fill me-2 fs-4"></i>
-                          <div className="flex-grow-1">
-                            <strong>Próxima Recompensa:</strong> {currentScan.result.details.next_reward_gap.name}<br />
-                            <div className="progress mt-2 mb-1" style={{ height: '10px' }}>
-                              <div 
-                                className="progress-bar bg-success" 
-                                role="progressbar" 
-                                style={{ 
-                                  width: `${Math.max(5, 100 - ((currentScan.result.details.next_reward_gap.missing_points / currentScan.result.details.next_reward_gap.points_required) * 100))}%` 
-                                }}
-                                aria-valuenow="25" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small>
-                              Faltam <strong>{currentScan.result.details.next_reward_gap.missing_points}</strong> pontos 
-                              (de {currentScan.result.details.next_reward_gap.points_required})
-                            </small>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </form>
-                </div>
-              </div>
+              <button
+                className="btn btn-success btn-lg rounded-circle position-fixed zupy-fab"
+                style={{ right: 24, bottom: 96, zIndex: 2001 }}
+                onClick={() => { setDrawerType('pontos'); setDrawerOpen(true); }}
+                aria-label="Adicionar Pontos"
+              >
+                <i className="bi bi-plus-circle fs-2"></i>
+              </button>
             )}
-            
-            {/* CUPOM - Card de resgate - NOVO! */}
+            {/* Botão flutuante para abrir o drawer de resgate */}
             {isCoupon && canRedeem && !redeemed && (
-              <div className="card border-0 shadow-sm mb-4 animate__animated animate__pulse animate__slow animate__infinite">
-                <div className="card-header bg-warning text-dark">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-ticket-perforated-fill me-2"></i>
-                    Cupom Disponível para Resgate
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <div className="alert alert-info mb-3">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>{clientDetails.client_name || 'Cliente'}</strong>
-                        <br />
-                        <small>Cupom: {clientDetails.title || 'Disponível para resgate'}</small>
-                      </div>
-                      {clientDetails.expiry_date && (
-                        <span className="badge bg-secondary px-2 py-1">
-                          Exp: {new Date(clientDetails.expiry_date).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="text-center mb-3">
-                    <h4>{clientDetails.title || currentScan.result?.details?.title}</h4>
-                    <p className="text-muted">{clientDetails.description || currentScan.result?.details?.description}</p>
-                  </div>
-                  
-                  <button 
-                    className="btn btn-warning btn-lg w-100" 
-                    onClick={handleRedeemCoupon}
-                    disabled={isRedeeming}
-                  >
-                    {isRedeeming ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Processando...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-check-circle-fill me-2"></i>
-                        Resgatar Cupom Agora
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+              <button
+                className="btn btn-warning btn-lg rounded-circle position-fixed zupy-fab"
+                style={{ right: 24, bottom: 96, zIndex: 2001 }}
+                onClick={() => { setDrawerType('resgate'); setDrawerOpen(true); }}
+                aria-label="Resgatar Cupom"
+              >
+                <i className="bi bi-ticket-perforated-fill fs-2"></i>
+              </button>
             )}
+            {/* Drawer de ações */}
+            <ActionDrawer
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              type={drawerType}
+              onSubmit={drawerType === 'pontos' ? handlePointsSubmit : handleRedeemCoupon}
+              loading={drawerType === 'pontos' ? isSubmitting : isRedeeming}
+              clientDetails={clientDetails}
+              points={points}
+              setPoints={setPoints}
+              maxPoints={clientDetails.operator_max_points || 100}
+            />
+
+            
+            {/* Card de resgate removido: agora é feito via drawer */}
+            
             
             {/* Cupom já resgatado - NOVO! */}
             {isCoupon && redeemed && (
@@ -910,5 +792,26 @@ function ResultPage() {
     </MainLayout>
   );
 }
+
+// Estilo para o botão flutuante (FAB)
+<style jsx>{`
+  .zupy-fab {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 50%;
+    padding: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .zupy-fab:active {
+    background: #198754;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+`}</style>
 
 export default ResultPage;
