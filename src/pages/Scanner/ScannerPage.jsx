@@ -148,43 +148,7 @@ function ScannerPage() {
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            {showScanner ? null : (
-              <div className="text-center py-5 my-4 bg-dark rounded shadow-sm">
-                <div className="d-flex flex-column align-items-center">
-                  <div className="scanner-icon-circle mb-4">
-                    <i className="bi bi-qr-code-scan fs-1"></i>
-                  </div>
-                  <h2 className="h4 mb-4 text-white">Escaneie um QR Code</h2>
-                  <button
-                    className="btn btn-primary btn-lg px-5 py-3 mb-3"
-                    onClick={handleStartScan}
-                    disabled={isProcessing || scanningStatus !== 'idle'}
-                  >
-                    {scanningStatus === 'processing' || isProcessing ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Processando...
-                      </>
-                    ) : scanningStatus === 'scanning' ? (
-                      <>
-                        <span className="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
-                        Escaneando...
-                      </>
-                    ) : (
-                      'Iniciar Scanner'
-                    )}
-                  </button>
-                  <button
-                    className="btn btn-outline-light"
-                    onClick={handleHistoryClick}
-                    disabled={isProcessing}
-                  >
-                    <i className="bi bi-clock-history me-2"></i>
-                    Histórico de scans
-                  </button>
-                </div>
-              </div>
-            )}
+            
           </div>
         </div>
       </div>
