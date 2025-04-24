@@ -170,8 +170,9 @@ function MainLayout({ title, children, activeMenu, visor }) {
             <button 
               className="nav-item-center"
               onClick={() => handleNavigation('/scanner')}
+              aria-label="Início"
             >
-              <div className={`scan-button-circle ${activeMenu === 'scanner' ? 'active' : ''}`}>
+              <div className={`scan-button-premium-dark ${activeMenu === 'scanner' ? 'active' : ''}`}>
                 <i className="bi bi-qr-code-scan"></i>
               </div>
             </button>
@@ -184,16 +185,19 @@ function MainLayout({ title, children, activeMenu, visor }) {
             </button>
           </nav>
         </div>
-        
-        {/* Estilos CSS ajustados para rodapé mais compacto */}
         <style jsx>{`
+          .zupy-footer {
+            box-shadow: 0 -6px 30px 0 #0e273a77, 0 -1px 8px #000a !important;
+            background: linear-gradient(180deg, #23252b 80%, #181a20 100%) !important;
+            border-top: 1.5px solid #232c3a !important;
+            position: relative;
+          }
           .nav-bar {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            padding: 4px 0; /* Reduzido padding vertical */
+            padding: 8px 0 4px 0;
           }
-          
           .nav-item {
             display: flex;
             flex-direction: column;
@@ -201,26 +205,19 @@ function MainLayout({ title, children, activeMenu, visor }) {
             background: transparent;
             border: none;
             color: #adb5bd;
-            padding: 6px 12px; /* Reduzido padding */
+            padding: 6px 10px;
             cursor: pointer;
             transition: color 0.2s;
-            flex: 1;
-            /* font-size: 0.75rem; */ /* Font size not needed if text is removed */
+            font-size: 1.3rem;
+            z-index: 2;
           }
-          
-          .nav-item i {
-            font-size: 1.5rem; /* Aumentar um pouco o ícone lateral sem texto */
-            /* margin-bottom: 3px; */ /* Margin not needed if text is removed */
-          }
-          
-          .nav-item.active {
-            color: white;
-          }
-          
+          .nav-item.active,
           .nav-item:hover {
-            color: white;
+            color: #fff;
           }
-          
+          .nav-item i {
+            font-size: 1.4rem;
+          }
           .nav-item-center {
             display: flex;
             justify-content: center;
@@ -228,34 +225,48 @@ function MainLayout({ title, children, activeMenu, visor }) {
             background: transparent;
             border: none;
             padding: 0;
-            transform: translateY(-25px); /* Aumentado deslocamento para "sair" mais */
             position: relative;
-            z-index: 1030;
-            flex: 1;
+            z-index: 3;
+            flex: none;
           }
-          
-          .scan-button-circle {
-            width: 70px; /* Aumentado tamanho */
-            height: 70px; /* Aumentado tamanho */
+          .scan-button-premium-dark {
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
-            background-color: var(--bs-success); /* Mudado para verde Bootstrap */
+            background: #191c20;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Aumentado sombra */
-            transition: all 0.3s ease;
-            border: 3px solid var(--bs-dark); /* Adiciona borda para destacar do fundo */
+            color: #fff;
+            border: 3px solid #25d2ff;
+            box-shadow: 0 0 12px 2px #25d2ff55, 0 2px 18px #000a;
+            transition: all 0.22s cubic-bezier(.4,0,.2,1);
+            margin: 0 8px;
           }
-          
-          .scan-button-circle i {
-            font-size: 2.2rem; /* Aumentado tamanho do ícone */
+          .scan-button-premium-dark i {
+            font-size: 2.3rem;
+            color: #fff;
+            filter: drop-shadow(0 0 2px #25d2ff99);
           }
-          
-          .scan-button-circle.active, 
-          .scan-button-circle:hover {
-            background-color: #157347; /* Verde mais escuro no hover */
-            transform: scale(1.08) translateY(-2px); /* Efeito de hover mais pronunciado */
+          .scan-button-premium-dark.active, 
+          .scan-button-premium-dark:hover {
+            box-shadow: 0 0 18px 4px #25d2ffcc, 0 4px 24px #000d;
+            border-color: #25d2ff;
+            background: #181a20;
+          }
+          @media (max-width: 480px) {
+            .scan-button-premium-dark {
+              width: 54px;
+              height: 54px;
+              border-width: 2px;
+            }
+            .scan-button-premium-dark i {
+              font-size: 1.7rem;
+            }
+            .nav-item {
+              font-size: 1.1rem;
+              padding: 4px 6px;
+            }
           }
         `}</style>
       </footer>
