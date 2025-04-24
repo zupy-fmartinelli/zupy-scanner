@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNetwork } from '../../contexts/NetworkContext';
+import { useScanner } from '../../contexts/ScannerContext';
 import PwaInstallPrompt from '../pwa/PwaInstallPrompt';
 import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
 
@@ -31,6 +32,17 @@ function MainLayout({ title, children, activeMenu, visor }) {
   const handleNavigation = (path) => {
     navigate(path);
   };
+
+  // Sempre força novo scan ao clicar no botão central
+  const { clearCurrentScan } = useScanner();
+  const handleGoToScanner = () => {
+    if (typeof clearCurrentScan === 'function') {
+      clearCurrentScan();
+    }
+    navigate('/scanner');
+  };
+
+
   
   const handleSync = async () => {
     const result = await syncData();
@@ -169,7 +181,7 @@ function MainLayout({ title, children, activeMenu, visor }) {
             </button>
             <button 
               className="nav-item-center"
-              onClick={() => handleNavigation('/scanner')}
+              onClick={handleGoToScanner}
               aria-label="Início"
             >
               <div className={`scan-button-premium-dark ${activeMenu === 'scanner' ? 'active' : ''}`}>
@@ -239,9 +251,15 @@ function MainLayout({ title, children, activeMenu, visor }) {
             align-items: center;
             color: #fff;
             border: 3px solid #25d2ff;
-            box-shadow: 0 0 12px 2px #25d2ff55, 0 2px 18px #000a;
+            box-shadow: 0 2px 18px #000a; /* Sombra escura apenas */
             transition: all 0.22s cubic-bezier(.4,0,.2,1);
             margin: 0 8px;
+          }
+          .scan-button-premium-dark:active,
+          .scan-button-premium-dark:focus-visible {
+            box-shadow: 0 0 18px 4px #25d2ffcc, 0 4px 24px #000d;
+            border-color: #25d2ff;
+            background: #181a20;
           }
           .scan-button-premium-dark i {
             font-size: 2.3rem;
@@ -250,7 +268,6 @@ function MainLayout({ title, children, activeMenu, visor }) {
           }
           .scan-button-premium-dark.active, 
           .scan-button-premium-dark:hover {
-            box-shadow: 0 0 18px 4px #25d2ffcc, 0 4px 24px #000d;
             border-color: #25d2ff;
             background: #181a20;
           }
