@@ -6,8 +6,9 @@ import { useScanner } from '../../contexts/ScannerContext';
 import { useNetwork } from '../../contexts/NetworkContext';
 import { scanQRCode, checkPermissions, requestPermissions } from '../../utils/scanner';
 import { isNative } from '../../utils/platform';
-import ScannerComponent from '../../components/scanner/ScannerComponent';
+import ScannerCamera from '../../components/scanner/ScannerCamera';
 import MainLayout from '../../components/layout/MainLayout';
+import Visor from '../../components/visor/CameraVisor';
 
 function ScannerPage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function ScannerPage() {
   const { isOnline, pendingCount } = useNetwork();
   
   const [showScanner, setShowScanner] = useState(false);
-  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing, initializing
+  const [scanningStatus, setScanningStatus] = useState('idle'); // idle, scanning, processing
   
   // Navigate to result page when scan is processed
   useEffect(() => {
@@ -30,13 +31,14 @@ function ScannerPage() {
     // Only start if not already scanning or processing
     if (scanningStatus === 'idle') {
       console.log("ScannerPage mounted, attempting to start scan automatically.");
-      setScanningStatus('initializing'); // Indicate initialization
       handleStartScan();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
   
   const handleStartScan = async () => {
+    setShowScanner(true);
+    setScanningStatus('scanning');
     try {
       if (isNative()) {
         // Check and request camera permissions for native apps
@@ -108,34 +110,39 @@ function ScannerPage() {
   };
   
   return (
-    <MainLayout title="Scanner" activeMenu="scanner">
+    <MainLayout
+      title="Scanner"
+      activeMenu="scanner"
+      visor={
+        <Visor
+            mode={scanningStatus}
+            onToggleScanner={() => {
+              if (showScanner) {
+                setShowScanner(false);
+                setScanningStatus('idle');
+              } else {
+                setShowScanner(true);
+                setScanningStatus('scanning');
+              }
+            }}
+          >
+            {showScanner && scanningStatus === 'scanning' && (
+              <ScannerCamera onQrScanned={handleQRScanned} />
+            )}
+          </Visor>
+      }
+    >
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            
-            {/* Scanner */}
-            {showScanner ? (
-              <div className="card bg-dark border-0 mb-4 shadow">
-                <div className="card-body p-0">
-                  <ScannerComponent 
-                    onQrScanned={handleQRScanned}
-                    onClose={() => {
-                      setShowScanner(false);
-                      setScanningStatus('idle');
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
+            {showScanner ? null : (
               <div className="text-center py-5 my-4 bg-dark rounded shadow-sm">
                 <div className="d-flex flex-column align-items-center">
                   <div className="scanner-icon-circle mb-4">
                     <i className="bi bi-qr-code-scan fs-1"></i>
                   </div>
-                  
                   <h2 className="h4 mb-4 text-white">Escaneie um QR Code</h2>
-                  
-                  <button 
+                  <button
                     className="btn btn-primary btn-lg px-5 py-3 mb-3"
                     onClick={handleStartScan}
                     disabled={isProcessing || scanningStatus !== 'idle'}
@@ -154,8 +161,7 @@ function ScannerPage() {
                       'Iniciar Scanner'
                     )}
                   </button>
-                  
-                  <button 
+                  <button
                     className="btn btn-outline-light"
                     onClick={handleHistoryClick}
                     disabled={isProcessing}
@@ -169,19 +175,6 @@ function ScannerPage() {
           </div>
         </div>
       </div>
-      
-      <style jsx>{`
-        .scanner-icon-circle {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background-color: #5c2d91;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-        }
-      `}</style>
     </MainLayout>
   );
 }

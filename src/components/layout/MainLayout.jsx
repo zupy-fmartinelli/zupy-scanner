@@ -13,7 +13,7 @@ import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
  * @param {React.ReactNode} props.children - Page content
  * @param {string} props.activeMenu - Active menu item
  */
-function MainLayout({ title, children, activeMenu }) {
+function MainLayout({ title, children, activeMenu, visor }) {
   const navigate = useNavigate();
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
@@ -41,50 +41,46 @@ function MainLayout({ title, children, activeMenu }) {
   
   return (
     <div className="zupy-layout-root">
-      {/* Header fixo */}
-      <header className="zupy-header bg-dark text-white shadow-sm">
-        <div className="container-fluid">
-          <div className="d-flex align-items-center py-2">
-            <img 
-              src={ZupyLogo} 
-              alt="Zupy" 
-              className="me-2"
-              style={{ height: '32px' }}
-            />
-            <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
-            
-            {/* Status indicators */}
-            <div className="d-flex align-items-center me-2">
-              {/* Online status */}
-              <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
-              
-              {/* Pending operations */}
-              {pendingCount > 0 && (
-                <span className="badge bg-warning me-2">
-                  <i className="bi bi-clock-history me-1"></i>
-                  {pendingCount}
+      {/* Visor customizado, se fornecido */}
+      {visor ? (
+        <div className="zupy-visor-area">{visor}</div>
+      ) : (
+        <header className="zupy-header bg-dark text-white shadow-sm">
+          <div className="container-fluid">
+            <div className="d-flex align-items-center py-2">
+              <img 
+                src={ZupyLogo} 
+                alt="Zupy" 
+                className="me-2"
+                style={{ height: '32px' }}
+              />
+              <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
+              {/* Status indicators */}
+              <div className="d-flex align-items-center me-2">
+                {/* Online status */}
+                <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
+                  {isOnline ? 'Online' : 'Offline'}
                 </span>
-              )}
-            </div>
-            
-            {/* Sync button */}
-            <button 
-              className="btn btn-sm btn-outline-light me-2"
-              onClick={handleSync}
-              disabled={isSyncing || !isOnline}
-            >
-              {isSyncing ? (
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              ) : (
-                <i className="bi bi-arrow-repeat"></i>
-              )}
-              <span className="visually-hidden">Sincronizar</span>
-            </button>
-            
-            {/* User menu */}
-            <div className="dropdown">
+                {/* Pending operations */}
+                {pendingCount > 0 && (
+                  <span className="badge bg-warning me-2">
+                    <i className="bi bi-clock-history me-1"></i>
+                    {pendingCount}
+                  </span>
+                )}
+              </div>
+              {/* Sync button */}
+              <button 
+                className="btn btn-sm btn-outline-light me-2"
+                onClick={handleSync}
+                disabled={isSyncing || !isOnline}
+              >
+                {isSyncing ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  <i className="bi bi-arrow-repeat"></i>
+                )}
+              </button>
               <button 
                 className="btn btn-sm btn-dark dropdown-toggle" 
                 type="button" 
@@ -132,8 +128,8 @@ function MainLayout({ title, children, activeMenu }) {
               </ul>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
       
       {/* Bloco central rolável */}
       <main className="zupy-scrollable-content">

@@ -9,6 +9,8 @@ import MainLayout from '../../components/layout/MainLayout';
 import ActionDrawer from '../../components/actions/ActionDrawer';
 import ScannerDisplay from '../../components/scanner/ScannerDisplay';
 import ClientDetails from '../../components/client/ClientDetails';
+import ClientInfoAccordion from '../../components/client/ClientInfoAccordion';
+import RewardsAccordion from '../../components/client/RewardsAccordion';
 
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
@@ -397,6 +399,21 @@ function ResultPage() {
             {/* Bloco superior fixo: visor/result */}
             <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
             <ClientDetails clientDetails={clientDetails} currentScan={currentScan} />
+
+            {/* Accordion de informações do cliente */}
+            <ClientInfoAccordion
+              clientDetails={clientDetails}
+              rfmSegment={rfmSegment}
+              expanded={expandedSection === 'client'}
+              onToggle={() => setExpandedSection(expandedSection === 'client' ? null : 'client')}
+            />
+
+            {/* Accordion de prêmios disponíveis */}
+            <RewardsAccordion
+              rewards={clientDetails.rewards}
+              expanded={expandedSection === 'rewards'}
+              onToggle={() => setExpandedSection(expandedSection === 'rewards' ? null : 'rewards')}
+            />
 
             <ActionDrawer
               open={drawerOpen}
