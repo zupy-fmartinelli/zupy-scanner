@@ -9,6 +9,7 @@ import { isNative } from '../../utils/platform';
 import ScannerCamera from '../../components/scanner/ScannerCamera';
 import MainLayout from '../../components/layout/MainLayout';
 import Visor from '../../components/visor/CameraVisor';
+import ScannerDisplay from '../../components/scanner/ScannerDisplay';
 
 function ScannerPage() {
   const navigate = useNavigate();
@@ -78,11 +79,7 @@ function ScannerPage() {
     setScanningStatus('processing');
     
     // Fornecer feedback visual imediato
-    toast.info('QR Code detectado! Processando...', {
-      autoClose: 1500,
-      position: "top-center",
-      hideProgressBar: false,
-    });
+    // Mensagem visual será exibida no visor, não toast.
     
     try {
       const scanResult = await processScan(qrData);
@@ -126,8 +123,24 @@ function ScannerPage() {
               }
             }}
           >
-            {showScanner && scanningStatus === 'scanning' && (
-              <ScannerCamera onQrScanned={handleQRScanned} />
+             {/* Exibe display de informações completas se houver scan */}
+            {scanningStatus === 'processing' && (!currentScan || !currentScan.result) ? (
+              <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100" style={{minHeight:120}}>
+                <div className="spinner-border text-warning mb-3" role="status" />
+                <div className="fw-bold text-warning fs-5">QR Code detectado! Processando...</div>
+              </div>
+            ) : currentScan && (currentScan.result || currentScan.processed) ? (
+              <ScannerDisplay
+                currentScan={currentScan}
+                clientDetails={currentScan.clientDetails || {}}
+                rfmSegment={currentScan.rfmSegment || {}}
+                reward={currentScan.reward || {}}
+                coupon={currentScan.coupon || {}}
+              />
+            ) : (
+              showScanner && scanningStatus === 'scanning' && (
+                <ScannerCamera onQrScanned={handleQRScanned} />
+              )
             )}
           </Visor>
       }
