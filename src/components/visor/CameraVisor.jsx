@@ -24,10 +24,16 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
         style={{
           width: '100%',
           aspectRatio: '16/9',
-          borderRadius: 20,
+          borderRadius: 28,
           overflow: 'hidden',
           margin: 0,
-          background: '#23252b',
+          background: mode === 'idle' ? 'radial-gradient(ellipse at center, rgba(90,100,105,0.65) 70%, #23252b 100%)' : '#23252b',
+          border: '6px solid #18191b',
+          boxShadow: 'none',
+          transition: 'background 0.6s',
+          position: 'sticky',
+          top: 0,
+          zIndex: 20,
         }}
       >
         <div style={{width:'100%',height:'100%',position:'absolute',top:0,left:0}}>
@@ -51,6 +57,7 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
 
       </div>
       {/* LED (botão Zupy) */}
+      {/* LED centralizado sobre o visor, não abaixo */}
       <VisorLED color={glowColor} mode={mode} onClick={onToggleScanner} />
     </div>
   );
@@ -63,13 +70,15 @@ function VisorLED({ color, mode, onClick }) {
       className="zupy-visor-led-btn btn btn-link p-0 position-absolute"
       style={{
         left: '50%',
-        bottom: -28,
+        bottom: -28, // LED ainda mais para baixo, alinhamento preciso
         transform: 'translateX(-50%)',
-        zIndex: 10,
+        zIndex: 40,
         background: 'none',
         border: 'none',
         outline: 'none',
         transition: 'box-shadow 0.3s, border-color 0.3s',
+        boxShadow: 'none',
+        pointerEvents: 'auto',
       }}
       tabIndex={0}
       aria-label={mode === 'scanning' ? 'Desligar scanner' : 'Ligar scanner'}

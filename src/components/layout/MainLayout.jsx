@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,7 +18,16 @@ function MainLayout({ title, children, activeMenu, visor }) {
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  
+
+  // Altura dinâmica do visor
+  const visorRef = useRef(null);
+  const [visorHeight, setVisorHeight] = useState(0);
+  useLayoutEffect(() => {
+    if (visorRef.current) {
+      setVisorHeight(visorRef.current.offsetHeight);
+    }
+  }, [visor]);
+
   const handleNavigation = (path) => {
     navigate(path);
   };
@@ -38,12 +47,12 @@ function MainLayout({ title, children, activeMenu, visor }) {
     await logout();
     navigate('/auth');
   };
-  
+
   return (
-    <div className="zupy-layout-root">
+    <div className="zupy-layout-root" style={{ background: '#23252b', height: '100vh', overflow: 'hidden' }}>
       {/* Visor customizado, se fornecido */}
       {visor ? (
-        <div className="zupy-visor-area">{visor}</div>
+        <div className="zupy-visor-area" ref={visorRef}>{visor}</div>
       ) : (
         <header className="zupy-header bg-dark text-white shadow-sm">
           <div className="container-fluid">
@@ -132,7 +141,15 @@ function MainLayout({ title, children, activeMenu, visor }) {
       )}
       
       {/* Bloco central rolável */}
-      <main className="zupy-scrollable-content">
+      <main
+        className="zupy-scrollable-content"
+        style={{
+          paddingTop: visorHeight,
+          height: `calc(100vh - ${visorHeight}px)`,
+          overflowY: 'auto',
+          background: '#23252b',
+        }}
+      >
         {children}
       </main>
       
