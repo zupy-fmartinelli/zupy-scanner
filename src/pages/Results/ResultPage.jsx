@@ -69,16 +69,19 @@ function ResultPage() {
   useEffect(() => {
     if (!currentScan || !currentScan.result) return;
     
-    // Para cartões de fidelidade, abre drawer de pontos
-    if (currentScan.result.scan_type === 'loyalty_card' && !finalized) {
-      setDrawerType('pontos');
-      setDrawerOpen(true);
-    }
-    // Para cupons que podem ser resgatados
-    else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
-      setDrawerType('resgate');
-      setDrawerOpen(true);
-    }
+    // Atraso pequeno para garantir que o drawer abra após a renderização
+    setTimeout(() => {
+      // Para cartões de fidelidade, abre drawer de pontos
+      if (currentScan.result.scan_type === 'loyalty_card' && !finalized) {
+        setDrawerType('pontos');
+        setDrawerOpen(true);
+      }
+      // Para cupons que podem ser resgatados
+      else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
+        setDrawerType('resgate');
+        setDrawerOpen(true);
+      }
+    }, 200);
     // eslint-disable-next-line
   }, [finalized, currentScan, redeemed]);
   // Calcula o segmento RFM - Implementado como useCallback para evitar recriações

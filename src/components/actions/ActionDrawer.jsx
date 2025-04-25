@@ -276,24 +276,24 @@ function ActionDrawer({
           overflow-y: auto;
           display: flex;
           flex-direction: column;
-          height: 200px; /* Altura reduzida para modo recolhido */
+          height: 180px; /* Altura reduzida ainda mais para modo recolhido */
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* IE/Edge */
         }
         
         /* Estado recolhido do drawer */
         .device-action-drawer.collapsed {
-          height: 200px; /* Altura reduzida */
+          height: 180px; /* Altura reduzida para modo recolhido */
         }
         
         /* Estado expandido do drawer */
         .device-action-drawer.expanded {
-          height: calc(100vh - 230px); /* Altura ajustada para ficar abaixo da barra de status */
+          height: calc(100vh - 280px); /* Altura ajustada para não ultrapassar a barra central */
         }
         
         /* Animação para a alça do drawer quando fechado */
         .device-action-drawer:not(.open) {
-          transform: translateY(calc(100% - 15px)); /* Mostra apenas a alça quando fechado */
+          transform: translateY(calc(100% - 20px)); /* Mostra apenas a alça e a barra quando fechado */
         }
         
         /* Ocultar barra de rolagem */
@@ -311,7 +311,7 @@ function ActionDrawer({
         /* Alça do drawer - melhorada para deslizamento */
         .drawer-handle {
           width: 100%;
-          height: 30px;
+          height: 20px;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -336,23 +336,30 @@ function ActionDrawer({
           background: rgba(255,255,255,0.6);
           border-radius: 10px;
           display: block;
-          margin-top: -2px;
+          margin-top: 2px;
         }
         
         /* Estilos especiais para quando o drawer não está aberto */
         .device-action-drawer:not(.open) .drawer-handle:before {
-          background: rgba(255,255,255,0.8);
+          background: rgba(255,255,255,0.9);
           height: 5px;
-          margin-top: 10px; /* Posiciona a barra branca no centro da área visível */
-          box-shadow: 0 0 10px rgba(255,255,255,0.5);
+          margin-top: 8px; /* Posiciona a barra branca no centro da área visível */
+          box-shadow: 0 0 10px rgba(255,255,255,0.6);
         }
         
         .drawer-handle-icon {
           position: absolute;
-          top: 14px;
+          top: 8px;
           color: rgba(255,255,255,0.7);
-          font-size: 20px;
+          font-size: 18px;
           animation: pulse-icon 2s infinite;
+        }
+        
+        /* Estilos especiais para ícone quando o drawer não está aberto */
+        .device-action-drawer:not(.open) .drawer-handle-icon {
+          top: 0px;
+          font-size: 16px;
+          color: rgba(255,255,255,0.9);
         }
         
         @keyframes pulse-icon {
