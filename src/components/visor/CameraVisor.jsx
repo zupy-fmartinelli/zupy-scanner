@@ -85,11 +85,17 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           padding: 0;
           margin: 0;
           z-index: 20;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
         
         .device-frame {
           position: relative;
           width: 100%;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
         }
         
         .device-screen {
@@ -101,6 +107,7 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           position: relative;
           box-shadow: 0 8px 25px rgba(0,0,0,0.3);
           background-size: cover;
+          flex: 1;
         }
         
         .screen-content {
@@ -209,7 +216,7 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
         .device-led-button {
           position: absolute;
           left: 50%;
-          bottom: -28px;
+          bottom: -20px; /* Posicionado mais acima */
           transform: translateX(-50%);
           width: 60px;
           height: 60px;
@@ -221,10 +228,11 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           justify-content: center;
           padding: 0;
           outline: none;
-          z-index: 40;
+          z-index: 1000; /* Valor muito alto para garantir que fique acima de absolutamente tudo */
           transition: all 0.3s;
           cursor: pointer;
           box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+          margin-top: -40px; /* Ajuste negativo para puxar para cima */
         }
         
         .device-led-button:hover {

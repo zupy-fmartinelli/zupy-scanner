@@ -27,13 +27,25 @@ function ScannerPage() {
     }
   }, [currentScan, navigate]);
   
-  // Start scanner automatically on mount
+  // Start scanner immediately on mount
   useEffect(() => {
-    // Only start if not already scanning or processing
-    if (scanningStatus === 'idle') {
-      console.log("ScannerPage mounted, attempting to start scan automatically.");
-      handleStartScan();
-    }
+    console.log("ScannerPage mounted, starting camera automatically");
+    setShowScanner(true);
+    setScanningStatus('scanning');
+    
+    // Forçar reinicialização da câmera após um breve delay
+    setTimeout(() => {
+      const videoElement = document.getElementById('scannerVideo');
+      if (videoElement && videoElement.srcObject === null) {
+        console.log("Forçando reinício da câmera");
+        setShowScanner(false);
+        setTimeout(() => {
+          setShowScanner(true);
+          setScanningStatus('scanning');
+        }, 300);
+      }
+    }, 500);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
   
@@ -138,7 +150,8 @@ function ScannerPage() {
                 coupon={currentScan.coupon || {}}
               />
             ) : (
-              showScanner && scanningStatus === 'scanning' && (
+              // Sempre mostrar a câmera quando scanningStatus é 'scanning', independente do showScanner
+              scanningStatus === 'scanning' && (
                 <ScannerCamera onQrScanned={handleQRScanned} />
               )
             )}

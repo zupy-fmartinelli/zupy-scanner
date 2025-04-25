@@ -293,10 +293,12 @@ function MainLayout({ title, children, activeMenu, visor }) {
           z-index: 20;
           background: #252830;
           padding: 0 12px 20px;
-          height: 50vh;
+          height: 50vh; /* 50% da altura da viewport */
+          min-height: 50%; /* Garante tamanho mínimo */
           display: flex;
           flex-direction: column;
           justify-content: center;
+          box-sizing: border-box;
         }
         
         .device-header {

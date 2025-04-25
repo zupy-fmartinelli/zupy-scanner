@@ -115,8 +115,8 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   };
   
   return (
-    <div className="scanner-container position-relative" style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden', background: '#23252b', margin: 0, padding: 0 }}>
-      <div className="position-relative scanner-frame" style={{ width: '100%', height: '100%', margin: 0, padding: 0 }}>
+    <div className="scanner-container position-relative" style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden', background: '#23252b', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
+      <div className="position-relative scanner-frame" style={{ width: '100%', height: '100%', margin: 0, padding: 0, flex: 1 }}>
         <video
           ref={videoRef}
           className="scanner-video"
@@ -124,6 +124,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
           playsInline
           muted
           autoPlay
+          id="scannerVideo"
         />  
         <canvas 
           ref={canvasRef}
