@@ -123,6 +123,8 @@ zupy-scanner/
 
 ## Versões
 
+25 de Abril de 2025 - Versão estável e 100% funcional. Todas as funcionalidades foram validadas tanto pelo painel quanto pelo scanner. Esta versão é considerada segura para retorno ao uso em produção, garantindo confiabilidade, segurança e experiência aprimorada para os usuários e operadores.
+
 24 de Abril de 2025 - Alterado para fazer um Scanner Bolitão com ar Prêmium e interface mais simples para os usuários Att Fabinho
 
 
