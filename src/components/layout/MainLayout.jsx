@@ -316,14 +316,16 @@ function MainLayout({ title, children, activeMenu, visor }) {
           background: linear-gradient(180deg, #32384a 0%, #282c3d 100%);
           border-top: 1px solid #454c63;
           border-bottom: 1px solid #454c63;
-          padding: 12px 16px;
+          padding: 14px 20px;
           font-size: 15px;
           color: #e0e0e0;
           overflow-x: auto;
           white-space: nowrap;
-          gap: 16px;
+          gap: 20px;
           margin-top: 12px;
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+          height: auto;
+          min-height: 52px;
         }
         
         .status-indicator {
