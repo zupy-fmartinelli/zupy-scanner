@@ -12,6 +12,7 @@ import ScannerDisplay from '../../components/scanner/ScannerDisplay';
 import ClientDetails from '../../components/client/ClientDetails';
 import ClientInfoAccordion from '../../components/client/ClientInfoAccordion';
 import RewardsAccordion from '../../components/client/RewardsAccordion';
+import styles from './ResultPage.module.css';
 
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
@@ -441,11 +442,13 @@ function ResultPage() {
           )}
         </Visor>
       </div>
-      <div className="container py-4">
+      {/* VISOR FIXO NO TOPO */}
+      <div className={styles.zupyResultVisorFixed}>
+        <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
+      </div>
+      <div className={`container py-4 ${styles.zupyResultContent}`}>
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            {/* Bloco superior fixo: visor/result */}
-            <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
             
 
             {/* Accordion de informações do cliente */}

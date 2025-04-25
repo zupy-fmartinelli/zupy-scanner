@@ -23,34 +23,70 @@ function ActionDrawer({
   setPoints = () => {},
   maxPoints = 100
 }) {
+  const [inputError, setInputError] = React.useState('');
+
   if (!open) return null;
   return (
-    <div className="zupy-action-drawer-slider zupy-action-drawer-purple text-white position-fixed w-100" style={{left:0,right:0,bottom:0,zIndex:2000,display:'flex',justifyContent:'center'}}>
-      <div>
+    <div className="zupy-action-drawer-slider zupy-action-drawer-purple text-white position-fixed w-100" style={{left:0,right:0,bottom:0,zIndex:1000,display:'flex',justifyContent:'center'}}>
+      <div style={{padding: 0}}>
         <button className="btn-close btn-close-white drawer-close-btn" onClick={onClose} aria-label="Fechar"></button>
         {type === 'pontos' && (
-  <form onSubmit={onSubmit} className="mb-0">
-    <div className="d-flex align-items-center mb-2 position-relative drawer-form-row">
-      <span className="drawer-coin-icon">
-        <i className="bi bi-cash-coin" style={{color:'#22c55e'}}></i>
+  <form onSubmit={e => {
+    e.preventDefault();
+    if (!points || points < 1) {
+      setInputError('Digite um valor válido');
+      return;
+    }
+    setInputError('');
+    onSubmit(e);
+  }} className="mb-0">
+    {/* Código do cartão e badge válido */}
+    <div className="mb-4 d-flex align-items-center" style={{justifyContent:'space-between'}}>
+      <span className="fw-bold text-white" style={{fontSize:'1.15em', letterSpacing:'1px', display:'flex', alignItems:'center', gap:12}}>
+        {clientDetails.card_number ? `ZP-${String(clientDetails.card_number).slice(-8).toUpperCase()}` : 'Cartão'}
+        {clientDetails.card_number && (
+          <span className="text-secondary ms-2" style={{fontSize:'0.95em', opacity:0.7}}>{String(clientDetails.card_number).toUpperCase()}</span>
+        )}
       </span>
+      {clientDetails.valid !== false && (
+        <span className="badge" style={{fontSize:'0.95em', fontWeight:600, borderRadius:8, background:'#111', color:'#39FF14', boxShadow:'0 0 4px #39FF14aa', marginLeft:'auto', letterSpacing:'1px'}}>Válido</span>
+      )}
+    </div>
+    {/* Pontuação total, nome dinâmico */}
+    <div className="mb-2" style={{marginTop:2, minHeight:28}}>
+      <span className="text-light fw-bold" style={{fontSize:'1.08em', opacity:0.93, letterSpacing:'0.5px'}}>
+        {clientDetails.points || 0} {clientDetails.points_name || 'pontos'}
+      </span>
+      {!clientDetails.points_name && (
+        <span className="small text-warning ms-2" style={{fontSize:'0.97em', opacity:0.7}}>(Solicitar ao backend: points.name do programa)</span>
+      )}
+    </div>
+    {/* Campo de input e botão lado a lado */}
+    <div className="d-flex align-items-end mb-2 drawer-form-row" style={{gap:32, marginTop: 24}}>
       <input
         id="drawerPointsInput"
         type="number"
         min={1}
         max={maxPoints}
-        className="form-control drawer-input bg-white text-dark border-0 shadow-sm"
-        value={points}
-        onChange={e => setPoints(Number(e.target.value))}
+        className={`form-control drawer-input drawer-input-green bg-white text-dark border-0 shadow-sm fs-3 px-5 py-4 drawer-input-focus${inputError ? ' drawer-input-error' : ''}`}
+        style={{fontWeight:700, letterSpacing:'1px', flex:'2 1 220px', maxWidth:320, fontSize:'1.5em', border: inputError ? '2px solid #ff2d55' : '2px solid #39FF14', boxShadow: inputError ? '0 0 0 2px #ff2d5540' : '0 0 0 2px #39FF1440', transition:'box-shadow .22s, border-color .22s'}}
+        value={points === 0 ? '' : points}
+        onChange={e => {
+          let val = e.target.value.replace(/^0+(?!$)/, '');
+          if (val === '') val = 0;
+          setPoints(Number(val));
+          if (Number(val) > 0) setInputError('');
+        }}
         disabled={loading}
-        required
         autoFocus
+        onFocus={e => e.target.select()}
       />
-      <button type="submit" className="btn drawer-btn-add ms-2 d-flex align-items-center justify-content-center" disabled={loading}>
+      <button type="submit" className="btn drawer-btn-add d-flex align-items-center justify-content-center fs-4 py-4 px-5" style={{flex:'1 1 140px', minWidth:140, fontWeight:700}} disabled={loading}>
         {loading ? <span className="spinner-border spinner-border-sm" /> : <i className="bi bi-plus-circle me-2"></i>}
         <span>Adicionar</span>
       </button>
     </div>
+    <div className="w-100 mb-4" style={{minHeight:'28px', color:inputError ? '#ff2d55' : 'transparent', fontWeight:500, fontSize:'1.04em', textAlign:'center', transition:'color .2s'}}>{inputError || '.'}</div>
     <div className="form-text text-end text-light">Máximo: <strong>{maxPoints}</strong></div>
   </form>
 )}
@@ -119,17 +155,45 @@ function ActionDrawer({
            justify-content: center;
            pointer-events: none;
          }
-         .zupy-action-drawer-purple {
-           background: #3d1a68;
-           border-radius: 22px 22px 0 0;
-           box-shadow: 0 -1px 8px 2px #2d104a55, 0 -1px 4px rgba(0,0,0,0.10);
-           border: 2px solid #3d1a68;
-           max-width: 480px;
-           width: 100%;
-           margin: 0 auto;
-           padding: 32px 18px 16px 18px;
-           pointer-events: all;
-         }
+          .zupy-action-drawer-purple {
+            background: #3d1a68;
+            border-radius: 22px 22px 0 0;
+            box-shadow: 0 -1px 8px 2px #2d104a55, 0 -1px 4px rgba(0,0,0,0.10);
+            border: 2px solid #3d1a68;
+            max-width: 420px;
+            width: 98vw;
+            margin: 0 12px 0 12px;
+            padding: 20px 18px 48px 18px;
+            pointer-events: all;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity .32s cubic-bezier(.4,1,.7,1), transform .32s cubic-bezier(.4,1,.7,1);
+          }
+          .zupy-action-drawer-slider.zupy-action-drawer-purple.text-white.position-fixed.w-100[style*="display: flex"] {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            transition: opacity .32s cubic-bezier(.4,1,.7,1), transform .32s cubic-bezier(.4,1,.7,1);
+          }
+          @media (max-width: 600px) {
+            .zupy-action-drawer-purple {
+              max-width: 98vw;
+              padding: 12px 8px 56px 8px;
+              margin: 0 2vw 0 2vw;
+            }
+          }
+          .drawer-input-green {
+            border: 2px solid #39FF14 !important;
+            box-shadow: none !important;
+            outline: none;
+            transition: border-color .22s;
+          }
+          .drawer-input-focus:focus {
+            border: 2px solid #39FF14 !important;
+            box-shadow: none !important;
+            outline: none;
+            transition: border-color .22s;
+          }
          .zupy-action-drawer-purple {
            background: #3d1a68;
          }

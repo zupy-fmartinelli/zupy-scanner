@@ -1,0 +1,27 @@
+.zupy-result-visor-fixed {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 20;
+  background: #181a1f;
+  box-shadow: 0 2px 18px #000a;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 8px;
+  margin-bottom: 18px;
+}
+
+.zupy-result-content {
+  margin-top: 16px;
+  padding-top: 120px; /* espaço para o visor fixo */
+}
+
+@media (max-width: 600px) {
+  .zupy-result-visor-fixed {
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+  }
+  .zupy-result-content {
+    padding-top: 100px;
+  }
+}
