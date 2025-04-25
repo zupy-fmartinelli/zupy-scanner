@@ -94,12 +94,13 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
         
         .device-screen {
           width: 100%;
-          aspect-ratio: 16/9;
+          height: 100%; /* Preenche todo o espaço do visor */
           border-radius: 28px;
-          border: 6px solid #18191b;
+          border: 6px solid #252a3c;
           overflow: hidden;
           position: relative;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+          background-size: cover;
         }
         
         .screen-content {
@@ -122,64 +123,75 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
         
         .screen-corner {
           position: absolute;
-          width: 32px;
-          height: 32px;
+          width: 40px;
+          height: 40px;
         }
         
         .screen-corner.top-left {
-          top: 8px;
-          left: 8px;
-          border-top: 2px solid #fff;
-          border-left: 2px solid #fff;
-          border-radius: 2px 0 0 0;
+          top: 12px;
+          left: 12px;
+          border-top: 3px solid rgba(255,255,255,0.8);
+          border-left: 3px solid rgba(255,255,255,0.8);
+          border-radius: 4px 0 0 0;
+          box-shadow: -1px -1px 0 rgba(255,255,255,0.2), inset 2px 2px 3px rgba(0,0,0,0.3);
         }
         
         .screen-corner.top-right {
-          top: 8px;
-          right: 8px;
-          border-top: 2px solid #fff;
-          border-right: 2px solid #fff;
-          border-radius: 0 2px 0 0;
+          top: 12px;
+          right: 12px;
+          border-top: 3px solid rgba(255,255,255,0.8);
+          border-right: 3px solid rgba(255,255,255,0.8);
+          border-radius: 0 4px 0 0;
+          box-shadow: 1px -1px 0 rgba(255,255,255,0.2), inset -2px 2px 3px rgba(0,0,0,0.3);
         }
         
         .screen-corner.bottom-left {
-          bottom: 8px;
-          left: 8px;
-          border-bottom: 2px solid #fff;
-          border-left: 2px solid #fff;
-          border-radius: 0 0 0 2px;
+          bottom: 12px;
+          left: 12px;
+          border-bottom: 3px solid rgba(255,255,255,0.8);
+          border-left: 3px solid rgba(255,255,255,0.8);
+          border-radius: 0 0 0 4px;
+          box-shadow: -1px 1px 0 rgba(255,255,255,0.2), inset 2px -2px 3px rgba(0,0,0,0.3);
         }
         
         .screen-corner.bottom-right {
-          bottom: 8px;
-          right: 8px;
-          border-bottom: 2px solid #fff;
-          border-right: 2px solid #fff;
-          border-radius: 0 0 2px 0;
+          bottom: 12px;
+          right: 12px;
+          border-bottom: 3px solid rgba(255,255,255,0.8);
+          border-right: 3px solid rgba(255,255,255,0.8);
+          border-radius: 0 0 4px 0;
+          box-shadow: 1px 1px 0 rgba(255,255,255,0.2), inset -2px -2px 3px rgba(0,0,0,0.3);
         }
         
         .screen-status-text {
           position: absolute;
-          top: 10px;
+          top: 16px;
           left: 0;
           width: 100%;
           text-align: center;
-          color: #ccc;
-          font-weight: 500;
+          color: rgba(255,255,255,0.9);
+          font-weight: 600;
           letter-spacing: 2px;
-          font-size: 15px;
-          text-shadow: 0 1px 4px #000;
+          font-size: 16px;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+          background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.2) 80%, transparent 100%);
+          padding: 4px 0;
+          backdrop-filter: blur(1px);
         }
         
         .screen-model-text {
           position: absolute;
-          bottom: 10px;
-          left: 16px;
-          color: #ccc;
-          font-size: 13px;
-          opacity: 0.7;
+          bottom: 16px;
+          left: 20px;
+          color: rgba(255,255,255,0.8);
+          font-size: 14px;
+          font-weight: 500;
           letter-spacing: 1px;
-          text-shadow: 0 1px 4px #000;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+          background: rgba(0,0,0,0.2);
+          padding: 4px 10px;
+          border-radius: 4px;
+          backdrop-filter: blur(1px);
         }
         
         .scanner-laser {
@@ -199,10 +211,10 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           left: 50%;
           bottom: -28px;
           transform: translateX(-50%);
-          width: 56px;
-          height: 56px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
-          background: #23252b;
+          background: linear-gradient(135deg, #252a3c, #1e2334);
           border: 2px solid;
           display: flex;
           align-items: center;
@@ -210,13 +222,23 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           padding: 0;
           outline: none;
           z-index: 40;
-          transition: box-shadow 0.3s, border-color 0.3s;
+          transition: all 0.3s;
           cursor: pointer;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .device-led-button:hover {
+          transform: translateX(-50%) translateY(-3px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        
+        .device-led-button:active {
+          transform: translateX(-50%) translateY(-1px);
         }
         
         .device-led-button img {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           filter: drop-shadow(0 0 8px #000);
         }
         

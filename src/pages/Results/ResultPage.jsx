@@ -65,13 +65,17 @@ function ResultPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState(null); // 'pontos' ou 'resgate'
 
-  // Abre automaticamente o drawer ao montar a página, se necessário
+  // Abre automaticamente o drawer ao montar a página
   useEffect(() => {
     if (!currentScan || !currentScan.result) return;
-    if (!finalized && currentScan.result.scan_type === 'loyalty_card' && currentScan.result?.requires_input && currentScan.result?.input_type === 'points') {
+    
+    // Para cartões de fidelidade, abre drawer de pontos
+    if (currentScan.result.scan_type === 'loyalty_card' && !finalized) {
       setDrawerType('pontos');
       setDrawerOpen(true);
-    } else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
+    }
+    // Para cupons que podem ser resgatados
+    else if (currentScan.result.scan_type === 'coupon' && currentScan.result?.can_redeem === true && !redeemed) {
       setDrawerType('resgate');
       setDrawerOpen(true);
     }
@@ -398,53 +402,273 @@ function ResultPage() {
       title="Resultado" 
       activeMenu="scanner"
       visor={
-        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : 'idle'}>
-          <div className="d-flex align-items-center h-100 px-4 py-3">
-            {/* Foto do cliente */}
-            {clientDetails.photo_url ? (
-              <img 
-                src={clientDetails.photo_url} 
-                alt="Foto" 
-                style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',marginRight:16,border:'2px solid #444'}} 
-              />
-            ) : (
-              <div style={{width:56,height:56,borderRadius:'50%',background:'#222',marginRight:16,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <i className="bi bi-person fs-2 text-secondary" />
+        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : 'idle')}>
+          <div className="client-visor-content">
+            <div className="client-info-header">
+              {/* Foto do cliente */}
+              {clientDetails.photo_url ? (
+                <img 
+                  src={clientDetails.photo_url} 
+                  alt="Foto" 
+                  className="client-photo"
+                />
+              ) : (
+                <div className="client-photo-placeholder">
+                  <i className="bi bi-person fs-2" />
+                </div>
+              )}
+              
+              <div className="client-details">
+                <div className="client-name">{clientDetails.client_name || '-'}</div>
+                <div className="client-card-info">
+                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
+                  {isLoyaltyCard && (
+                    <span className="card-valid-badge">Válido</span>
+                  )}
+                </div>
+                <div className="client-visit">Última visita: <span>{formatDate(clientDetails.last_visit)}</span></div>
               </div>
-            )}
-            <div style={{flex:1}}>
-              <div className="fw-bold fs-5 mb-1">{clientDetails.client_name || '-'}</div>
-              <div className="d-flex align-items-center mb-1">
-                <div className="small text-light">Cartão: <span className="fw-semibold">{formatCardCode(clientDetails.card_number)}</span></div>
+              
+              {/* Segmento RFM e pontos */}
+              <div className="client-segment">
+                <span className={`segment-badge ${rfmSegment.class || 'bg-secondary'}`}>
+                  {rfmSegment.emoji || '👤'} {rfmSegment.label || 'Segmento'}
+                </span>
+                <div className="client-points">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
+              </div>
+            </div>
+            
+            {/* Área de informações adicionais */}
+            <div className="client-additional-info">
+              {/* Alertas importantes */}
+              {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
+                <div className="client-alert reward-alert">
+                  <i className="bi bi-gift-fill"></i>
+                  <span>Prêmios disponíveis para resgate!</span>
+                </div>
+              )}
+              
+              {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+                <div className="client-alert progress-alert">
+                  <i className="bi bi-trophy-fill"></i>
+                  <span>Faltam <b>{clientDetails.next_reward_gap.missing_points}</b> pontos para <b>{clientDetails.next_reward_gap.name}</b> ({clientDetails.next_reward_gap.points_required} pts)</span>
+                </div>
+              )}
+              
+              {/* Status do cartão e ações disponíveis */}
+              <div className="client-status">
                 {isLoyaltyCard && (
-                  <span className="badge bg-success ms-2" style={{fontSize:13,letterSpacing:1}}>Cartão válido</span>
+                  <div className="status-item points-status">
+                    <i className="bi bi-trophy"></i>
+                    <span>{clientDetails.points || 0} pontos acumulados</span>
+                  </div>
+                )}
+                
+                {isCoupon && (
+                  <div className="status-item coupon-status">
+                    <i className="bi bi-ticket-perforated"></i>
+                    <span>{clientDetails.title || "Cupom"}</span>
+                  </div>
                 )}
               </div>
-              <div className="small text-light">Última visita: <span className="fw-semibold">{formatDate(clientDetails.last_visit)}</span></div>
-            </div>
-            {/* Segmento RFM e pontos */}
-            <div className="text-end ms-3">
-              <span className={`badge ${rfmSegment.class || 'bg-secondary'} px-2 py-1 mb-1`}>
-                {rfmSegment.emoji || '👤'} {rfmSegment.label || 'Segmento'}
-              </span>
-              <div className="fw-bold fs-6 text-success">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
             </div>
           </div>
           
-          {/* Alertas importantes */}
-          {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
-            <div className="alert alert-success d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
-              <i className="bi bi-gift-fill me-2"></i>
-              Prêmios disponíveis para resgate!
-            </div>
-          )}
-          
-          {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
-            <div className="alert alert-info d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
-              <i className="bi bi-trophy-fill me-2"></i>
-              Faltam <b>{clientDetails.next_reward_gap.missing_points}</b> pontos para <b>{clientDetails.next_reward_gap.name}</b> ({clientDetails.next_reward_gap.points_required} pts)
-            </div>
-          )}
+          <style jsx>{`
+            .client-visor-content {
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+              padding: 16px;
+              color: white;
+            }
+            
+            .client-info-header {
+              display: flex;
+              align-items: center;
+              margin-bottom: 12px;
+            }
+            
+            .client-photo {
+              width: 70px;
+              height: 70px;
+              border-radius: 50%;
+              object-fit: cover;
+              margin-right: 16px;
+              border: 2px solid rgba(255,255,255,0.3);
+              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            
+            .client-photo-placeholder {
+              width: 70px;
+              height: 70px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, #2d3142, #1e2334);
+              margin-right: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #adb5bd;
+              border: 2px solid rgba(255,255,255,0.1);
+            }
+            
+            .client-details {
+              flex: 1;
+            }
+            
+            .client-name {
+              font-size: 22px;
+              font-weight: 600;
+              margin-bottom: 4px;
+              color: rgba(255,255,255,0.95);
+              text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            
+            .client-card-info {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 4px;
+            }
+            
+            .card-number {
+              font-size: 14px;
+              color: rgba(255,255,255,0.8);
+            }
+            
+            .card-number span {
+              font-weight: 600;
+              letter-spacing: 0.5px;
+            }
+            
+            .card-valid-badge {
+              background: rgba(40, 167, 69, 0.2);
+              color: #39FF14;
+              padding: 2px 8px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+              border: 1px solid rgba(40, 167, 69, 0.4);
+              box-shadow: 0 0 8px rgba(57, 255, 20, 0.2);
+            }
+            
+            .client-visit {
+              font-size: 14px;
+              color: rgba(255,255,255,0.7);
+            }
+            
+            .client-visit span {
+              font-weight: 600;
+            }
+            
+            .client-segment {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              margin-left: 16px;
+            }
+            
+            .segment-badge {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 13px;
+              font-weight: 600;
+              margin-bottom: 4px;
+              letter-spacing: 0.5px;
+              display: inline-block;
+            }
+            
+            .client-points {
+              font-size: 18px;
+              font-weight: 700;
+              color: #39FF14;
+              text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            
+            .client-additional-info {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              margin-top: 16px;
+            }
+            
+            .client-alert {
+              display: flex;
+              align-items: center;
+              padding: 10px 12px;
+              border-radius: 8px;
+              font-size: 14px;
+              border: 1px solid rgba(255,255,255,0.1);
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            
+            .client-alert i {
+              margin-right: 8px;
+              font-size: 16px;
+            }
+            
+            .reward-alert {
+              background: rgba(40, 167, 69, 0.15);
+              border-color: rgba(40, 167, 69, 0.3);
+              color: #d4f7dc;
+            }
+            
+            .progress-alert {
+              background: rgba(0, 123, 255, 0.15);
+              border-color: rgba(0, 123, 255, 0.3);
+              color: #cce5ff;
+            }
+            
+            .client-status {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              margin-top: 8px;
+            }
+            
+            .status-item {
+              background: rgba(0,0,0,0.2);
+              border-radius: 6px;
+              padding: 8px 12px;
+              display: flex;
+              align-items: center;
+              font-size: 14px;
+              border: 1px solid rgba(255,255,255,0.1);
+            }
+            
+            .status-item i {
+              margin-right: 6px;
+            }
+            
+            .points-status {
+              color: #ffd700;
+            }
+            
+            .coupon-status {
+              color: #ff9800;
+            }
+            
+            @media (max-width: 380px) {
+              .client-photo, .client-photo-placeholder {
+                width: 60px;
+                height: 60px;
+              }
+              
+              .client-name {
+                font-size: 18px;
+              }
+              
+              .card-number, .client-visit {
+                font-size: 13px;
+              }
+              
+              .client-points {
+                font-size: 16px;
+              }
+            }
+          `}</style>
         </Visor>
       }
     >
@@ -463,38 +687,16 @@ function ResultPage() {
           </div>
           
           {/* Conteúdo adicional baseado no tipo de resultado */}
+          {/* Removido o botão de adicionar pontos, usando apenas o drawer */}
           {isLoyaltyCard && !finalized && (
             <div className={styles['device-result-content']}>
-              <button 
-                className={`${styles['device-action-button']} ${styles['device-action-add-points']}`}
-                onClick={() => {
-                  setDrawerType('pontos');
-                  setDrawerOpen(true);
-                }}
-              >
-                <i className="bi bi-plus-circle"></i>
-                Adicionar Pontos
-              </button>
-              <div className="text-center" style={{fontSize: '13px', opacity: 0.7}}>
+              <div className="text-center mt-2" style={{fontSize: '14px', opacity: 0.8}}>
                 {clientDetails.points || 0} pontos disponíveis atualmente
               </div>
             </div>
           )}
           
-          {isCoupon && canRedeem && !redeemed && (
-            <div className={styles['device-result-content']}>
-              <button 
-                className={`${styles['device-action-button']} ${styles['device-action-redeem']}`}
-                onClick={() => {
-                  setDrawerType('resgate');
-                  setDrawerOpen(true);
-                }}
-              >
-                <i className="bi bi-ticket-perforated"></i>
-                Resgatar Cupom
-              </button>
-            </div>
-          )}
+          {/* Removido o botão de resgatar, usando apenas o drawer */}
           
           {isCoupon && redeemed && (
             <div className={styles['device-result-content']}>
@@ -508,14 +710,7 @@ function ResultPage() {
           )}
         </div>
         
-        {/* Botão de novo scan */}
-        <button 
-          className={`${styles['device-action-button']} ${styles['device-action-new-scan']}`}
-          onClick={handleNewScanClick}
-        >
-          <i className="bi bi-qr-code-scan"></i>
-          Novo Scan
-        </button>
+        {/* Removido o botão de novo scan, já que ele existe no rodapé */}
         
         {/* Painéis de acordeão com informações complementares */}
         <div className="mt-4">

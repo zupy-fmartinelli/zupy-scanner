@@ -44,14 +44,9 @@ function MainLayout({ title, children, activeMenu, visor }) {
   };
   
   const handleSync = async () => {
-    const result = await syncData();
-    if (result.synced > 0) {
-      toast.success(`${result.synced} itens sincronizados com sucesso`);
-    } else if (result.pending === 0 && result.failed === 0) {
-      toast.info('Nenhum item pendente para sincronização');
-    } else if (result.failed > 0) {
-      toast.error(`${result.failed} itens com falha de sincronização`);
-    }
+    // Esta função agora serve para alternar a câmera (trocar câmera frontal/traseira)
+    // Implementação futura
+    toast.info('Alternando câmera (funcionalidade a ser implementada)');
   };
   
   const handleLogout = async () => {
@@ -131,16 +126,11 @@ function MainLayout({ title, children, activeMenu, visor }) {
         )}
         
         <button 
-          className="sync-button"
+          className="toggle-camera"
           onClick={handleSync}
-          disabled={isSyncing || !isOnline}
-          title="Sincronizar dados"
+          title="Alternar câmera"
         >
-          {isSyncing ? (
-            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          ) : (
-            <i className="bi bi-arrow-repeat"></i>
-          )}
+          <i className="bi bi-camera2"></i>
         </button>
       </div>
       
@@ -237,26 +227,43 @@ function MainLayout({ title, children, activeMenu, visor }) {
           height: 100vh;
           max-width: 480px;
           margin: 0 auto;
-          background: #212529;
+          background: linear-gradient(180deg, #2c3347 0%, #212635 100%);
           position: relative;
           overflow: hidden;
           box-shadow: 0 0 40px rgba(0,0,0,0.5);
+          border-left: 1px solid #3d4257;
+          border-right: 1px solid #3d4257;
         }
         
         /* Parte superior - elementos físicos do dispositivo */
         .device-top {
-          background: #18191b;
+          background: linear-gradient(180deg, #1e2334 0%, #252a3c 100%);
           padding: 12px 0 6px;
           position: relative;
           z-index: 30;
+          border-bottom: 1px solid #3d4257;
         }
         
         .device-speaker {
-          width: 60px;
+          width: 80px;
           height: 5px;
-          background: #2a2d31;
+          background: #454c63;
           border-radius: 5px;
           margin: 0 auto;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .device-speaker:after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 2s infinite;
         }
         
         .device-sensors {
@@ -284,39 +291,47 @@ function MainLayout({ title, children, activeMenu, visor }) {
         /* Área do visor */
         .device-visor-area {
           z-index: 20;
-          background: #18191b;
+          background: #252830;
           padding: 0 12px 20px;
+          height: 50vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
         
         .device-header {
-          background: #23252b;
-          border-radius: 12px;
+          background: linear-gradient(180deg, #2d3142 0%, #343b4f 100%);
+          border-radius: 16px;
           color: #fff;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          border: 1px solid #3d4257;
         }
         
         /* Barra de status */
         .device-status-bar {
           display: flex;
           align-items: center;
-          background: #1a1c20;
-          border-top: 1px solid #2a2d31;
-          border-bottom: 1px solid #2a2d31;
-          padding: 6px 12px;
-          font-size: 13px;
-          color: #adb5bd;
+          background: linear-gradient(180deg, #32384a 0%, #282c3d 100%);
+          border-top: 1px solid #454c63;
+          border-bottom: 1px solid #454c63;
+          padding: 12px 16px;
+          font-size: 15px;
+          color: #e0e0e0;
           overflow-x: auto;
           white-space: nowrap;
-          gap: 12px;
+          gap: 16px;
+          margin-top: 12px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
         .status-indicator {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 6px;
         }
         
         .status-indicator i {
-          font-size: 14px;
+          font-size: 16px;
         }
         
         .status-indicator.online {
@@ -327,38 +342,37 @@ function MainLayout({ title, children, activeMenu, visor }) {
           color: #ffd600;
         }
         
-        .sync-button {
+        .toggle-camera {
           margin-left: auto;
-          width: 28px;
-          height: 28px;
+          width: 38px;
+          height: 38px;
           border-radius: 50%;
-          background: #2a2d31;
-          border: none;
-          color: #adb5bd;
+          background: linear-gradient(135deg, #3f4659, #323748);
+          border: 1px solid #454c63;
+          color: #e0e0e0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background 0.2s;
+          transition: all 0.2s;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
-        .sync-button:hover:not(:disabled) {
-          background: #3a3d41;
+        .toggle-camera:hover {
+          background: linear-gradient(135deg, #4a526a, #3a4054);
           color: #fff;
-        }
-        
-        .sync-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         
         /* Área de conteúdo principal */
         .device-content-area {
           flex: 1;
           overflow-y: auto;
-          background: #23252b;
+          background: linear-gradient(180deg, #2f3447 0%, #252a3c 100%);
           padding: 16px 12px;
           padding-bottom: 84px; /* Espaço para o rodapé */
           color: #fff;
+          box-shadow: inset 0 5px 15px rgba(0,0,0,0.15);
         }
         
         /* Rodapé */
@@ -368,11 +382,17 @@ function MainLayout({ title, children, activeMenu, visor }) {
           left: 0;
           right: 0;
           z-index: 50;
-          background: linear-gradient(180deg, #18191b 0%, #141518 100%);
-          border-top: 2px solid #232c3a;
+          background: linear-gradient(180deg, #1e2334 0%, #151928 100%);
+          border-top: 2px solid #3d4257;
           height: 80px;
           max-width: 480px;
           margin: 0 auto;
+          box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
         
         .device-nav-bar {
@@ -384,22 +404,31 @@ function MainLayout({ title, children, activeMenu, visor }) {
         }
         
         .nav-button {
-          background: transparent;
-          border: none;
-          color: #adb5bd;
+          background: linear-gradient(135deg, #323748, #252b3d);
+          border: 1px solid #3d4257;
+          color: #e0e0e0;
           font-size: 24px;
-          transition: color 0.2s;
-          padding: 10px;
+          transition: all 0.2s;
+          padding: 12px;
           border-radius: 50%;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+          width: 52px;
+          height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         
         .nav-button.active {
           color: #fff;
+          background: linear-gradient(135deg, #3f4659, #2d3347);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.1);
         }
         
         .nav-button:hover {
           color: #fff;
-          background: rgba(255,255,255,0.05);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         
         .nav-button-center {
@@ -409,18 +438,32 @@ function MainLayout({ title, children, activeMenu, visor }) {
         }
         
         .scan-button {
-          width: 62px;
-          height: 62px;
+          width: 64px;
+          height: 64px;
           border-radius: 50%;
-          background: #191c20;
+          background: linear-gradient(135deg, #1e2334, #151928);
           display: flex;
           justify-content: center;
           align-items: center;
           color: #fff;
-          border: 3px solid #25d2ff;
-          box-shadow: 0 0 15px rgba(37, 210, 255, 0.4);
+          border: 3px solid #00a3ff;
+          box-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
           transition: all 0.2s;
           font-size: 24px;
+          position: relative;
+        }
+        
+        .scan-button:after {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          right: -1px;
+          bottom: -1px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(0,163,255,0.5), transparent);
+          opacity: 0.6;
+          z-index: -1;
         }
         
         .scan-button:active {
@@ -428,12 +471,12 @@ function MainLayout({ title, children, activeMenu, visor }) {
         }
         
         .scan-button.active {
-          background: #1a2a36;
-          box-shadow: 0 0 20px rgba(37, 210, 255, 0.6);
+          background: linear-gradient(135deg, #0a2d44, #103756);
+          box-shadow: 0 0 20px rgba(0, 163, 255, 0.6);
         }
         
         .scan-button i {
-          filter: drop-shadow(0 0 2px rgba(37, 210, 255, 0.8));
+          filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.8));
         }
         
         @media (max-width: 480px) {

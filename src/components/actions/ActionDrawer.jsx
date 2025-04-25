@@ -39,8 +39,12 @@ function ActionDrawer({
 
   return (
     <div className={`device-action-drawer ${open ? 'open' : ''}`}>
-      {/* Alça do drawer */}
-      <div className="drawer-handle"></div>
+      {/* Alça do drawer - aumentar para facilitar deslizamento */}
+      <div className="drawer-handle">
+        <div className="drawer-handle-icon">
+          <i className="bi bi-chevron-compact-up"></i>
+        </div>
+      </div>
       
       {/* Botão de fechar */}
       <button className="drawer-close-btn" onClick={onClose} aria-label="Fechar">
@@ -213,19 +217,68 @@ function ActionDrawer({
           transform: translateY(100%);
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           opacity: 1;
+          border-top: 1px solid rgba(255,255,255,0.2);
+          border-left: 1px solid rgba(255,255,255,0.1);
+          border-right: 1px solid rgba(255,255,255,0.1);
+          height: 70vh; /* Altura fixa para drawer deslizante */
+          max-height: 600px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        /* Estilos de rolagem do drawer */
+        .device-action-drawer::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .device-action-drawer::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.2);
+          border-radius: 10px;
+        }
+        
+        .device-action-drawer::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
+          border-radius: 10px;
+        }
+        
+        .device-action-drawer::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,255,255,0.3);
         }
         
         .device-action-drawer.open {
           transform: translateY(0);
         }
         
-        /* Alça do drawer */
+        /* Alça do drawer - melhorada para deslizamento */
         .drawer-handle {
+          width: 100%;
+          height: 28px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 0 auto 16px;
+          cursor: grab;
+        }
+        
+        .drawer-handle:active {
+          cursor: grabbing;
+        }
+        
+        .drawer-handle:before {
+          content: '';
           width: 60px;
           height: 5px;
-          background: rgba(255,255,255,0.3);
+          background: rgba(255,255,255,0.4);
           border-radius: 10px;
-          margin: 0 auto 20px;
+          display: block;
+        }
+        
+        .drawer-handle-icon {
+          position: absolute;
+          top: 10px;
+          color: rgba(255,255,255,0.5);
+          font-size: 18px;
         }
         
         /* Botão de fechar */
@@ -254,6 +307,8 @@ function ActionDrawer({
         /* Conteúdo do drawer */
         .drawer-content {
           padding: 0 4px;
+          flex: 1;
+          overflow-y: auto;
         }
         
         /* Estilos para o form de pontos */
