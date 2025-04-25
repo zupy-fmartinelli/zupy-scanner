@@ -55,10 +55,7 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
             <div className="screen-status-text">QR-Scanner</div>
             <div className="screen-model-text">ZUPY-2025-REV1</div>
             
-            {/* Laser do scanner (visível apenas no modo scanning) */}
-            {mode === 'scanning' && (
-              <div className="scanner-laser"></div>
-            )}
+            {/* Laser do scanner removido para evitar duplicação */}
           </div>
         </div>
         
@@ -201,18 +198,6 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           backdrop-filter: blur(1px);
         }
         
-        .scanner-laser {
-          position: absolute;
-          top: 48%;
-          left: 0;
-          right: 0;
-          height: 3px;
-          background: #ff0000;
-          box-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000;
-          border-radius: 2px;
-          animation: laser-animation 2.5s infinite;
-        }
-        
         .device-led-button {
           position: absolute;
           left: 50%;
@@ -250,19 +235,6 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           filter: drop-shadow(0 0 8px #000);
         }
         
-        @keyframes laser-animation {
-          0%, 100% {
-            top: 20%;
-            opacity: 0.8;
-          }
-          50% {
-            top: 80%;
-            opacity: 0.8;
-          }
-          51%, 99% {
-            opacity: 0;
-          }
-        }
         
         @keyframes pulse-scanning {
           0%, 100% {
