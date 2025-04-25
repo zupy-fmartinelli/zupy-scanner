@@ -99,10 +99,7 @@ function ActionDrawer({
         </div>
       </div>
       
-      {/* Botão de fechar */}
-      <button className="drawer-close-btn" onClick={onClose} aria-label="Fechar">
-        <i className="bi bi-x"></i>
-      </button>
+      {/* Botão de fechar removido a pedido do cliente */}
       
       {/* Conteúdo específico para cada tipo de drawer */}
       <div className="drawer-content">
@@ -268,7 +265,7 @@ function ActionDrawer({
           background: linear-gradient(180deg, #3d1a68 0%, #2b1047 100%);
           border-radius: 24px 24px 0 0;
           box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-          padding: 16px 20px 80px; /* Aumentado padding-bottom para o rodapé */
+          padding: 12px 20px 80px; /* Padding reduzido no topo e mantido no fundo para o rodapé */
           color: #fff;
           transform: translateY(100%);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -279,37 +276,33 @@ function ActionDrawer({
           overflow-y: auto;
           display: flex;
           flex-direction: column;
-          height: 270px; /* Altura padrão para modo recolhido */
+          height: 200px; /* Altura reduzida para modo recolhido */
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE/Edge */
         }
         
         /* Estado recolhido do drawer */
         .device-action-drawer.collapsed {
-          height: 270px;
+          height: 200px; /* Altura reduzida */
         }
         
         /* Estado expandido do drawer */
         .device-action-drawer.expanded {
-          height: calc(100vh - 144px); /* Expande até a barra de status quando expandido */
+          height: calc(100vh - 230px); /* Altura ajustada para ficar abaixo da barra de status */
         }
         
-        /* Estilos de rolagem do drawer */
+        /* Animação para a alça do drawer quando fechado */
+        .device-action-drawer:not(.open) {
+          transform: translateY(calc(100% - 15px)); /* Mostra apenas a alça quando fechado */
+        }
+        
+        /* Ocultar barra de rolagem */
         .device-action-drawer::-webkit-scrollbar {
-          width: 6px;
+          display: none;
+          width: 0;
         }
         
-        .device-action-drawer::-webkit-scrollbar-track {
-          background: rgba(0,0,0,0.2);
-          border-radius: 10px;
-        }
-        
-        .device-action-drawer::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.2);
-          border-radius: 10px;
-        }
-        
-        .device-action-drawer::-webkit-scrollbar-thumb:hover {
-          background: rgba(255,255,255,0.3);
-        }
+        /* Estilos de scrollbar removidos para evitar exibição */
         
         .device-action-drawer.open {
           transform: translateY(0);
@@ -318,11 +311,11 @@ function ActionDrawer({
         /* Alça do drawer - melhorada para deslizamento */
         .drawer-handle {
           width: 100%;
-          height: 36px;
+          height: 30px;
           display: flex;
           justify-content: center;
           align-items: center;
-          margin: 0 auto 16px;
+          margin: 0 auto 10px;
           cursor: grab;
           position: relative;
           /* Destaque visual para tornar a área de toque mais óbvia */
@@ -339,18 +332,26 @@ function ActionDrawer({
         .drawer-handle:before {
           content: '';
           width: 60px;
-          height: 5px;
-          background: rgba(255,255,255,0.4);
+          height: 4px;
+          background: rgba(255,255,255,0.6);
           border-radius: 10px;
           display: block;
-          margin-top: -8px;
+          margin-top: -2px;
+        }
+        
+        /* Estilos especiais para quando o drawer não está aberto */
+        .device-action-drawer:not(.open) .drawer-handle:before {
+          background: rgba(255,255,255,0.8);
+          height: 5px;
+          margin-top: 10px; /* Posiciona a barra branca no centro da área visível */
+          box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
         
         .drawer-handle-icon {
           position: absolute;
-          top: 16px;
+          top: 14px;
           color: rgba(255,255,255,0.7);
-          font-size: 22px;
+          font-size: 20px;
           animation: pulse-icon 2s infinite;
         }
         
