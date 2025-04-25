@@ -77,26 +77,43 @@ function ActionDrawer({
               </div>
             </div>
             
-            {/* Display para pontos e inputs */}
+            {/* Display para pontos e inputs em linha única */}
             <div className="points-input-container">
-              {/* Input numérico para pontos */}
-              <input
-                id="drawerPointsInput"
-                type="number"
-                min={1}
-                max={maxPoints}
-                className={`points-input${inputError ? ' input-error' : ''}`}
-                value={points === 0 ? '' : points}
-                onChange={e => {
-                  let val = e.target.value.replace(/^0+(?!$)/, '');
-                  if (val === '') val = 0;
-                  setPoints(Number(val));
-                  if (Number(val) > 0) setInputError('');
-                }}
-                disabled={loading}
-                autoFocus
-                onFocus={e => e.target.select()}
-              />
+              <div className="points-input-row">
+                {/* Input numérico para pontos */}
+                <input
+                  id="drawerPointsInput"
+                  type="number"
+                  min={1}
+                  max={maxPoints}
+                  className={`points-input${inputError ? ' input-error' : ''}`}
+                  value={points === 0 ? '' : points}
+                  onChange={e => {
+                    let val = e.target.value.replace(/^0+(?!$)/, '');
+                    if (val === '') val = 0;
+                    setPoints(Number(val));
+                    if (Number(val) > 0) setInputError('');
+                  }}
+                  disabled={loading}
+                  autoFocus
+                  onFocus={e => e.target.select()}
+                  placeholder="Pontos"
+                />
+                
+                {/* Botão para submeter em linha com o input */}
+                <button 
+                  type="submit" 
+                  className="add-points-btn"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="loading-spinner"></span>
+                  ) : (
+                    <i className="bi bi-plus-circle"></i>
+                  )}
+                  <span className="btn-text">Adicionar</span>
+                </button>
+              </div>
               
               {/* Mensagem de erro */}
               {inputError && (
@@ -107,20 +124,6 @@ function ActionDrawer({
                 Máximo: <strong>{maxPoints}</strong> pontos
               </div>
             </div>
-            
-            {/* Botão para submeter */}
-            <button 
-              type="submit" 
-              className="add-points-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading-spinner"></span>
-              ) : (
-                <i className="bi bi-plus-circle me-2"></i>
-              )}
-              <span>Adicionar Pontos</span>
-            </button>
           </form>
         )}
         
@@ -205,14 +208,14 @@ function ActionDrawer({
           left: 0;
           right: 0;
           bottom: 0;
-          z-index: 2000;
+          z-index: 40; /* Menor que o rodapé (z-index: 50) e maior que o visor (z-index: 20) */
           max-width: 480px;
           width: 100%;
           margin: 0 auto;
           background: linear-gradient(180deg, #3d1a68 0%, #2b1047 100%);
           border-radius: 24px 24px 0 0;
           box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-          padding: 16px 20px 50px;
+          padding: 16px 20px 80px; /* Aumentado padding-bottom para o rodapé */
           color: #fff;
           transform: translateY(100%);
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -220,8 +223,7 @@ function ActionDrawer({
           border-top: 1px solid rgba(255,255,255,0.2);
           border-left: 1px solid rgba(255,255,255,0.1);
           border-right: 1px solid rgba(255,255,255,0.1);
-          height: 70vh; /* Altura fixa para drawer deslizante */
-          max-height: 600px;
+          max-height: calc(100vh - 144px); /* Limita altura até a barra de status */
           overflow-y: auto;
           display: flex;
           flex-direction: column;
@@ -353,18 +355,23 @@ function ActionDrawer({
           margin-bottom: 24px;
         }
         
+        .points-input-row {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 10px;
+        }
+        
         .points-input {
-          width: 100%;
-          height: 70px;
+          flex: 1;
+          height: 60px;
           background: #fff;
           color: #000;
           border: 3px solid #39FF14;
           border-radius: 16px;
-          font-size: 28px;
+          font-size: 24px;
           font-weight: 700;
           text-align: center;
-          padding: 0 20px;
-          margin-bottom: 10px;
+          padding: 0 15px;
           letter-spacing: 1px;
           box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
           transition: border-color 0.2s, box-shadow 0.2s;
@@ -394,18 +401,20 @@ function ActionDrawer({
         }
         
         .add-points-btn {
-          width: 100%;
-          height: 58px;
+          width: auto;
+          min-width: 120px;
+          height: 60px;
           background: linear-gradient(135deg, #6c3ad1, #a259ff);
           border: none;
           border-radius: 16px;
           color: #fff;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 600;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
+          padding: 0 16px;
           transition: all 0.2s;
           box-shadow: 0 4px 15px rgba(162, 89, 255, 0.4);
         }
@@ -419,6 +428,10 @@ function ActionDrawer({
         .add-points-btn:disabled {
           opacity: 0.7;
           cursor: not-allowed;
+        }
+        
+        .btn-text {
+          white-space: nowrap;
         }
         
         /* Estilos para o form de cupom */
