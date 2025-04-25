@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 /**
  * Drawer de Ações para adicionar pontos ou resgatar cupom - estilo dispositivo físico
@@ -24,6 +24,52 @@ function ActionDrawer({
   maxPoints = 100
 }) {
   const [inputError, setInputError] = useState('');
+  const [expanded, setExpanded] = useState(false);
+  const drawerRef = useRef(null);
+  const startYRef = useRef(0);
+  const currentYRef = useRef(0);
+  
+  // Função para manipular o início do deslizamento
+  const handleTouchStart = (e) => {
+    startYRef.current = e.touches[0].clientY;
+    currentYRef.current = startYRef.current;
+    
+    // Adiciona eventos para acompanhar o movimento
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+  };
+  
+  // Função para manipular o movimento durante o deslizamento
+  const handleTouchMove = (e) => {
+    e.preventDefault(); // Previne o comportamento padrão (rolagem da página)
+    currentYRef.current = e.touches[0].clientY;
+    const deltaY = currentYRef.current - startYRef.current;
+    
+    // Se deslizando para cima (expandindo)
+    if (deltaY < -50 && !expanded) {
+      setExpanded(true);
+    }
+    
+    // Se deslizando para baixo (recolhendo)
+    if (deltaY > 50 && expanded) {
+      setExpanded(false);
+    }
+  };
+  
+  // Função para finalizar o deslizamento
+  const handleTouchEnd = () => {
+    // Remove os eventos quando o toque terminar
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  };
+
+  // Efeito para limpar os listeners de eventos ao desmontar o componente
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [expanded]);
 
   if (!open) return null;
   
@@ -38,11 +84,18 @@ function ActionDrawer({
   };
 
   return (
-    <div className={`device-action-drawer ${open ? 'open' : ''}`}>
+    <div 
+      ref={drawerRef}
+      className={`device-action-drawer ${open ? 'open' : ''} ${expanded ? 'expanded' : 'collapsed'}`}
+    >
       {/* Alça do drawer - aumentar para facilitar deslizamento */}
-      <div className="drawer-handle">
+      <div 
+        className="drawer-handle" 
+        onClick={() => setExpanded(!expanded)}
+        onTouchStart={handleTouchStart}
+      >
         <div className="drawer-handle-icon">
-          <i className="bi bi-chevron-compact-up"></i>
+          <i className={`bi ${expanded ? 'bi-chevron-compact-down' : 'bi-chevron-compact-up'}`}></i>
         </div>
       </div>
       
@@ -218,15 +271,25 @@ function ActionDrawer({
           padding: 16px 20px 80px; /* Aumentado padding-bottom para o rodapé */
           color: #fff;
           transform: translateY(100%);
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           opacity: 1;
           border-top: 1px solid rgba(255,255,255,0.2);
           border-left: 1px solid rgba(255,255,255,0.1);
           border-right: 1px solid rgba(255,255,255,0.1);
-          max-height: calc(100vh - 144px); /* Limita altura até a barra de status */
           overflow-y: auto;
           display: flex;
           flex-direction: column;
+          height: 270px; /* Altura padrão para modo recolhido */
+        }
+        
+        /* Estado recolhido do drawer */
+        .device-action-drawer.collapsed {
+          height: 270px;
+        }
+        
+        /* Estado expandido do drawer */
+        .device-action-drawer.expanded {
+          height: calc(100vh - 144px); /* Expande até a barra de status quando expandido */
         }
         
         /* Estilos de rolagem do drawer */
@@ -255,16 +318,22 @@ function ActionDrawer({
         /* Alça do drawer - melhorada para deslizamento */
         .drawer-handle {
           width: 100%;
-          height: 28px;
+          height: 36px;
           display: flex;
           justify-content: center;
           align-items: center;
           margin: 0 auto 16px;
           cursor: grab;
+          position: relative;
+          /* Destaque visual para tornar a área de toque mais óbvia */
+          background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+          border-radius: 20px 20px 0 0;
+          touch-action: none; /* Previne comportamentos padrão de toque */
         }
         
         .drawer-handle:active {
           cursor: grabbing;
+          background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
         }
         
         .drawer-handle:before {
@@ -274,13 +343,20 @@ function ActionDrawer({
           background: rgba(255,255,255,0.4);
           border-radius: 10px;
           display: block;
+          margin-top: -8px;
         }
         
         .drawer-handle-icon {
           position: absolute;
-          top: 10px;
-          color: rgba(255,255,255,0.5);
-          font-size: 18px;
+          top: 16px;
+          color: rgba(255,255,255,0.7);
+          font-size: 22px;
+          animation: pulse-icon 2s infinite;
+        }
+        
+        @keyframes pulse-icon {
+          0%, 100% { opacity: 0.7; transform: translateY(0); }
+          50% { opacity: 1; transform: translateY(3px); }
         }
         
         /* Botão de fechar */
