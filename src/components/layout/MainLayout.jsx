@@ -14,8 +14,10 @@ import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
  * @param {React.ReactNode} props.children - Page content
  * @param {string} props.activeMenu - Active menu item
  * @param {React.ReactNode} props.visor - Custom visor component
+ * @param {string} props.tabActive - Active tab in navigation
+ * @param {Function} props.onTabChange - Tab change handler
  */
-function MainLayout({ title, children, activeMenu, visor }) {
+function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange }) {
   const navigate = useNavigate();
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
@@ -99,39 +101,69 @@ function MainLayout({ title, children, activeMenu, visor }) {
         )}
       </div>
       
-      {/* Status bar com informações do operador e device */}
+      {/* Status bar com navegação em tabs */}
       <div className="device-status-bar">
-        <div className="status-indicator online">
-          <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
-          <span>{isOnline ? 'Online' : 'Offline'}</span>
+        <div className="status-tabs">
+          <div className="status-indicator online">
+            <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
+            <span>{isOnline ? 'Online' : 'Offline'}</span>
+          </div>
+          
+          <div className="status-indicator user">
+            <i className="bi bi-person-badge"></i>
+            <span>{userData?.name || 'Operador'}</span>
+          </div>
+          
+          {scannerData?.name && (
+            <div className="status-indicator device">
+              <i className="bi bi-qr-code-scan"></i>
+              <span>{scannerData.name}</span>
+            </div>
+          )}
+          
+          {pendingCount > 0 && (
+            <div className="status-indicator pending">
+              <i className="bi bi-hourglass-split"></i>
+              <span>{pendingCount} pendente(s)</span>
+            </div>
+          )}
         </div>
         
-        <div className="status-indicator user">
-          <i className="bi bi-person-badge"></i>
-          <span>{userData?.name || 'Operador'}</span>
-        </div>
-        
-        {scannerData?.name && (
-          <div className="status-indicator device">
-            <i className="bi bi-qr-code-scan"></i>
-            <span>{scannerData.name}</span>
+        {onTabChange && (
+          <div className="nav-tabs">
+            <button 
+              className={`nav-tab ${tabActive === 'details' ? 'active' : ''}`} 
+              data-tab="details"
+              onClick={() => onTabChange('details')}
+            >
+              <i className="bi bi-info-circle"></i>
+              <span>Detalhes</span>
+            </button>
+            <button 
+              className={`nav-tab ${tabActive === 'client' ? 'active' : ''}`} 
+              data-tab="client"
+              onClick={() => onTabChange('client')}
+            >
+              <i className="bi bi-person"></i>
+              <span>Cliente</span>
+            </button>
+            <button 
+              className={`nav-tab ${tabActive === 'rewards' ? 'active' : ''}`} 
+              data-tab="rewards"
+              onClick={() => onTabChange('rewards')}
+            >
+              <i className="bi bi-gift"></i>
+              <span>Prêmios</span>
+            </button>
+            <button 
+              className="toggle-camera"
+              onClick={handleSync}
+              title="Alternar câmera"
+            >
+              <i className="bi bi-camera2"></i>
+            </button>
           </div>
         )}
-        
-        {pendingCount > 0 && (
-          <div className="status-indicator pending">
-            <i className="bi bi-hourglass-split"></i>
-            <span>{pendingCount} pendente(s)</span>
-          </div>
-        )}
-        
-        <button 
-          className="toggle-camera"
-          onClick={handleSync}
-          title="Alternar câmera"
-        >
-          <i className="bi bi-camera2"></i>
-        </button>
       </div>
       
       {/* Área central rolável - informações complementares */}
@@ -309,29 +341,36 @@ function MainLayout({ title, children, activeMenu, visor }) {
           border: 1px solid #3d4257;
         }
         
-        /* Barra de status */
+        /* Barra de status com tabs */
         .device-status-bar {
           display: flex;
-          align-items: center;
+          flex-direction: column;
           background: linear-gradient(180deg, #32384a 0%, #282c3d 100%);
           border-top: 1px solid #454c63;
           border-bottom: 1px solid #454c63;
-          padding: 14px 20px;
+          padding: 10px 0 0;
           font-size: 15px;
           color: #e0e0e0;
-          overflow-x: auto;
-          white-space: nowrap;
-          gap: 20px;
           margin-top: 12px;
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           height: auto;
-          min-height: 52px;
+        }
+        
+        .status-tabs {
+          display: flex;
+          align-items: center;
+          padding: 0 15px;
+          overflow-x: auto;
+          white-space: nowrap;
+          gap: 16px;
+          margin-bottom: 8px;
         }
         
         .status-indicator {
           display: flex;
           align-items: center;
           gap: 6px;
+          font-size: 14px;
         }
         
         .status-indicator i {
@@ -346,8 +385,45 @@ function MainLayout({ title, children, activeMenu, visor }) {
           color: #ffd600;
         }
         
+        .nav-tabs {
+          display: flex;
+          width: 100%;
+          border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-tab {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 0;
+          background: transparent;
+          color: rgba(255,255,255,0.6);
+          border: none;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s;
+          font-size: 12px;
+          gap: 4px;
+          cursor: pointer;
+        }
+        
+        .nav-tab i {
+          font-size: 16px;
+        }
+        
+        .nav-tab.active {
+          color: #fff;
+          border-bottom: 2px solid #00a3ff;
+          background: rgba(0, 163, 255, 0.05);
+        }
+        
+        .nav-tab:hover:not(.active) {
+          color: rgba(255,255,255,0.8);
+          background: rgba(255,255,255,0.05);
+        }
+        
         .toggle-camera {
-          margin-left: auto;
           width: 38px;
           height: 38px;
           border-radius: 50%;
@@ -359,6 +435,7 @@ function MainLayout({ title, children, activeMenu, visor }) {
           justify-content: center;
           transition: all 0.2s;
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+          margin: 5px 10px;
         }
         
         .toggle-camera:hover {

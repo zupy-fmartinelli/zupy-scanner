@@ -62,6 +62,10 @@ function ResultPage() {
   const [finalized, setFinalized] = useState(false);
   const [redeemed, setRedeemed] = useState(false);
   const [expandedSection, setExpandedSection] = useState('details'); // 'details', 'rewards', 'client'
+  const [activeTab, setActiveTab] = useState('details'); // Para controlar a tab ativa na barra de navegação
+  const [statusMessage, setStatusMessage] = useState('');
+  const [statusType, setStatusType] = useState('success'); // 'success', 'error', 'info'
+  const [showStatus, setShowStatus] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState(null); // 'pontos' ou 'resgate'
 
@@ -135,7 +139,7 @@ function ResultPage() {
   // Handler para resgate de cupom
   const handleRedeemCoupon = async () => {
     if (!currentScan || !currentScan.result) {
-      toast.error('Dados do cupom não disponíveis');
+      showStatusMessage('Dados do cupom não disponíveis', 'error');
       return;
     }
     
@@ -161,14 +165,14 @@ function ResultPage() {
         console.log("Resposta do resgate:", result);
         
         if (result && result.processed) {
-          toast.success('Cupom resgatado com sucesso!');
+          showStatusMessage('Cupom resgatado com sucesso!', 'success');
           setRedeemed(true);
           
           // Atualizar o scan atual com o resultado
           currentScan.result = result.result;
           currentScan.processed = true;
         } else {
-          toast.error('Erro ao resgatar cupom. Tente novamente.');
+          showStatusMessage('Erro ao resgatar cupom. Tente novamente.', 'error');
           console.error('Erro no resgate, resposta:', result);
         }
       } else {
@@ -187,20 +191,20 @@ function ResultPage() {
         console.log("Resposta da API de resgate:", result);
         
         if (result && result.success) {
-          toast.success('Cupom resgatado com sucesso!');
+          showStatusMessage('Cupom resgatado com sucesso!', 'success');
           setRedeemed(true);
           
           // Atualizar o scan atual com o resultado do resgate
           currentScan.result = result;
           currentScan.processed = true;
         } else {
-          toast.error(result?.message || 'Erro ao resgatar cupom');
+          showStatusMessage(result?.message || 'Erro ao resgatar cupom', 'error');
           console.error('Erro na resposta do resgate:', result);
         }
       }
     } catch (error) {
       console.error('Erro ao resgatar cupom:', error);
-      toast.error(error.message || 'Erro ao processar o resgate');
+      showStatusMessage(error.message || 'Erro ao processar o resgate', 'error');
     } finally {
       setIsRedeeming(false);
     }
@@ -210,12 +214,12 @@ function ResultPage() {
     e.preventDefault();
     
     if (!currentScan || !currentScan.result) {
-      toast.error('Dados do escaneamento não disponíveis');
+      showStatusMessage('Dados do escaneamento não disponíveis', 'error');
       return;
     }
     
     if (points < 1) {
-      toast.error('A quantidade de pontos deve ser maior que zero');
+      showStatusMessage('A quantidade de pontos deve ser maior que zero', 'error');
       return;
     }
     
@@ -229,13 +233,13 @@ function ResultPage() {
       
       // Verificar se temos os dados necessários
       if (!scanData.scan_id) {
-        toast.error('ID do scan não disponível para finalizar a operação');
+        showStatusMessage('ID do scan não disponível para finalizar a operação', 'error');
         console.error('Scan ID não encontrado:', scanData);
         return;
       }
       
       if (!scannerData || !scannerData.id) {
-        toast.error('Dados do scanner não disponíveis');
+        showStatusMessage('Dados do scanner não disponíveis', 'error');
         console.error('Scanner Data não encontrado:', scannerData);
         return;
       }
@@ -255,19 +259,19 @@ function ResultPage() {
       console.log("Resposta da API:", result);
       
       if (result && result.success) {
-        toast.success('Pontos adicionados com sucesso!');
+        showStatusMessage('Pontos adicionados com sucesso!', 'success');
         setFinalized(true);
         
         // Atualizar o resultado do scan
         currentScan.result = result;
         currentScan.processed = true;
       } else {
-        toast.error(result?.message || 'Erro ao adicionar pontos');
+        showStatusMessage(result?.message || 'Erro ao adicionar pontos', 'error');
         console.error('Erro na resposta:', result);
       }
     } catch (error) {
       console.error('Erro ao enviar pontos:', error);
-      toast.error(error.message || 'Erro ao processar a solicitação');
+      showStatusMessage(error.message || 'Erro ao processar a solicitação', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -276,6 +280,18 @@ function ResultPage() {
   // Toggles para expandir/contrair seções
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
+  };
+  
+  // Função para mostrar mensagens de status no visor (substitui os toasts)
+  const showStatusMessage = (message, type = 'success') => {
+    setStatusMessage(message);
+    setStatusType(type);
+    setShowStatus(true);
+    
+    // Auto-esconde após 3 segundos
+    setTimeout(() => {
+      setShowStatus(false);
+    }, 3000);
   };
   
   // Formatar data da última visita
@@ -404,76 +420,118 @@ function ResultPage() {
     <MainLayout 
       title="Resultado" 
       activeMenu="scanner"
+      tabActive={activeTab}
+      onTabChange={setActiveTab}
       visor={
         <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : 'idle')}>
           <div className="client-visor-content">
-            <div className="client-info-header">
-              {/* Foto do cliente */}
-              {clientDetails.photo_url ? (
-                <img 
-                  src={clientDetails.photo_url} 
-                  alt="Foto" 
-                  className="client-photo"
-                />
+            {/* Área de status principal - mais visível para feedback */}
+            <div className="client-status-header">
+              {showStatus ? (
+                <div className={`status-message ${statusType}`}>
+                  <i className={`bi ${
+                    statusType === 'success' ? 'bi-check-circle-fill' : 
+                    statusType === 'error' ? 'bi-exclamation-circle-fill' : 
+                    'bi-info-circle-fill'
+                  }`}></i>
+                  <span>{statusMessage}</span>
+                </div>
               ) : (
-                <div className="client-photo-placeholder">
-                  <i className="bi bi-person fs-2" />
+                <div className="status-message success">
+                  <i className="bi bi-check-circle-fill"></i>
+                  <span>Cliente identificado</span>
                 </div>
               )}
-              
-              <div className="client-details">
-                <div className="client-name">{clientDetails.client_name || '-'}</div>
-                <div className="client-card-info">
-                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
-                  {isLoyaltyCard && (
-                    <span className="card-valid-badge">Válido</span>
-                  )}
-                </div>
-                <div className="client-visit">Última visita: <span>{formatDate(clientDetails.last_visit)}</span></div>
-              </div>
-              
-              {/* Segmento RFM e pontos */}
-              <div className="client-segment">
-                <span className={`segment-badge ${rfmSegment.class || 'bg-secondary'}`}>
-                  {rfmSegment.emoji || '👤'} {rfmSegment.label || 'Segmento'}
-                </span>
-                <div className="client-points">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
-              </div>
             </div>
             
-            {/* Área de informações adicionais */}
-            <div className="client-additional-info">
-              {/* Alertas importantes */}
-              {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
-                <div className="client-alert reward-alert">
-                  <i className="bi bi-gift-fill"></i>
-                  <span>Prêmios disponíveis para resgate!</span>
-                </div>
-              )}
-              
-              {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
-                <div className="client-alert progress-alert">
-                  <i className="bi bi-trophy-fill"></i>
-                  <span>Faltam <b>{clientDetails.next_reward_gap.missing_points}</b> pontos para <b>{clientDetails.next_reward_gap.name}</b> ({clientDetails.next_reward_gap.points_required} pts)</span>
-                </div>
-              )}
-              
-              {/* Status do cartão e ações disponíveis */}
-              <div className="client-status">
-                {isLoyaltyCard && (
-                  <div className="status-item points-status">
-                    <i className="bi bi-trophy"></i>
-                    <span>{clientDetails.points || 0} pontos acumulados</span>
+            {/* Área principal com foto e nome em destaque */}
+            <div className="client-info-header">
+              {/* Foto do cliente - maior e mais destacada */}
+              <div className="client-photo-area">
+                {clientDetails.photo_url ? (
+                  <img 
+                    src={clientDetails.photo_url} 
+                    alt="Foto" 
+                    className="client-photo"
+                  />
+                ) : (
+                  <div className="client-photo-placeholder">
+                    <i className="bi bi-person fs-2" />
                   </div>
                 )}
                 
-                {isCoupon && (
-                  <div className="status-item coupon-status">
-                    <i className="bi bi-ticket-perforated"></i>
-                    <span>{clientDetails.title || "Cupom"}</span>
+                {/* Badge de válido integrado à foto */}
+                {isLoyaltyCard && (
+                  <div className="client-valid-indicator">
+                    <i className="bi bi-check-circle-fill"></i>
                   </div>
                 )}
               </div>
+              
+              <div className="client-details">
+                {/* Nome do cliente - maior e mais destacado */}
+                <div className="client-name-large">{clientDetails.client_name || '-'}</div>
+                
+                {/* Pontos em destaque */}
+                <div className="client-points-large">
+                  <span className="points-value">{clientDetails.points || 0}</span>
+                  <span className="points-label">pontos</span>
+                </div>
+                
+                <div className="client-card-info">
+                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Informações secundárias - mais organizadas */}
+            <div className="client-additional-info">
+              {/* Segmento RFM com emoji e cores em destaque */}
+              <div className="client-segment-box">
+                <div className="segment-label">Segmento</div>
+                <div className={`segment-badge-large ${rfmSegment.class || 'bg-secondary'}`}>
+                  <span className="segment-emoji">{rfmSegment.emoji || '👤'}</span>
+                  <span className="segment-name">{rfmSegment.label || 'Cliente'}</span>
+                </div>
+              </div>
+              
+              {/* Informações de visita e progresso */}
+              <div className="client-visit-info">
+                <div className="visit-date">
+                  <i className="bi bi-calendar-check"></i>
+                  <span>Última visita: <b>{formatDate(clientDetails.last_visit)}</b></span>
+                </div>
+                
+                {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+                  <div className="progress-bar-container">
+                    <div className="progress-label">
+                      Próximo prêmio: <b>{clientDetails.next_reward_gap.name}</b>
+                    </div>
+                    <div className="progress-bar-wrapper">
+                      <div className="progress-bar" 
+                           style={{width: `${Math.min(100, 100 - (clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required * 100))}%`}}>
+                      </div>
+                    </div>
+                    <div className="progress-values">
+                      <span>Faltam {clientDetails.next_reward_gap.missing_points} pts</span>
+                      <span>{clientDetails.next_reward_gap.points_required} pts</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Área de notificações importantes */}
+              {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
+                <div className="client-notification reward-notification">
+                  <div className="notification-icon">
+                    <i className="bi bi-gift-fill"></i>
+                  </div>
+                  <div className="notification-content">
+                    <div className="notification-title">Prêmios Disponíveis!</div>
+                    <div className="notification-text">Cliente tem {clientDetails.rewards.length} prêmio(s) para resgate</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -482,61 +540,144 @@ function ResultPage() {
               display: flex;
               flex-direction: column;
               height: 100%;
-              padding: 16px;
+              padding: 14px;
               color: white;
+              overflow-y: auto;
+              scrollbar-width: none;
             }
             
+            .client-visor-content::-webkit-scrollbar {
+              display: none;
+            }
+            
+            /* Área de status/mensagens no topo para feedback */
+            .client-status-header {
+              margin-bottom: 10px;
+            }
+            
+            .status-message {
+              padding: 8px 12px;
+              border-radius: 10px;
+              font-size: 14px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-weight: 500;
+              animation: fade-in 0.3s ease-in-out;
+            }
+            
+            .status-message.success {
+              background: rgba(40, 167, 69, 0.2);
+              border: 1px solid rgba(40, 167, 69, 0.4);
+              color: #39FF14;
+            }
+            
+            .status-message.error {
+              background: rgba(220, 53, 69, 0.2);
+              border: 1px solid rgba(220, 53, 69, 0.4);
+              color: #ff6b6b;
+            }
+            
+            .status-message i {
+              font-size: 16px;
+            }
+            
+            /* Área de informações principais - reorganizada */
             .client-info-header {
               display: flex;
               align-items: center;
-              margin-bottom: 12px;
+              padding: 10px;
+              margin-bottom: 14px;
+              background: rgba(0,0,0,0.15);
+              border-radius: 12px;
+            }
+            
+            .client-photo-area {
+              position: relative;
+              margin-right: 14px;
             }
             
             .client-photo {
-              width: 70px;
-              height: 70px;
+              width: 80px;
+              height: 80px;
               border-radius: 50%;
               object-fit: cover;
-              margin-right: 16px;
-              border: 2px solid rgba(255,255,255,0.3);
-              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+              border: 3px solid rgba(255,255,255,0.2);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             }
             
             .client-photo-placeholder {
-              width: 70px;
-              height: 70px;
+              width: 80px;
+              height: 80px;
               border-radius: 50%;
               background: linear-gradient(135deg, #2d3142, #1e2334);
-              margin-right: 16px;
               display: flex;
               align-items: center;
               justify-content: center;
               color: #adb5bd;
-              border: 2px solid rgba(255,255,255,0.1);
+              border: 3px solid rgba(255,255,255,0.1);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            }
+            
+            .client-valid-indicator {
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              background: #39FF14;
+              color: rgba(0,0,0,0.8);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              border: 2px solid rgba(0,0,0,0.2);
+              box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             }
             
             .client-details {
               flex: 1;
             }
             
-            .client-name {
-              font-size: 22px;
-              font-weight: 600;
-              margin-bottom: 4px;
-              color: rgba(255,255,255,0.95);
+            .client-name-large {
+              font-size: 24px;
+              font-weight: 700;
+              margin-bottom: 8px;
+              color: white;
               text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              line-height: 1.1;
+            }
+            
+            .client-points-large {
+              display: flex;
+              align-items: baseline;
+              margin-bottom: 8px;
+            }
+            
+            .points-value {
+              font-size: 28px;
+              font-weight: 700;
+              color: #39FF14;
+              text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            }
+            
+            .points-label {
+              font-size: 16px;
+              font-weight: 500;
+              color: rgba(255,255,255,0.8);
+              margin-left: 6px;
             }
             
             .client-card-info {
               display: flex;
               align-items: center;
-              gap: 8px;
-              margin-bottom: 4px;
+              gap: 10px;
             }
             
             .card-number {
               font-size: 14px;
-              color: rgba(255,255,255,0.8);
+              color: rgba(255,255,255,0.7);
             }
             
             .card-number span {
@@ -544,140 +685,162 @@ function ResultPage() {
               letter-spacing: 0.5px;
             }
             
-            .card-valid-badge {
-              background: rgba(40, 167, 69, 0.2);
-              color: #39FF14;
-              padding: 2px 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              font-weight: 600;
-              letter-spacing: 0.5px;
-              border: 1px solid rgba(40, 167, 69, 0.4);
-              box-shadow: 0 0 8px rgba(57, 255, 20, 0.2);
-            }
-            
-            .client-visit {
-              font-size: 14px;
-              color: rgba(255,255,255,0.7);
-            }
-            
-            .client-visit span {
-              font-weight: 600;
-            }
-            
-            .client-segment {
-              display: flex;
-              flex-direction: column;
-              align-items: flex-end;
-              margin-left: 16px;
-            }
-            
-            .segment-badge {
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 13px;
-              font-weight: 600;
-              margin-bottom: 4px;
-              letter-spacing: 0.5px;
-              display: inline-block;
-            }
-            
-            .client-points {
-              font-size: 18px;
-              font-weight: 700;
-              color: #39FF14;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            }
-            
+            /* Informações adicionais - melhor organizadas */
             .client-additional-info {
-              flex: 1;
               display: flex;
               flex-direction: column;
-              gap: 10px;
-              margin-top: 16px;
+              gap: 14px;
             }
             
-            .client-alert {
+            /* Segmento RFM com design aprimorado */
+            .client-segment-box {
+              padding: 10px;
+              background: rgba(0,0,0,0.15);
+              border-radius: 10px;
+              margin-bottom: 4px;
+            }
+            
+            .segment-label {
+              font-size: 13px;
+              color: rgba(255,255,255,0.6);
+              margin-bottom: 6px;
+            }
+            
+            .segment-badge-large {
               display: flex;
               align-items: center;
-              padding: 10px 12px;
+              gap: 6px;
+              padding: 8px 10px;
               border-radius: 8px;
-              font-size: 14px;
-              border: 1px solid rgba(255,255,255,0.1);
-              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+              font-size: 15px;
+              font-weight: 600;
             }
             
-            .client-alert i {
-              margin-right: 8px;
-              font-size: 16px;
+            .segment-emoji {
+              font-size: 18px;
+              margin-right: 4px;
             }
             
-            .reward-alert {
-              background: rgba(40, 167, 69, 0.15);
-              border-color: rgba(40, 167, 69, 0.3);
-              color: #d4f7dc;
-            }
-            
-            .progress-alert {
-              background: rgba(0, 123, 255, 0.15);
-              border-color: rgba(0, 123, 255, 0.3);
-              color: #cce5ff;
-            }
-            
-            .client-status {
+            /* Visita e progresso */
+            .client-visit-info {
               display: flex;
-              flex-wrap: wrap;
+              flex-direction: column;
               gap: 8px;
-              margin-top: 8px;
+              padding: 10px;
+              background: rgba(0,0,0,0.15);
+              border-radius: 10px;
             }
             
-            .status-item {
-              background: rgba(0,0,0,0.2);
-              border-radius: 6px;
-              padding: 8px 12px;
+            .visit-date {
               display: flex;
               align-items: center;
+              gap: 8px;
               font-size: 14px;
-              border: 1px solid rgba(255,255,255,0.1);
+              color: rgba(255,255,255,0.75);
             }
             
-            .status-item i {
-              margin-right: 6px;
+            .progress-bar-container {
+              margin-top: 2px;
             }
             
-            .points-status {
-              color: #ffd700;
+            .progress-label {
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: rgba(255,255,255,0.75);
             }
             
-            .coupon-status {
-              color: #ff9800;
+            .progress-bar-wrapper {
+              height: 8px;
+              background: rgba(255,255,255,0.1);
+              border-radius: 4px;
+              overflow: hidden;
+              margin-bottom: 4px;
+            }
+            
+            .progress-bar {
+              height: 100%;
+              background: linear-gradient(90deg, #00a3ff, #39FF14);
+              border-radius: 4px;
+              transition: width 0.6s ease;
+            }
+            
+            .progress-values {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12px;
+              color: rgba(255,255,255,0.6);
+            }
+            
+            /* Notificações */
+            .client-notification {
+              display: flex;
+              align-items: center;
+              padding: 12px;
+              border-radius: 10px;
+              margin-top: 4px;
+            }
+            
+            .reward-notification {
+              background: rgba(40, 167, 69, 0.15);
+              border: 1px solid rgba(40, 167, 69, 0.3);
+            }
+            
+            .notification-icon {
+              width: 36px;
+              height: 36px;
+              border-radius: 50%;
+              background: rgba(40, 167, 69, 0.2);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 18px;
+              color: #39FF14;
+              margin-right: 12px;
+            }
+            
+            .notification-content {
+              flex: 1;
+            }
+            
+            .notification-title {
+              font-size: 15px;
+              font-weight: 600;
+              color: #39FF14;
+              margin-bottom: 2px;
+            }
+            
+            .notification-text {
+              font-size: 13px;
+              color: rgba(255,255,255,0.8);
+            }
+            
+            /* Animações */
+            @keyframes fade-in {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
             }
             
             @media (max-width: 380px) {
               .client-photo, .client-photo-placeholder {
-                width: 60px;
-                height: 60px;
+                width: 70px;
+                height: 70px;
               }
               
-              .client-name {
-                font-size: 18px;
+              .client-name-large {
+                font-size: 20px;
               }
               
-              .card-number, .client-visit {
-                font-size: 13px;
-              }
-              
-              .client-points {
-                font-size: 16px;
+              .points-value {
+                font-size: 24px;
               }
             }
           `}</style>
         </Visor>
       }
     >
-      {/* Área central com informações complementares */}
+      {/* Área central com informações complementares baseadas na tab selecionada */}
       <div className="px-2">
-        {/* Status do scan */}
+        {/* Status do scan sempre visível no topo */}
         <div className={styles['device-result-panel']}>
           <div className={styles['device-result-header']}>
             <div className={styles['device-result-icon']} style={{color: resultStatus.colorClass.replace('text-', '')}}>
@@ -688,117 +851,208 @@ function ResultPage() {
               <p style={{margin: 0, fontSize: '14px', opacity: 0.9}}>{resultStatus.message}</p>
             </div>
           </div>
-          
-          {/* Conteúdo adicional baseado no tipo de resultado */}
-          {/* Removido o botão de adicionar pontos, usando apenas o drawer */}
-          {isLoyaltyCard && !finalized && (
-            <div className={styles['device-result-content']}>
-              <div className="text-center mt-2" style={{fontSize: '14px', opacity: 0.8}}>
-                {clientDetails.points || 0} pontos disponíveis atualmente
-              </div>
-            </div>
-          )}
-          
-          {/* Removido o botão de resgatar, usando apenas o drawer */}
-          
-          {isCoupon && redeemed && (
-            <div className={styles['device-result-content']}>
-              <div style={{background: 'rgba(40, 167, 69, 0.1)', borderRadius: '8px', padding: '12px', marginBottom: '16px'}}>
-                <div className="text-center" style={{fontSize: '36px', color: '#28a745', marginBottom: '8px'}}>
-                  <i className="bi bi-check-circle"></i>
-                </div>
-                <p className="text-center" style={{margin: 0}}>Cupom "{clientDetails.title || 'Promocional'}" resgatado com sucesso!</p>
-              </div>
-            </div>
-          )}
         </div>
         
-        {/* Removido o botão de novo scan, já que ele existe no rodapé */}
-        
-        {/* Painéis de acordeão com informações complementares */}
-        <div className="mt-4">
-          {/* Informações do Cliente */}
-          {(isLoyaltyCard || isCoupon) && (
-            <ClientInfoAccordion
-              clientDetails={clientDetails}
-              rfmSegment={rfmSegment}
-              expanded={expandedSection === 'client'}
-              onToggle={() => toggleSection('client')}
-            />
-          )}
-          
-          {/* Recompensas Disponíveis */}
-          <RewardsAccordion
-            rewards={clientDetails.rewards}
-            nextReward={clientDetails.next_reward_gap}
-            expanded={expandedSection === 'rewards'}
-            onToggle={() => toggleSection('rewards')}
-          />
-          
-          {/* Detalhes da Transação */}
-          <div className={styles['device-accordion']}>
-            <div
-              className={styles['device-accordion-header']}
-              onClick={() => toggleSection('details')}
-            >
-              <h4>
-                <i className="bi bi-info-circle"></i>
-                Detalhes da Transação
-              </h4>
-              <i className={`bi ${expandedSection === 'details' ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
+        {/* Conteúdo baseado na tab ativa */}
+        {activeTab === 'details' && (
+          <div className="tab-content p-2">
+            <div className={styles['device-info-card']}>
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Data/Hora</div>
+                <div className={styles['device-info-value']}>
+                  {new Date(currentScan.timestamp).toLocaleString()}
+                </div>
+              </div>
+              
+              {currentScan.result?.scan_id && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>ID do Scan</div>
+                  <div className={styles['device-info-value']} style={{fontSize: '13px', opacity: 0.8}}>
+                    {currentScan.result.scan_id}
+                  </div>
+                </div>
+              )}
+              
+              {currentScan.result?.scan_type && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Tipo</div>
+                  <div className={styles['device-info-value']}>
+                    {isLoyaltyCard ? 'Cartão de Fidelidade' : 
+                     isCoupon ? 'Cupom' : currentScan.result.scan_type}
+                  </div>
+                </div>
+              )}
+              
+              {currentScan.result?.details?.program_name && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Programa</div>
+                  <div className={styles['device-info-value']}>
+                    {currentScan.result.details.program_name}
+                  </div>
+                </div>
+              )}
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Status</div>
+                <div className={styles['device-info-value']}>
+                  <span className={`${styles['device-badge']} ${styles['device-badge-' + (currentScan.processed ? 'success' : 'warning')]}`}>
+                    {currentScan.processed ? 'Processado' : 'Pendente'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Informações sobre pontos ou cupom*/}
+              {isLoyaltyCard && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Pontos</div>
+                  <div className={styles['device-info-value']}>
+                    <span className="fw-bold" style={{color: '#39FF14'}}>{clientDetails.points || 0}</span>
+                    {finalized && (
+                      <span className="ms-2 badge bg-success">+{points}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {isCoupon && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Status do Cupom</div>
+                  <div className={styles['device-info-value']}>
+                    {redeemed ? (
+                      <span className="badge bg-success">Resgatado</span>
+                    ) : (
+                      <span className="badge bg-primary">Disponível</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {expandedSection === 'details' && (
-              <div className={styles['device-accordion-content']}>
-                <div className={styles['device-info-card']}>
-                  <div className={styles['device-info-row']}>
-                    <div className={styles['device-info-label']}>Data/Hora</div>
-                    <div className={styles['device-info-value']}>
-                      {new Date(currentScan.timestamp).toLocaleString()}
+          </div>
+        )}
+        
+        {/* Tab de informações do cliente */}
+        {activeTab === 'client' && (isLoyaltyCard || isCoupon) && (
+          <div className="tab-content p-2 mt-3">
+            <div className={styles['device-info-card']}>
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Nome</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.client_name || '-'}
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Cartão</div>
+                <div className={styles['device-info-value']}>
+                  {formatCardCode(clientDetails.card_number)}
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Segmento</div>
+                <div className={styles['device-info-value']}>
+                  <span className={`badge ${rfmSegment.class?.replace('text-', 'text-bg-')}`}>
+                    {rfmSegment.emoji} {rfmSegment.label || 'Cliente'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Email</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.email || '-'}
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Telefone</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.phone || '-'}
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Última Visita</div>
+                <div className={styles['device-info-value']}>
+                  {formatDate(clientDetails.last_visit)}
+                </div>
+              </div>
+              
+              {clientDetails.signup_date && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Cliente desde</div>
+                  <div className={styles['device-info-value']}>
+                    {formatDate(clientDetails.signup_date)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Tab de prêmios/recompensas */}
+        {activeTab === 'rewards' && (
+          <div className="tab-content p-2 mt-3">
+            {/* Próximo prêmio */}
+            {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+              <div className={styles['device-info-card']} style={{marginBottom: '16px'}}>
+                <h5 className="mb-3">Próximo Prêmio</h5>
+                <div className="d-flex align-items-center mb-2">
+                  <div className="flex-grow-1">
+                    <div className="fw-bold">{clientDetails.next_reward_gap.name}</div>
+                    <div className="text-muted small">
+                      Faltam {clientDetails.next_reward_gap.missing_points} de {clientDetails.next_reward_gap.points_required} pontos
                     </div>
                   </div>
-                  
-                  {currentScan.result?.scan_id && (
-                    <div className={styles['device-info-row']}>
-                      <div className={styles['device-info-label']}>ID do Scan</div>
-                      <div className={styles['device-info-value']} style={{fontSize: '13px', opacity: 0.8}}>
-                        {currentScan.result.scan_id}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {currentScan.result?.scan_type && (
-                    <div className={styles['device-info-row']}>
-                      <div className={styles['device-info-label']}>Tipo</div>
-                      <div className={styles['device-info-value']}>
-                        {isLoyaltyCard ? 'Cartão de Fidelidade' : 
-                         isCoupon ? 'Cupom' : currentScan.result.scan_type}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {currentScan.result?.details?.program_name && (
-                    <div className={styles['device-info-row']}>
-                      <div className={styles['device-info-label']}>Programa</div>
-                      <div className={styles['device-info-value']}>
-                        {currentScan.result.details.program_name}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className={styles['device-info-row']}>
-                    <div className={styles['device-info-label']}>Status</div>
-                    <div className={styles['device-info-value']}>
-                      <span className={`${styles['device-badge']} ${styles['device-badge-' + (currentScan.processed ? 'success' : 'warning')]}`}>
-                        {currentScan.processed ? 'Processado' : 'Pendente'}
-                      </span>
-                    </div>
+                  <div className="ms-3">
+                    <span className="badge bg-primary">{Math.floor((1 - clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required) * 100)}%</span>
                   </div>
+                </div>
+                <div className="progress" style={{height: '8px'}}>
+                  <div 
+                    className="progress-bar" 
+                    role="progressbar"
+                    style={{
+                      width: `${Math.min(100, 100 - (clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required * 100))}%`,
+                      background: 'linear-gradient(90deg, #00a3ff, #39FF14)'
+                    }}
+                  ></div>
                 </div>
               </div>
             )}
+            
+            {/* Prêmios disponíveis */}
+            {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 ? (
+              <div className={styles['device-info-card']}>
+                <h5 className="mb-3">Prêmios Disponíveis</h5>
+                {clientDetails.rewards.map((reward, index) => (
+                  <div key={index} className="card mb-2" style={{background: 'rgba(57, 255, 20, 0.1)', border: '1px solid rgba(57, 255, 20, 0.3)'}}>
+                    <div className="card-body p-3">
+                      <div className="d-flex">
+                        <div className="reward-icon me-3">
+                          <i className="bi bi-gift-fill fs-3" style={{color: '#39FF14'}}></i>
+                        </div>
+                        <div>
+                          <h6 className="mb-1">{reward.name}</h6>
+                          <p className="mb-0 small">{reward.description || 'Sem descrição disponível'}</p>
+                          {reward.expiry_date && (
+                            <small className="text-muted">
+                              Válido até {new Date(reward.expiry_date).toLocaleDateString()}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="alert alert-info" role="alert">
+                Não há prêmios disponíveis para resgate no momento.
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
       
       {/* Action Drawer */}

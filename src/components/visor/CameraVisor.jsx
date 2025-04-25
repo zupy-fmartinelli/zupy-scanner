@@ -51,9 +51,9 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
             <div className="screen-corner bottom-left"></div>
             <div className="screen-corner bottom-right"></div>
             
-            {/* Textos de status */}
-            <div className="screen-status-text">QR-Scanner</div>
-            <div className="screen-model-text">ZUPY-2025-REV1</div>
+            {/* Textos de status - versões mais discretas */}
+            <div className="screen-status-text-small">QR-Scanner</div>
+            <div className="screen-model-text-small">ZUPY-2025-REV1</div>
             
             {/* Laser do scanner removido para evitar duplicação */}
           </div>
@@ -167,35 +167,37 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
           box-shadow: 1px 1px 0 rgba(255,255,255,0.2), inset -2px -2px 3px rgba(0,0,0,0.3);
         }
         
-        .screen-status-text {
-          position: absolute;
-          top: 16px;
-          left: 0;
-          width: 100%;
-          text-align: center;
-          color: rgba(255,255,255,0.9);
-          font-weight: 600;
-          letter-spacing: 2px;
-          font-size: 16px;
-          text-shadow: 0 2px 6px rgba(0,0,0,0.5);
-          background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.2) 80%, transparent 100%);
-          padding: 4px 0;
-          backdrop-filter: blur(1px);
-        }
+        /* Textos de status originais - removidos */
         
-        .screen-model-text {
+        /* Versões menores e mais discretas dos textos de status */
+        .screen-status-text-small {
           position: absolute;
-          bottom: 16px;
-          left: 20px;
-          color: rgba(255,255,255,0.8);
-          font-size: 14px;
+          top: 6px;
+          right: 10px;
+          color: rgba(255,255,255,0.5);
           font-weight: 500;
           letter-spacing: 1px;
-          text-shadow: 0 2px 6px rgba(0,0,0,0.5);
-          background: rgba(0,0,0,0.2);
-          padding: 4px 10px;
+          font-size: 12px;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+          padding: 2px 6px;
           border-radius: 4px;
-          backdrop-filter: blur(1px);
+          background: rgba(0,0,0,0.15);
+          z-index: 10;
+        }
+        
+        .screen-model-text-small {
+          position: absolute;
+          bottom: 6px;
+          left: 10px;
+          color: rgba(255,255,255,0.4);
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+          padding: 2px 6px;
+          border-radius: 3px;
+          background: rgba(0,0,0,0.15);
+          z-index: 10;
         }
         
         .device-led-button {
