@@ -1,7 +1,8 @@
 import React from 'react';
+import styles from '../../pages/Results/ResultPage.module.css';
 
 /**
- * Accordion de informações do cliente para a ResultPage
+ * Accordion de informações do cliente para a ResultPage - Estilo dispositivo
  * Props:
  *   - clientDetails: detalhes do cliente
  *   - rfmSegment: segmento RFM calculado
@@ -10,79 +11,160 @@ import React from 'react';
  */
 function ClientInfoAccordion({ clientDetails, rfmSegment, expanded, onToggle }) {
   if (!clientDetails) return null;
+  
+  // Formatar data para exibição
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+  
   return (
-    <div className="card mb-3 border-0 shadow-sm">
+    <div className={styles['device-accordion']}>
       <div
-        className="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+        className={styles['device-accordion-header']}
         onClick={onToggle}
-        style={{ cursor: 'pointer' }}
       >
-        <h5 className="mb-0">
-          <i className="bi bi-person-circle me-2"></i>
+        <h4>
+          <i className="bi bi-person-circle"></i>
           Informações do Cliente
-        </h5>
+        </h4>
         <i className={`bi ${expanded ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
       </div>
+      
       {expanded && (
-        <div className="card-body">
+        <div className={styles['device-accordion-content']}>
           {/* Cabeçalho com nome e segmento */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
-              <span className={`badge ${rfmSegment.class} px-3 py-2 fs-6`}>
-                {rfmSegment.emoji} {clientDetails.rfm_segment || clientDetails.tier || 'Regular'}
-              </span>
-              {clientDetails.program_name && (
-                <div className="mt-2 text-muted small">
-                  <i className="bi bi-shop me-1"></i>
-                  {clientDetails.program_name}
+          <div className={styles['device-accordion-section']}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
+                <span className={`${styles['device-badge']} ${styles['device-badge-primary']}`}>
+                  {rfmSegment.emoji} {clientDetails.rfm_segment || clientDetails.tier || 'Regular'}
+                </span>
+              </div>
+              
+              {/* Pontos - destaque */}
+              <div className="text-center">
+                <div className={styles['device-badge-info']} style={{fontSize: '24px', padding: '8px 12px'}}>
+                  {clientDetails.points || 0}
+                </div>
+                <div style={{fontSize: '13px', marginTop: '4px'}}>Pontos</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Estatísticas do cliente */}
+          <div className={styles['device-accordion-section']}>
+            <h5 className={styles['device-accordion-section-title']}>Resumo</h5>
+            
+            <div className="row g-2">
+              {clientDetails.total_earned && (
+                <div className="col-4">
+                  <div className={styles['device-info-card']} style={{textAlign: 'center', padding: '12px 8px'}}>
+                    <div style={{fontSize: '20px', fontWeight: 'bold', color: '#2ecc71'}}>
+                      {clientDetails.total_earned}
+                    </div>
+                    <div style={{fontSize: '12px', opacity: '0.8'}}>Total Ganhos</div>
+                  </div>
+                </div>
+              )}
+              
+              {clientDetails.total_spent && (
+                <div className="col-4">
+                  <div className={styles['device-info-card']} style={{textAlign: 'center', padding: '12px 8px'}}>
+                    <div style={{fontSize: '20px', fontWeight: 'bold', color: '#e74c3c'}}>
+                      {clientDetails.total_spent}
+                    </div>
+                    <div style={{fontSize: '12px', opacity: '0.8'}}>Total Gastos</div>
+                  </div>
+                </div>
+              )}
+              
+              {clientDetails.rewards_redeemed !== undefined && (
+                <div className="col-4">
+                  <div className={styles['device-info-card']} style={{textAlign: 'center', padding: '12px 8px'}}>
+                    <div style={{fontSize: '20px', fontWeight: 'bold', color: '#f39c12'}}>
+                      {clientDetails.rewards_redeemed || 0}
+                    </div>
+                    <div style={{fontSize: '12px', opacity: '0.8'}}>Prêmios Resgatados</div>
+                  </div>
                 </div>
               )}
             </div>
-            {/* Pontos - destaque */}
-            <div className="text-center">
-              <div className="badge bg-info fs-2 fw-bold p-2 px-3">{clientDetails.points || 0}</div>
-              <div className="fs-6 text-light mt-1">Pontos Disponíveis</div>
+          </div>
+          
+          {/* Informações de contato */}
+          <div className={styles['device-accordion-section']}>
+            <h5 className={styles['device-accordion-section-title']}>Contato</h5>
+            
+            <div className={styles['device-info-card']}>
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Telefone</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.phone || clientDetails.whatsapp || 'Não informado'}
+                </div>
+              </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Email</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.email || 'Não informado'}
+                </div>
+              </div>
+              
+              {clientDetails.birth_date && (
+                <div className={styles['device-info-row']}>
+                  <div className={styles['device-info-label']}>Data de Nascimento</div>
+                  <div className={styles['device-info-value']}>
+                    {formatDate(clientDetails.birth_date)}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          {/* Estatísticas - cartões */}
-          <div className="row g-2 mb-4">
-            {clientDetails.total_earned && (
-              <div className="col-4">
-                <div className="card bg-light h-100">
-                  <div className="card-body p-2 text-center">
-                    <div className="fs-4 fw-bold text-success">{clientDetails.total_earned}</div>
-                    <div className="fs-7 text-muted">Total Ganhos</div>
-                  </div>
+          
+          {/* Informações adicionais */}
+          <div className={styles['device-accordion-section']}>
+            <h5 className={styles['device-accordion-section-title']}>Histórico</h5>
+            
+            <div className={styles['device-info-card']}>
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Membro Desde</div>
+                <div className={styles['device-info-value']}>
+                  {formatDate(clientDetails.member_since) || '-'}
                 </div>
               </div>
-            )}
-            {clientDetails.total_spent && (
-              <div className="col-4">
-                <div className="card bg-light h-100">
-                  <div className="card-body p-2 text-center">
-                    <div className="fs-4 fw-bold text-danger">{clientDetails.total_spent}</div>
-                    <div className="fs-7 text-muted">Total Gastos</div>
-                  </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Última Visita</div>
+                <div className={styles['device-info-value']}>
+                  {formatDate(clientDetails.last_visit)}
                 </div>
               </div>
-            )}
-            {clientDetails.rewards_redeemed !== undefined && (
-              <div className="col-4">
-                <div className="card bg-light h-100">
-                  <div className="card-body p-2 text-center">
-                    <div className="fs-4 fw-bold text-warning">{clientDetails.rewards_redeemed || 0}</div>
-                    <div className="fs-7 text-muted">Prêmios Resgatados</div>
-                  </div>
+              
+              <div className={styles['device-info-row']}>
+                <div className={styles['device-info-label']}>Cartão</div>
+                <div className={styles['device-info-value']}>
+                  {clientDetails.card_number || '-'}
                 </div>
               </div>
+            </div>
+            
+            {clientDetails.notes && (
+              <div className={styles['device-info-card']} style={{marginTop: '12px'}}>
+                <div style={{fontSize: '13px', opacity: '0.7', marginBottom: '4px'}}>Observações:</div>
+                <div style={{fontSize: '14px'}}>{clientDetails.notes}</div>
+              </div>
             )}
-          </div>
-          {/* Contato */}
-          <div className="mb-2">
-            <div className="fw-bold">Contato:</div>
-            <div>{clientDetails.phone || 'Não informado'}</div>
-            <div>{clientDetails.email || ''}</div>
           </div>
         </div>
       )}

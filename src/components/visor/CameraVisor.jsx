@@ -1,10 +1,11 @@
 import React from 'react';
 
 /**
- * CameraVisor: Visor 16:9 fixo no topo, estilo câmera fotográfica
+ * CameraVisor: Visor 16:9 fixo no topo, estilo dispositivo físico de scanner
  * Props:
- *   - children: conteúdo dinâmico (câmera, info, etc)
- *   - iconColor: cor do brilho externo do ícone Zupy
+ *   - children: conteúdo dinâmico (câmera, info do cliente, etc)
+ *   - mode: modo do visor (idle, scanning, processing, user_input, success, error)
+ *   - onToggleScanner: callback quando o botão LED é pressionado
  */
 function Visor({ children, mode = 'idle', onToggleScanner }) {
   // Mapeamento de cor do LED conforme status/mode
@@ -17,91 +18,241 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
     error: '#ff2d55', // vermelho
   };
   const glowColor = glowMap[mode] || '#bfc9d1';
+  
+  // Determinar animação com base no modo
+  const getLedAnimation = () => {
+    if (mode === 'scanning') return 'pulse-scanning 1.5s infinite';
+    if (mode === 'processing') return 'pulse-processing 1s infinite';
+    return 'none';
+  };
+  
   return (
-    <div className="zupy-camera-visor-wrapper position-relative w-100" style={{padding:0, margin:0}}>
-      <div
-        className="zupy-camera-visor position-relative bg-dark"
-        style={{
-          width: '100%',
-          aspectRatio: '16/9',
-          borderRadius: 28,
-          overflow: 'hidden',
-          margin: 0,
-          background: mode === 'idle' ? 'radial-gradient(ellipse at center, rgba(90,100,105,0.65) 70%, #23252b 100%)' : '#23252b',
-          border: '6px solid #18191b',
-          boxShadow: 'none',
-          transition: 'background 0.6s',
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        <div style={{width:'100%',height:'100%',position:'absolute',top:0,left:0}}>
-          {children}
+    <div className="device-visor-container">
+      {/* Moldura do dispositivo */}
+      <div className="device-frame">
+        {/* Visor principal */}
+        <div 
+          className={`device-screen ${mode}`}
+          style={{
+            background: mode === 'idle' ? 'radial-gradient(ellipse at center, rgba(90,100,105,0.65) 70%, #23252b 100%)' : '#23252b',
+            transition: 'background 0.6s',
+          }}
+        >
+          {/* Conteúdo do visor */}
+          <div className="screen-content">
+            {children}
+          </div>
+          
+          {/* Overlay com elementos fixos */}
+          <div className="screen-overlay">
+            {/* Cantos do visor */}
+            <div className="screen-corner top-left"></div>
+            <div className="screen-corner top-right"></div>
+            <div className="screen-corner bottom-left"></div>
+            <div className="screen-corner bottom-right"></div>
+            
+            {/* Textos de status */}
+            <div className="screen-status-text">QR-Scanner</div>
+            <div className="screen-model-text">ZUPY-2025-REV1</div>
+            
+            {/* Laser do scanner (visível apenas no modo scanning) */}
+            {mode === 'scanning' && (
+              <div className="scanner-laser"></div>
+            )}
+          </div>
         </div>
-        <div className="zupy-visor-overlay position-absolute top-0 start-0 w-100 h-100" style={{ pointerEvents: 'none', zIndex: 5 }}>
-          {/* Cantos arredondados (linhas brancas) */}
-          <div style={{position:'absolute',top:8,left:8,width:32,height:2,background:'#fff',borderRadius:'2px 2px 0 0'}}></div>
-          <div style={{position:'absolute',top:8,left:8,width:2,height:32,background:'#fff',borderRadius:'2px 0 0 2px'}}></div>
-          <div style={{position:'absolute',top:8,right:8,width:32,height:2,background:'#fff',borderRadius:'2px 2px 0 0'}}></div>
-          <div style={{position:'absolute',top:8,right:8,width:2,height:32,background:'#fff',borderRadius:'0 2px 2px 0'}}></div>
-          <div style={{position:'absolute',bottom:8,left:8,width:32,height:2,background:'#fff',borderRadius:'0 0 2px 2px'}}></div>
-          <div style={{position:'absolute',bottom:8,left:8,width:2,height:32,background:'#fff',borderRadius:'0 0 0 2px'}}></div>
-          <div style={{position:'absolute',bottom:8,right:8,width:32,height:2,background:'#fff',borderRadius:'0 0 2px 2px'}}></div>
-          <div style={{position:'absolute',bottom:8,right:8,width:2,height:32,background:'#fff',borderRadius:'0 0 2px 0'}}></div>
-          {/* Texto QR-Scanner no topo */}
-          <div style={{position:'absolute',top:10,left:0,width:'100%',textAlign:'center',color:'#ccc',fontWeight:500,letterSpacing:2,fontSize:15,textShadow:'0 1px 4px #000'}}>QR-Scanner</div>
-          {/* Texto ZUPY-2025-REV1 no canto inferior esquerdo */}
-          <div style={{position:'absolute',bottom:10,left:16,color:'#ccc',fontSize:13,opacity:0.7,letterSpacing:1,textShadow:'0 1px 4px #000'}}>ZUPY-2025-REV1</div>
-        </div>
-
+        
+        {/* LED indicador/botão */}
+        <button
+          type="button"
+          className={`device-led-button ${mode}`}
+          onClick={onToggleScanner}
+          aria-label={mode === 'scanning' ? 'Desligar scanner' : 'Ligar scanner'}
+          style={{
+            borderColor: glowColor,
+            boxShadow: `0 0 12px 3px ${glowColor}`,
+            animation: getLedAnimation(),
+          }}
+        >
+          <img src="/icons/ico-zupy-white.svg" alt="Zupy" />
+        </button>
       </div>
-      {/* LED (botão Zupy) */}
-      {/* LED centralizado sobre o visor, não abaixo */}
-      <VisorLED color={glowColor} mode={mode} onClick={onToggleScanner} />
+      
+      <style jsx>{`
+        .device-visor-container {
+          width: 100%;
+          position: relative;
+          padding: 0;
+          margin: 0;
+          z-index: 20;
+        }
+        
+        .device-frame {
+          position: relative;
+          width: 100%;
+        }
+        
+        .device-screen {
+          width: 100%;
+          aspect-ratio: 16/9;
+          border-radius: 28px;
+          border: 6px solid #18191b;
+          overflow: hidden;
+          position: relative;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+        
+        .screen-content {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+        
+        .screen-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 5;
+        }
+        
+        .screen-corner {
+          position: absolute;
+          width: 32px;
+          height: 32px;
+        }
+        
+        .screen-corner.top-left {
+          top: 8px;
+          left: 8px;
+          border-top: 2px solid #fff;
+          border-left: 2px solid #fff;
+          border-radius: 2px 0 0 0;
+        }
+        
+        .screen-corner.top-right {
+          top: 8px;
+          right: 8px;
+          border-top: 2px solid #fff;
+          border-right: 2px solid #fff;
+          border-radius: 0 2px 0 0;
+        }
+        
+        .screen-corner.bottom-left {
+          bottom: 8px;
+          left: 8px;
+          border-bottom: 2px solid #fff;
+          border-left: 2px solid #fff;
+          border-radius: 0 0 0 2px;
+        }
+        
+        .screen-corner.bottom-right {
+          bottom: 8px;
+          right: 8px;
+          border-bottom: 2px solid #fff;
+          border-right: 2px solid #fff;
+          border-radius: 0 0 2px 0;
+        }
+        
+        .screen-status-text {
+          position: absolute;
+          top: 10px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          color: #ccc;
+          font-weight: 500;
+          letter-spacing: 2px;
+          font-size: 15px;
+          text-shadow: 0 1px 4px #000;
+        }
+        
+        .screen-model-text {
+          position: absolute;
+          bottom: 10px;
+          left: 16px;
+          color: #ccc;
+          font-size: 13px;
+          opacity: 0.7;
+          letter-spacing: 1px;
+          text-shadow: 0 1px 4px #000;
+        }
+        
+        .scanner-laser {
+          position: absolute;
+          top: 48%;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #ff0000;
+          box-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000;
+          border-radius: 2px;
+          animation: laser-animation 2.5s infinite;
+        }
+        
+        .device-led-button {
+          position: absolute;
+          left: 50%;
+          bottom: -28px;
+          transform: translateX(-50%);
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: #23252b;
+          border: 2px solid;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          outline: none;
+          z-index: 40;
+          transition: box-shadow 0.3s, border-color 0.3s;
+          cursor: pointer;
+        }
+        
+        .device-led-button img {
+          width: 36px;
+          height: 36px;
+          filter: drop-shadow(0 0 8px #000);
+        }
+        
+        @keyframes laser-animation {
+          0%, 100% {
+            top: 20%;
+            opacity: 0.8;
+          }
+          50% {
+            top: 80%;
+            opacity: 0.8;
+          }
+          51%, 99% {
+            opacity: 0;
+          }
+        }
+        
+        @keyframes pulse-scanning {
+          0%, 100% {
+            box-shadow: 0 0 5px 2px #00e3ff;
+          }
+          50% {
+            box-shadow: 0 0 15px 5px #00e3ff;
+          }
+        }
+        
+        @keyframes pulse-processing {
+          0%, 100% {
+            box-shadow: 0 0 5px 2px #ffd600;
+          }
+          50% {
+            box-shadow: 0 0 15px 5px #ffd600;
+          }
+        }
+      `}</style>
     </div>
-  );
-}
-
-function VisorLED({ color, mode, onClick }) {
-  return (
-    <button
-      type="button"
-      className="zupy-visor-led-btn btn btn-link p-0 position-absolute"
-      style={{
-        left: '50%',
-        bottom: -28, // LED ainda mais para baixo, alinhamento preciso
-        transform: 'translateX(-50%)',
-        zIndex: 40,
-        background: 'none',
-        border: 'none',
-        outline: 'none',
-        transition: 'box-shadow 0.3s, border-color 0.3s',
-        boxShadow: 'none',
-        pointerEvents: 'auto',
-      }}
-      tabIndex={0}
-      aria-label={mode === 'scanning' ? 'Desligar scanner' : 'Ligar scanner'}
-      onClick={onClick}
-    >
-      <div
-        className="zupy-visor-led-glow"
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          background: '#23252b',
-          border: `2px solid ${color}`,
-          boxShadow: `0 0 12px 3px ${color}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'box-shadow 0.3s, border-color 0.3s',
-        }}
-      >
-        <img src="/icons/ico-zupy-white.svg" alt="Zupy" style={{width:36,height:36,filter:'drop-shadow(0 0 8px #000)'}} />
-      </div>
-    </button>
   );
 }
 

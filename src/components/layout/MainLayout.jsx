@@ -8,11 +8,12 @@ import PwaInstallPrompt from '../pwa/PwaInstallPrompt';
 import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
 
 /**
- * Main layout component with navigation
+ * Main layout component with navigation styled as a physical device
  * @param {Object} props - Component props
  * @param {string} props.title - Page title
  * @param {React.ReactNode} props.children - Page content
  * @param {string} props.activeMenu - Active menu item
+ * @param {React.ReactNode} props.visor - Custom visor component
  */
 function MainLayout({ title, children, activeMenu, visor }) {
   const navigate = useNavigate();
@@ -41,8 +42,6 @@ function MainLayout({ title, children, activeMenu, visor }) {
     }
     navigate('/scanner');
   };
-
-
   
   const handleSync = async () => {
     const result = await syncData();
@@ -61,14 +60,24 @@ function MainLayout({ title, children, activeMenu, visor }) {
   };
 
   return (
-    <div className="zupy-layout-root" style={{ background: '#23252b', height: '100vh', overflow: 'hidden' }}>
-      {/* Visor customizado, se fornecido */}
-      {visor ? (
-        <div className="zupy-visor-area" ref={visorRef}>{visor}</div>
-      ) : (
-        <header className="zupy-header bg-dark text-white shadow-sm">
-          <div className="container-fluid">
-            <div className="d-flex align-items-center py-2">
+    <div className="device-container">
+      {/* Parte superior do dispositivo */}
+      <div className="device-top">
+        {/* Elementos físicos do dispositivo */}
+        <div className="device-speaker"></div>
+        <div className="device-sensors">
+          <div className="sensor-dot"></div>
+          <div className="sensor-dot camera"></div>
+        </div>
+      </div>
+      
+      {/* Visor customizado, sempre no topo */}
+      <div className="device-visor-area" ref={visorRef}>
+        {visor ? (
+          visor
+        ) : (
+          <header className="device-header">
+            <div className="d-flex align-items-center p-2">
               <img 
                 src={ZupyLogo} 
                 alt="Zupy" 
@@ -76,216 +85,102 @@ function MainLayout({ title, children, activeMenu, visor }) {
                 style={{ height: '32px' }}
               />
               <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
+              
               {/* Status indicators */}
-              <div className="d-flex align-items-center me-2">
-                {/* Online status */}
+              <div className="d-flex align-items-center">
                 <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
-                {/* Pending operations */}
+                
                 {pendingCount > 0 && (
-                  <span className="badge bg-warning me-2">
+                  <span className="badge bg-warning">
                     <i className="bi bi-clock-history me-1"></i>
                     {pendingCount}
                   </span>
                 )}
               </div>
-              {/* Sync button */}
-              <button 
-                className="btn btn-sm btn-outline-light me-2"
-                onClick={handleSync}
-                disabled={isSyncing || !isOnline}
-              >
-                {isSyncing ? (
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                ) : (
-                  <i className="bi bi-arrow-repeat"></i>
-                )}
-              </button>
-              <button 
-                className="btn btn-sm btn-dark dropdown-toggle" 
-                type="button" 
-                id="userMenuButton" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-              >
-                <i className="bi bi-person-circle me-1"></i>
-                <span className="d-none d-md-inline">
-                  {userData?.name || 'Usuário'}
-                </span>
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
-                {/* Operator info */}
-                <li className="px-3 py-2 text-muted small">
-                  <div className="mb-2">
-                    <strong>Operador:</strong> {userData?.name || 'Não identificado'}
-                  </div>
-                  {scannerData?.name && (
-                    <div>
-                      <strong>Scanner:</strong> {scannerData.name}
-                    </div>
-                  )}
-                </li>
-                <li><hr className="dropdown-divider my-1" /></li>
-                <li>
-                  <button 
-                    className="dropdown-item" 
-                    onClick={() => handleNavigation('/settings')}
-                  >
-                    <i className="bi bi-gear me-2"></i>
-                    Configurações
-                  </button>
-                </li>
-                <li><hr className="dropdown-divider" /></li>
-                <li>
-                  <button 
-                    className="dropdown-item text-danger" 
-                    onClick={() => setShowLogoutConfirm(true)}
-                  >
-                    <i className="bi bi-box-arrow-right me-2"></i>
-                    Sair
-                  </button>
-                </li>
-              </ul>
             </div>
-          </div>
-        </header>
-      )}
+          </header>
+        )}
+      </div>
       
-      {/* Bloco central rolável */}
-      <main
-        className="zupy-scrollable-content"
-        style={{
-          paddingTop: visorHeight,
-          height: `calc(100vh - ${visorHeight}px)`,
-          overflowY: 'auto',
-          background: '#23252b',
-        }}
-      >
+      {/* Status bar com informações do operador e device */}
+      <div className="device-status-bar">
+        <div className="status-indicator online">
+          <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
+          <span>{isOnline ? 'Online' : 'Offline'}</span>
+        </div>
+        
+        <div className="status-indicator user">
+          <i className="bi bi-person-badge"></i>
+          <span>{userData?.name || 'Operador'}</span>
+        </div>
+        
+        {scannerData?.name && (
+          <div className="status-indicator device">
+            <i className="bi bi-qr-code-scan"></i>
+            <span>{scannerData.name}</span>
+          </div>
+        )}
+        
+        {pendingCount > 0 && (
+          <div className="status-indicator pending">
+            <i className="bi bi-hourglass-split"></i>
+            <span>{pendingCount} pendente(s)</span>
+          </div>
+        )}
+        
+        <button 
+          className="sync-button"
+          onClick={handleSync}
+          disabled={isSyncing || !isOnline}
+          title="Sincronizar dados"
+        >
+          {isSyncing ? (
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          ) : (
+            <i className="bi bi-arrow-repeat"></i>
+          )}
+        </button>
+      </div>
+      
+      {/* Área central rolável - informações complementares */}
+      <main className="device-content-area">
         {children}
       </main>
       
       {/* PWA Installation Prompt */}
       <PwaInstallPrompt />
       
-      {/* Rodapé fixo */}
-      <footer className="zupy-footer bg-dark text-white border-top shadow-lg">
-        <div className="container-fluid">
-          <nav className="nav-bar">
-            <button 
-              className={`nav-item ${activeMenu === 'history' ? 'active' : ''}`}
-              onClick={() => handleNavigation('/history')}
-              aria-label="Histórico"
-            >
-              <i className="bi bi-clock-history"></i>
-            </button>
-            <button 
-              className="nav-item-center"
-              onClick={handleGoToScanner}
-              aria-label="Início"
-            >
-              <div className={`scan-button-premium-dark ${activeMenu === 'scanner' ? 'active' : ''}`}>
-                <i className="bi bi-qr-code-scan"></i>
-              </div>
-            </button>
-            <button 
-              className={`nav-item ${activeMenu === 'settings' ? 'active' : ''}`}
-              onClick={() => handleNavigation('/settings')}
-              aria-label="Configurações"
-            >
-              <i className="bi bi-gear"></i>
-            </button>
-          </nav>
-        </div>
-        <style jsx>{`
-          .zupy-footer {
-            box-shadow: 0 -6px 30px 0 #0e273a77, 0 -1px 8px #000a !important;
-            background: linear-gradient(180deg, #23252b 80%, #181a20 100%) !important;
-            border-top: 1.5px solid #232c3a !important;
-            position: relative;
-          }
-          .nav-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0 4px 0;
-          }
-          .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: transparent;
-            border: none;
-            color: #adb5bd;
-            padding: 6px 10px;
-            cursor: pointer;
-            transition: color 0.2s;
-            font-size: 1.3rem;
-            z-index: 2;
-          }
-          .nav-item.active,
-          .nav-item:hover {
-            color: #fff;
-          }
-          .nav-item i {
-            font-size: 1.4rem;
-          }
-          .nav-item-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-            border: none;
-            padding: 0;
-            position: relative;
-            z-index: 3;
-            flex: none;
-          }
-          .scan-button-premium-dark {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            background: #191c20;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            border: 3px solid #25d2ff;
-            box-shadow: 0 2px 18px #000a; /* Sombra escura apenas */
-            transition: all 0.22s cubic-bezier(.4,0,.2,1);
-            margin: 0 8px;
-          }
-          .scan-button-premium-dark:active,
-          .scan-button-premium-dark:focus-visible {
-            box-shadow: 0 0 18px 4px #25d2ffcc, 0 4px 24px #000d;
-            border-color: #25d2ff;
-            background: #181a20;
-          }
-          .scan-button-premium-dark i {
-            font-size: 2.3rem;
-            color: #fff;
-            filter: drop-shadow(0 0 2px #25d2ff99);
-          }
-          .scan-button-premium-dark.active, 
-          .scan-button-premium-dark:hover {
-            border-color: #25d2ff;
-            background: #181a20;
-          }
-          @media (max-width: 480px) {
-            .scan-button-premium-dark {
-              width: 54px;
-              height: 54px;
-              border-width: 2px;
-            }
-            .scan-button-premium-dark i {
-              font-size: 1.7rem;
-            }
-            .nav-item {
-              font-size: 1.1rem;
-              padding: 4px 6px;
-            }
-          }
-        `}</style>
+      {/* Rodapé fixo - navegação */}
+      <footer className="device-footer">
+        <nav className="device-nav-bar">
+          <button 
+            className={`nav-button ${activeMenu === 'history' ? 'active' : ''}`}
+            onClick={() => handleNavigation('/history')}
+            aria-label="Histórico"
+          >
+            <i className="bi bi-clock-history"></i>
+          </button>
+          
+          <button 
+            className="nav-button-center"
+            onClick={handleGoToScanner}
+            aria-label="Scanner"
+          >
+            <div className={`scan-button ${activeMenu === 'scanner' ? 'active' : ''}`}>
+              <i className="bi bi-qr-code-scan"></i>
+            </div>
+          </button>
+          
+          <button 
+            className={`nav-button ${activeMenu === 'settings' ? 'active' : ''}`}
+            onClick={() => handleNavigation('/settings')}
+            aria-label="Configurações"
+          >
+            <i className="bi bi-gear"></i>
+          </button>
+        </nav>
       </footer>
       
       {/* Logout confirmation modal */}
@@ -334,68 +229,227 @@ function MainLayout({ title, children, activeMenu, visor }) {
         </div>
       )}
       
+      {/* Estilos do dispositivo */}
       <style jsx>{`
-        .nav-bar {
-          display: flex;
-          justify-content: space-around;
-          padding: 8px 0;
-        }
-        
-        .nav-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background: transparent;
-          border: none;
-          color: #adb5bd;
-          padding: 8px 16px;
-          cursor: pointer;
-          transition: color 0.2s;
-          flex: 1;
-        }
-        
-        .nav-item i {
-          font-size: 1.5rem;
-          margin-bottom: 4px;
-        }
-        
-        .nav-item span {
-          font-size: 0.8rem;
-        }
-        
-        .nav-item.active {
-          color: white;
-        }
-        
-        .nav-item:hover {
-          color: white;
-        }
-      `}</style>
-      {/* Estilos globais para layout fixo/rolável */}
-      <style jsx>{`
-        .zupy-layout-root {
+        .device-container {
           display: flex;
           flex-direction: column;
           height: 100vh;
-          background: #f8f9fa;
-        }
-        .zupy-header {
-          position: sticky;
-          top: 0;
-          z-index: 1050;
-        }
-        .zupy-footer {
-          position: sticky;
-          bottom: 0;
-          z-index: 1050;
-        }
-        .zupy-scrollable-content {
-          flex: 1 1 auto;
-          overflow-y: auto;
-          padding-bottom: 80px; /* espaço para rodapé */
-          padding-top: 12px; /* espaço para header */
+          max-width: 480px;
+          margin: 0 auto;
           background: #212529;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+        
+        /* Parte superior - elementos físicos do dispositivo */
+        .device-top {
+          background: #18191b;
+          padding: 12px 0 6px;
+          position: relative;
+          z-index: 30;
+        }
+        
+        .device-speaker {
+          width: 60px;
+          height: 5px;
+          background: #2a2d31;
+          border-radius: 5px;
+          margin: 0 auto;
+        }
+        
+        .device-sensors {
+          position: absolute;
+          top: 12px;
+          right: 20px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .sensor-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #444;
+        }
+        
+        .sensor-dot.camera {
+          width: 8px;
+          height: 8px;
+          background: #2a2d31;
+        }
+        
+        /* Área do visor */
+        .device-visor-area {
+          z-index: 20;
+          background: #18191b;
+          padding: 0 12px 20px;
+        }
+        
+        .device-header {
+          background: #23252b;
+          border-radius: 12px;
           color: #fff;
+        }
+        
+        /* Barra de status */
+        .device-status-bar {
+          display: flex;
+          align-items: center;
+          background: #1a1c20;
+          border-top: 1px solid #2a2d31;
+          border-bottom: 1px solid #2a2d31;
+          padding: 6px 12px;
+          font-size: 13px;
+          color: #adb5bd;
+          overflow-x: auto;
+          white-space: nowrap;
+          gap: 12px;
+        }
+        
+        .status-indicator {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        
+        .status-indicator i {
+          font-size: 14px;
+        }
+        
+        .status-indicator.online {
+          color: ${isOnline ? '#00ff7b' : '#ff2d55'};
+        }
+        
+        .status-indicator.pending {
+          color: #ffd600;
+        }
+        
+        .sync-button {
+          margin-left: auto;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: #2a2d31;
+          border: none;
+          color: #adb5bd;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+        
+        .sync-button:hover:not(:disabled) {
+          background: #3a3d41;
+          color: #fff;
+        }
+        
+        .sync-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        /* Área de conteúdo principal */
+        .device-content-area {
+          flex: 1;
+          overflow-y: auto;
+          background: #23252b;
+          padding: 16px 12px;
+          padding-bottom: 84px; /* Espaço para o rodapé */
+          color: #fff;
+        }
+        
+        /* Rodapé */
+        .device-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 50;
+          background: linear-gradient(180deg, #18191b 0%, #141518 100%);
+          border-top: 2px solid #232c3a;
+          height: 80px;
+          max-width: 480px;
+          margin: 0 auto;
+        }
+        
+        .device-nav-bar {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          height: 100%;
+          padding: 0 16px;
+        }
+        
+        .nav-button {
+          background: transparent;
+          border: none;
+          color: #adb5bd;
+          font-size: 24px;
+          transition: color 0.2s;
+          padding: 10px;
+          border-radius: 50%;
+        }
+        
+        .nav-button.active {
+          color: #fff;
+        }
+        
+        .nav-button:hover {
+          color: #fff;
+          background: rgba(255,255,255,0.05);
+        }
+        
+        .nav-button-center {
+          background: transparent;
+          border: none;
+          padding: 0;
+        }
+        
+        .scan-button {
+          width: 62px;
+          height: 62px;
+          border-radius: 50%;
+          background: #191c20;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: #fff;
+          border: 3px solid #25d2ff;
+          box-shadow: 0 0 15px rgba(37, 210, 255, 0.4);
+          transition: all 0.2s;
+          font-size: 24px;
+        }
+        
+        .scan-button:active {
+          transform: scale(0.95);
+        }
+        
+        .scan-button.active {
+          background: #1a2a36;
+          box-shadow: 0 0 20px rgba(37, 210, 255, 0.6);
+        }
+        
+        .scan-button i {
+          filter: drop-shadow(0 0 2px rgba(37, 210, 255, 0.8));
+        }
+        
+        @media (max-width: 480px) {
+          .device-container {
+            max-width: 100%;
+            box-shadow: none;
+          }
+          
+          .scan-button {
+            width: 54px;
+            height: 54px;
+          }
+          
+          .nav-button {
+            font-size: 22px;
+          }
         }
       `}</style>
     </div>

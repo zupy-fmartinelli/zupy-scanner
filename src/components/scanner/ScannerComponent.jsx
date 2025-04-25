@@ -139,7 +139,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
       
       {/* Status text */}
       
-      <style jsx>{`
+      <style>{`
         .scanner-container {
           background-color: #000;
           border-radius: 8px;

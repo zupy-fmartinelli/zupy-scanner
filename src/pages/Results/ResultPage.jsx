@@ -394,15 +394,19 @@ function ResultPage() {
   const resultStatus = getResultStatus();
   
   return (
-    <MainLayout title="Resultado" activeMenu="scanner">
-      {/* Visor fixo no topo, igual scanner */}
-      <div className="mb-4">
+    <MainLayout 
+      title="Resultado" 
+      activeMenu="scanner"
+      visor={
         <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : 'idle'}>
-
           <div className="d-flex align-items-center h-100 px-4 py-3">
             {/* Foto do cliente */}
             {clientDetails.photo_url ? (
-              <img src={clientDetails.photo_url} alt="Foto" style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',marginRight:16,border:'2px solid #444'}} />
+              <img 
+                src={clientDetails.photo_url} 
+                alt="Foto" 
+                style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',marginRight:16,border:'2px solid #444'}} 
+              />
             ) : (
               <div style={{width:56,height:56,borderRadius:'50%',background:'#222',marginRight:16,display:'flex',alignItems:'center',justifyContent:'center'}}>
                 <i className="bi bi-person fs-2 text-secondary" />
@@ -426,14 +430,15 @@ function ResultPage() {
               <div className="fw-bold fs-6 text-success">{clientDetails.points != null ? `${clientDetails.points} pts` : ''}</div>
             </div>
           </div>
-          {/* Aviso de prêmios disponíveis */}
+          
+          {/* Alertas importantes */}
           {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
             <div className="alert alert-success d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
               <i className="bi bi-gift-fill me-2"></i>
               Prêmios disponíveis para resgate!
             </div>
           )}
-          {/* Pontos para próxima recompensa */}
+          
           {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
             <div className="alert alert-info d-flex align-items-center py-2 px-3 mb-0 mt-2" style={{fontSize:15}}>
               <i className="bi bi-trophy-fill me-2"></i>
@@ -441,399 +446,181 @@ function ResultPage() {
             </div>
           )}
         </Visor>
-      </div>
-      {/* VISOR FIXO NO TOPO */}
-      <div className={styles.zupyResultVisorFixed}>
-        <ScannerDisplay currentScan={currentScan} clientDetails={clientDetails} rfmSegment={rfmSegment} />
-      </div>
-      <div className={`container py-4 ${styles.zupyResultContent}`}>
-        <div className="row justify-content-center">
-          <div className="col-md-8 col-lg-6">
-            
-
-            {/* Accordion de informações do cliente */}
+      }
+    >
+      {/* Área central com informações complementares */}
+      <div className="px-2">
+        {/* Status do scan */}
+        <div className={styles['device-result-panel']}>
+          <div className={styles['device-result-header']}>
+            <div className={styles['device-result-icon']} style={{color: resultStatus.colorClass.replace('text-', '')}}>
+              <i className={`bi ${resultStatus.icon}`}></i>
+            </div>
+            <div>
+              <h4 style={{margin: '0 0 4px 0', fontSize: '18px', color: resultStatus.colorClass.replace('text-', '')}}>{resultStatus.title}</h4>
+              <p style={{margin: 0, fontSize: '14px', opacity: 0.9}}>{resultStatus.message}</p>
+            </div>
+          </div>
+          
+          {/* Conteúdo adicional baseado no tipo de resultado */}
+          {isLoyaltyCard && !finalized && (
+            <div className={styles['device-result-content']}>
+              <button 
+                className={`${styles['device-action-button']} ${styles['device-action-add-points']}`}
+                onClick={() => {
+                  setDrawerType('pontos');
+                  setDrawerOpen(true);
+                }}
+              >
+                <i className="bi bi-plus-circle"></i>
+                Adicionar Pontos
+              </button>
+              <div className="text-center" style={{fontSize: '13px', opacity: 0.7}}>
+                {clientDetails.points || 0} pontos disponíveis atualmente
+              </div>
+            </div>
+          )}
+          
+          {isCoupon && canRedeem && !redeemed && (
+            <div className={styles['device-result-content']}>
+              <button 
+                className={`${styles['device-action-button']} ${styles['device-action-redeem']}`}
+                onClick={() => {
+                  setDrawerType('resgate');
+                  setDrawerOpen(true);
+                }}
+              >
+                <i className="bi bi-ticket-perforated"></i>
+                Resgatar Cupom
+              </button>
+            </div>
+          )}
+          
+          {isCoupon && redeemed && (
+            <div className={styles['device-result-content']}>
+              <div style={{background: 'rgba(40, 167, 69, 0.1)', borderRadius: '8px', padding: '12px', marginBottom: '16px'}}>
+                <div className="text-center" style={{fontSize: '36px', color: '#28a745', marginBottom: '8px'}}>
+                  <i className="bi bi-check-circle"></i>
+                </div>
+                <p className="text-center" style={{margin: 0}}>Cupom "{clientDetails.title || 'Promocional'}" resgatado com sucesso!</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Botão de novo scan */}
+        <button 
+          className={`${styles['device-action-button']} ${styles['device-action-new-scan']}`}
+          onClick={handleNewScanClick}
+        >
+          <i className="bi bi-qr-code-scan"></i>
+          Novo Scan
+        </button>
+        
+        {/* Painéis de acordeão com informações complementares */}
+        <div className="mt-4">
+          {/* Informações do Cliente */}
+          {(isLoyaltyCard || isCoupon) && (
             <ClientInfoAccordion
               clientDetails={clientDetails}
               rfmSegment={rfmSegment}
               expanded={expandedSection === 'client'}
-              onToggle={() => setExpandedSection(expandedSection === 'client' ? null : 'client')}
+              onToggle={() => toggleSection('client')}
             />
-
-            {/* Accordion de prêmios disponíveis */}
-            <RewardsAccordion
-              rewards={clientDetails.rewards}
-              expanded={expandedSection === 'rewards'}
-              onToggle={() => setExpandedSection(expandedSection === 'rewards' ? null : 'rewards')}
-            />
-
-            <ActionDrawer
-              open={drawerOpen}
-              onClose={() => setDrawerOpen(false)}
-              type={drawerType}
-              onSubmit={drawerType === 'pontos' ? (e) => {
-                handlePointsSubmit(e);
-                setDrawerOpen(false);
-              } : (e) => {
-                handleRedeemCoupon(e);
-                setDrawerOpen(false);
-              }}
-              loading={drawerType === 'pontos' ? isSubmitting : isRedeeming}
-              clientDetails={clientDetails}
-              points={points}
-              setPoints={setPoints}
-              maxPoints={clientDetails.operator_max_points || 100}
-            />
-
-            {/* Aqui pode seguir com acordeões, histórico, botões, etc, SEM JSX solto. */}
-            {/* Exemplo de botão para novo scan: */}
-            <div className="d-flex justify-content-center mt-4 mb-3">
-              <button 
-                className="btn btn-primary btn-lg px-5 py-3"
-                onClick={handleNewScanClick}
-              >
-                <i className="bi bi-qr-code-scan me-2"></i>
-                Novo Scan
-              </button>
+          )}
+          
+          {/* Recompensas Disponíveis */}
+          <RewardsAccordion
+            rewards={clientDetails.rewards}
+            nextReward={clientDetails.next_reward_gap}
+            expanded={expandedSection === 'rewards'}
+            onToggle={() => toggleSection('rewards')}
+          />
+          
+          {/* Detalhes da Transação */}
+          <div className={styles['device-accordion']}>
+            <div
+              className={styles['device-accordion-header']}
+              onClick={() => toggleSection('details')}
+            >
+              <h4>
+                <i className="bi bi-info-circle"></i>
+                Detalhes da Transação
+              </h4>
+              <i className={`bi ${expandedSection === 'details' ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
             </div>
-            {/* Adicione outros blocos ou acordeões aqui, sempre dentro de um elemento pai válido */}
-             
-            {/* Card de resgate removido: agora é feito via drawer */}
             
-            
-            {/* Cupom já resgatado - NOVO! */}
-            {isCoupon && redeemed && (
-              <div className="card border-0 shadow-sm mb-4">
-                <div className="card-header bg-success text-white">
-                  <h5 className="card-title mb-0">
-                    <i className="bi bi-check-circle-fill me-2"></i>
-                    Cupom Resgatado com Sucesso
-                  </h5>
-                </div>
-                <div className="card-body text-center">
-                  <div className="display-4 text-success mb-3">
-                    <i className="bi bi-ticket-perforated-fill"></i>
+            {expandedSection === 'details' && (
+              <div className={styles['device-accordion-content']}>
+                <div className={styles['device-info-card']}>
+                  <div className={styles['device-info-row']}>
+                    <div className={styles['device-info-label']}>Data/Hora</div>
+                    <div className={styles['device-info-value']}>
+                      {new Date(currentScan.timestamp).toLocaleString()}
+                    </div>
                   </div>
                   
-                  <h4>{clientDetails.title || 'Cupom'}</h4>
-                  <p>{clientDetails.description || ''}</p>
+                  {currentScan.result?.scan_id && (
+                    <div className={styles['device-info-row']}>
+                      <div className={styles['device-info-label']}>ID do Scan</div>
+                      <div className={styles['device-info-value']} style={{fontSize: '13px', opacity: 0.8}}>
+                        {currentScan.result.scan_id}
+                      </div>
+                    </div>
+                  )}
                   
-                  <div className="alert alert-success mt-3">
-                    Este cupom foi resgatado com sucesso e já não está mais disponível para uso.
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* COMEÇAM AS SEÇÕES DE ACORDEÃO */}
-            
-            {/* Informações do Cliente (quando for cartão de fidelidade ou cupom) */}
-            {(isLoyaltyCard || isCoupon) && (
-              <div className="card mb-3 border-0 shadow-sm">
-                <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center" 
-                     onClick={() => toggleSection('client')}
-                     style={{ cursor: 'pointer' }}>
-                  <h5 className="mb-0">
-                    <i className="bi bi-person-circle me-2"></i>
-                    Informações do Cliente
-                  </h5>
-                  <i className={`bi ${expandedSection === 'client' ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
-                </div>
-                
-                {expandedSection === 'client' && (
-                  <div className="card-body">
-                    {/* Cabeçalho com nome e segmento */}
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <div>
-                        <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
-                        <span className={`badge ${rfmSegment.class} px-3 py-2 fs-6`}>
-                          {rfmSegment.emoji} {clientDetails.rfm_segment || clientDetails.tier || 'Regular'}
-                        </span>
-                        {clientDetails.program_name && (
-                          <div className="mt-2 text-muted small">
-                            <i className="bi bi-shop me-1"></i>
-                            {clientDetails.program_name}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Pontos - destaque */}
-                      <div className="text-center">
-                        <div className="badge bg-info fs-2 fw-bold p-2 px-3">{clientDetails.points || 0}</div>
-                        <div className="fs-6 text-light mt-1">Pontos Disponíveis</div>
+                  {currentScan.result?.scan_type && (
+                    <div className={styles['device-info-row']}>
+                      <div className={styles['device-info-label']}>Tipo</div>
+                      <div className={styles['device-info-value']}>
+                        {isLoyaltyCard ? 'Cartão de Fidelidade' : 
+                         isCoupon ? 'Cupom' : currentScan.result.scan_type}
                       </div>
                     </div>
-                    
-                    {/* Estatísticas - cartões */}
-                    <div className="row g-2 mb-4">
-                      {clientDetails.total_earned && (
-                        <div className="col-4">
-                          <div className="card bg-light h-100">
-                            <div className="card-body p-2 text-center">
-                              <div className="fs-4 fw-bold text-success">{clientDetails.total_earned}</div>
-                              <div className="fs-7 text-muted">Total Ganhos</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {clientDetails.total_spent && (
-                        <div className="col-4">
-                          <div className="card bg-light h-100">
-                            <div className="card-body p-2 text-center">
-                              <div className="fs-4 fw-bold text-danger">{clientDetails.total_spent}</div>
-                              <div className="fs-7 text-muted">Total Gastos</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {clientDetails.rewards_redeemed !== undefined && (
-                        <div className="col-4">
-                          <div className="card bg-light h-100">
-                            <div className="card-body p-2 text-center">
-                              <div className="fs-4 fw-bold text-warning">{clientDetails.rewards_redeemed || 0}</div>
-                              <div className="fs-7 text-muted">Prêmios Resgatados</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Código do cartão com destaque */}
-                    <div className="card bg-light mb-4">
-                      <div className="card-body p-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="text-muted">Código do Cartão:</span>
-                          <span className="badge bg-dark px-3 py-2 fs-6">{formatCardCode(clientDetails.card_id)}</span>
-                        </div>
+                  )}
+                  
+                  {currentScan.result?.details?.program_name && (
+                    <div className={styles['device-info-row']}>
+                      <div className={styles['device-info-label']}>Programa</div>
+                      <div className={styles['device-info-value']}>
+                        {currentScan.result.details.program_name}
                       </div>
                     </div>
-                    
-                    <h5 className="border-bottom pb-2 mb-3">Informações do Cliente</h5>
-                    
-                    {/* Informações pessoais */}
-                    <div className="row g-3">
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-primary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-person-fill text-white"></i>
-                              </div>
-                              <strong>Nome</strong>
-                            </div>
-                            <div className="ps-4 text-light">{clientDetails.client_name || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-info p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-envelope text-white"></i>
-                              </div>
-                              <strong>Email</strong>
-                            </div>
-                            <div className="ps-4 text-light">{clientDetails.email || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-success p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-phone text-white"></i>
-                              </div>
-                              <strong>WhatsApp</strong>
-                            </div>
-                            <div className="ps-4 text-light">{clientDetails.whatsapp || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-warning p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-calendar-event text-white"></i>
-                              </div>
-                              <strong>Aniversário</strong>
-                            </div>
-                            <div className="ps-4 text-light">{clientDetails.birth_date || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <h5 className="border-bottom pb-2 mb-3 mt-4">Resumo do Cliente</h5>
-                    
-                    <div className="row g-3">
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-primary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-calendar-check text-white"></i>
-                              </div>
-                              <strong>Membro Desde</strong>
-                            </div>
-                            <div className="ps-4 text-light">{formatDate(clientDetails.member_since) || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="col-6">
-                        <div className="card bg-dark mb-2">
-                          <div className="card-body p-2">
-                            <div className="d-flex align-items-center mb-1">
-                              <div className="rounded-circle bg-info p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                                <i className="bi bi-clock-history text-white"></i>
-                              </div>
-                              <strong>Última Visita</strong>
-                            </div>
-                            <div className="ps-4 text-light">{formatDate(clientDetails.last_visit) || '-'}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {clientDetails.notes && (
-                      <div className="card bg-dark mt-4">
-                        <div className="card-header">
-                          <div className="d-flex align-items-center">
-                            <div className="rounded-circle bg-secondary p-1 me-2 d-flex align-items-center justify-content-center" style={{width: '32px', height: '32px'}}>
-                              <i className="bi bi-sticky-fill text-white"></i>
-                            </div>
-                            <strong>Observações</strong>
-                          </div>
-                        </div>
-                        <div className="card-body">
-                          <p className="mb-0 text-light">{clientDetails.notes}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Recompensas disponíveis (quando for cartão de fidelidade ou cupom) */}
-            {(isLoyaltyCard || isCoupon) && currentScan.result?.details?.available_rewards && currentScan.result.details.available_rewards.length > 0 && (
-              <div className="card mb-3 border-0 shadow-sm">
-                <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center"
-                     onClick={() => toggleSection('rewards')}
-                     style={{ cursor: 'pointer' }}>
-                  <h5 className="mb-0">
-                    <i className="bi bi-gift me-2"></i>
-                    Recompensas Disponíveis ({currentScan.result.details.available_rewards.length})
-                  </h5>
-                  <i className={`bi ${expandedSection === 'rewards' ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
-                </div>
-                
-                {expandedSection === 'rewards' && (
-                  <div className="card-body">
-                    <div className="list-group">
-                      {currentScan.result.details.available_rewards.map((reward, index) => (
-                        <div key={reward.id || index} className="list-group-item list-group-item-action">
-                          <div className="d-flex justify-content-between align-items-center mb-1">
-                            <h6 className="mb-0">{reward.name}</h6>
-                            <span className="badge bg-primary">{reward.points_required} pontos</span>
-                          </div>
-                          <p className="mb-0 small text-muted">{reward.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {currentScan.result.details.next_reward_gap && currentScan.result.details.next_reward_gap.name && (
-                      <div className="alert alert-info mt-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <strong>Próxima Recompensa:</strong> {currentScan.result.details.next_reward_gap.name}<br />
-                            <small>
-                              Faltam <strong>{currentScan.result.details.next_reward_gap.missing_points}</strong> pontos
-                            </small>
-                          </div>
-                          <span className="badge bg-info ms-2">
-                            {currentScan.result.details.next_reward_gap.points_required} pts
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Detalhes da Transação */}
-            <div className="card mb-3 border-0 shadow-sm">
-              <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center"
-                   onClick={() => toggleSection('details')}
-                   style={{ cursor: 'pointer' }}>
-                <h5 className="mb-0">
-                  <i className="bi bi-info-circle me-2"></i>
-                  Detalhes da Transação
-                </h5>
-                <i className={`bi ${expandedSection === 'details' ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
-              </div>
-              
-              {expandedSection === 'details' && (
-                <div className="card-body">
-                  <ul className="list-group list-group-flush">
-                    <li className="list-group-item d-flex justify-content-between">
-                      <span>Data/Hora:</span>
-                      <span>{new Date(currentScan.timestamp).toLocaleString()}</span>
-                    </li>
-                    
-                    {currentScan.result?.scan_id && (
-                      <li className="list-group-item d-flex justify-content-between">
-                        <span>ID do Scan:</span>
-                        <span className="text-muted">{currentScan.result.scan_id}</span>
-                      </li>
-                    )}
-                    
-                    {currentScan.result?.scan_type && (
-                      <li className="list-group-item d-flex justify-content-between">
-                        <span>Tipo:</span>
-                        <span>{isLoyaltyCard ? 'Cartão de Fidelidade' : 
-                               isCoupon ? 'Cupom' : currentScan.result.scan_type}</span>
-                      </li>
-                    )}
-                    
-                    {currentScan.result?.details?.program_name && (
-                      <li className="list-group-item d-flex justify-content-between">
-                        <span>Programa:</span>
-                        <span>{currentScan.result.details.program_name}</span>
-                      </li>
-                    )}
-                    
-                    <li className="list-group-item d-flex justify-content-between">
-                      <span>Status:</span>
-                      <span className={`badge ${resultStatus.colorClass}`}>
+                  )}
+                  
+                  <div className={styles['device-info-row']}>
+                    <div className={styles['device-info-label']}>Status</div>
+                    <div className={styles['device-info-value']}>
+                      <span className={`${styles['device-badge']} ${styles['device-badge-' + (currentScan.processed ? 'success' : 'warning')]}`}>
                         {currentScan.processed ? 'Processado' : 'Pendente'}
                       </span>
-                    </li>
-                  </ul>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            <div className="d-flex justify-content-center mt-4 mb-3">
-              <button 
-                className="btn btn-primary btn-lg px-5 py-3"
-                onClick={handleNewScanClick}
-              >
-                <i className="bi bi-qr-code-scan me-2"></i>
-                Novo Scan
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      
+      {/* Action Drawer */}
+      <ActionDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        type={drawerType}
+        onSubmit={drawerType === 'pontos' ? (e) => {
+          handlePointsSubmit(e);
+          setDrawerOpen(false);
+        } : (e) => {
+          handleRedeemCoupon(e);
+          setDrawerOpen(false);
+        }}
+        loading={drawerType === 'pontos' ? isSubmitting : isRedeeming}
+        clientDetails={clientDetails}
+        points={points}
+        setPoints={setPoints}
+        maxPoints={clientDetails.operator_max_points || 100}
+      />
     </MainLayout>
   );
 }
