@@ -433,8 +433,38 @@ function ResultPage() {
           (finalized || redeemed ? 'success' : 'idle')))
         }>
           <div className="client-visor-content">
-            {/* Renderiza a mensagem de erro DENTRO do visor se houver erro */}
-            {currentScan.status === 'error' || (currentScan.result && currentScan.result.success === false) ? (
+            {/* 1. Renderiza tela de SUCESSO (pontos) se finalizado */}
+            {finalized && points > 0 ? (
+              <div className="operation-success-screen">
+                <div className="success-check-container">
+                  <div className="success-check-icon">
+                    <i className="bi bi-check-lg"></i>
+                  </div>
+                </div>
+                <div className="success-message">
+                  <div className="success-title">Operação Concluída!</div>
+                  <div className="success-points">+{points} pontos</div>
+                  <div className="success-detail">Total atual: {currentScan.result?.details?.current_points || clientDetails.points || points} pontos</div> {/* Usar dados atualizados se disponíveis */}
+                </div>
+              </div>
+            ) :
+            /* 2. Renderiza tela de SUCESSO (resgate) se redimido */
+            redeemed ? (
+              <div className="operation-success-screen">
+                 <div className="success-check-container redemption">
+                  <div className="success-check-icon redemption">
+                    <i className="bi bi-gift"></i>
+                  </div>
+                </div>
+                <div className="success-message">
+                  <div className="success-title">Prêmio Resgatado!</div>
+                  <div className="success-detail reward-name">{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
+                  <div className="success-points redemption">Resgate efetuado com sucesso</div>
+                </div>
+              </div>
+            ) :
+            /* 3. Renderiza tela de ERRO se houver erro */
+            currentScan.status === 'error' || (currentScan.result && currentScan.result.success === false) ? (
               <ErrorMessageDisplay
                 title={resultStatus.title}
                 message={resultStatus.message}
@@ -442,40 +472,8 @@ function ResultPage() {
                 colorClass={resultStatus.colorClass}
               />
             ) : (
-              // Renderiza o conteúdo normal do visor se não houver erro
+              // 4. Renderiza o conteúdo normal do visor se não houver erro nem sucesso finalizado
               <>
-                {/* Tela de sucesso após operação completa */}
-                {finalized && points > 0 && (
-                  <div className="operation-success-screen">
-                    <div className="success-check-container">
-                      <div className="success-check-icon">
-                        <i className="bi bi-check-lg"></i>
-                      </div>
-                    </div>
-                    <div className="success-message">
-                      <div className="success-title">Operação Concluída!</div>
-                      <div className="success-points">+{points} pontos</div>
-                      <div className="success-detail">Total atual: {clientDetails.current_points || clientDetails.points || points} pontos</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tela de sucesso para resgates */}
-                {redeemed && (
-                  <div className="operation-success-screen">
-                     <div className="success-check-container redemption">
-                      <div className="success-check-icon redemption">
-                        <i className="bi bi-gift"></i>
-                      </div>
-                    </div>
-                    <div className="success-message">
-                      <div className="success-title">Prêmio Resgatado!</div>
-                      <div className="success-detail reward-name">{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
-                      <div className="success-points redemption">Resgate efetuado com sucesso</div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Área principal do visor com layout verde brilhante */}
                 <div className="client-info-header">
                    {/* Foto do cliente (da API) */}
@@ -603,12 +601,12 @@ function ResultPage() {
             /* Área de status/mensagens no topo para feedback */
             /* Nova tela de sucesso de operação */
             .operation-success-screen {
-              position: absolute;
-              top: 0;
-              left: 0;
+              /* position: absolute; */ /* Mantido comentado */
+              /* top: 0; */
+              /* left: 0; */
               width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.85);
+              height: 100%; /* Ocupa o espaço do visor */
+              /* background: rgba(0, 0, 0, 0.85); */ /* REMOVIDO fundo escuro */
               z-index: 100;
               display: flex;
               flex-direction: column;
@@ -616,6 +614,7 @@ function ResultPage() {
               justify-content: center;
               padding: 20px;
               animation: fade-in 0.3s ease-out;
+              border-radius: inherit; /* Herda o border-radius do pai */
             }
 
             .success-check-container {
