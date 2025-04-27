@@ -44,13 +44,13 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
     }
     navigate('/scanner');
   };
-  
+
   const handleSync = async () => {
     // Esta função agora serve para alternar a câmera (trocar câmera frontal/traseira)
     // Implementação futura
     toast.info('Alternando câmera (funcionalidade a ser implementada)');
   };
-  
+
   const handleLogout = async () => {
     await logout();
     navigate('/auth');
@@ -67,7 +67,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           <div className="sensor-dot camera"></div>
         </div>
       </div>
-      
+
       {/* Visor customizado, sempre no topo - Adicionar classe condicional */}
       <div className={`device-visor-area ${visor ? 'has-custom-visor' : ''}`} ref={visorRef}>
         {visor ? (
@@ -75,20 +75,20 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
         ) : (
           <header className="device-header">
             <div className="d-flex align-items-center p-2">
-              <img 
-                src={ZupyLogo} 
-                alt="Zupy" 
+              <img
+                src={ZupyLogo}
+                alt="Zupy"
                 className="me-2"
                 style={{ height: '32px' }}
               />
               <h1 className="h5 mb-0 flex-grow-1">{title}</h1>
-              
+
               {/* Status indicators */}
               <div className="d-flex align-items-center">
                 <span className={`badge ${isOnline ? 'bg-success' : 'bg-danger'} me-2`}>
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
-                
+
                 {pendingCount > 0 && (
                   <span className="badge bg-warning">
                     <i className="bi bi-clock-history me-1"></i>
@@ -100,7 +100,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           </header>
         )}
       </div>
-      
+
       {/* Status bar com navegação em tabs */}
       <div className="device-status-bar">
         <div className="status-tabs">
@@ -108,19 +108,19 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
             <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
             <span>{isOnline ? 'Online' : 'Offline'}</span>
           </div>
-          
+
           <div className="status-indicator user">
             <i className="bi bi-person-badge"></i>
             <span>{userData?.name || 'Operador'}</span>
           </div>
-          
+
           {scannerData?.name && (
             <div className="status-indicator device">
               <i className="bi bi-qr-code-scan"></i>
               <span>{scannerData.name}</span>
             </div>
           )}
-          
+
           {pendingCount > 0 && (
             <div className="status-indicator pending">
               <i className="bi bi-hourglass-split"></i>
@@ -128,34 +128,34 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
             </div>
           )}
         </div>
-        
+
         {onTabChange && (
           <div className="nav-tabs">
-            <button 
-              className={`nav-tab ${tabActive === 'details' ? 'active' : ''}`} 
+            <button
+              className={`nav-tab ${tabActive === 'details' ? 'active' : ''}`}
               data-tab="details"
               onClick={() => onTabChange('details')}
             >
               <i className="bi bi-info-circle"></i>
               <span>Detalhes</span>
             </button>
-            <button 
-              className={`nav-tab ${tabActive === 'client' ? 'active' : ''}`} 
+            <button
+              className={`nav-tab ${tabActive === 'client' ? 'active' : ''}`}
               data-tab="client"
               onClick={() => onTabChange('client')}
             >
               <i className="bi bi-person"></i>
               <span>Cliente</span>
             </button>
-            <button 
-              className={`nav-tab ${tabActive === 'rewards' ? 'active' : ''}`} 
+            <button
+              className={`nav-tab ${tabActive === 'rewards' ? 'active' : ''}`}
               data-tab="rewards"
               onClick={() => onTabChange('rewards')}
             >
               <i className="bi bi-gift"></i>
               <span>Prêmios</span>
             </button>
-            <button 
+            <button
               className="toggle-camera"
               onClick={handleSync}
               title="Alternar câmera"
@@ -165,27 +165,27 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           </div>
         )}
       </div>
-      
+
       {/* Área central rolável - informações complementares */}
       <main className="device-content-area">
         {children}
       </main>
-      
+
       {/* PWA Installation Prompt */}
       <PwaInstallPrompt />
-      
+
       {/* Rodapé fixo - navegação */}
       <footer className="device-footer">
         <nav className="device-nav-bar">
-          <button 
+          <button
             className={`nav-button ${activeMenu === 'history' ? 'active' : ''}`}
             onClick={() => handleNavigation('/history')}
             aria-label="Histórico"
           >
             <i className="bi bi-clock-history"></i>
           </button>
-          
-          <button 
+
+          <button
             className="nav-button-center"
             onClick={handleGoToScanner}
             aria-label="Scanner"
@@ -194,8 +194,8 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
               <i className="bi bi-qr-code-scan"></i>
             </div>
           </button>
-          
-          <button 
+
+          <button
             className={`nav-button ${activeMenu === 'settings' ? 'active' : ''}`}
             onClick={() => handleNavigation('/settings')}
             aria-label="Configurações"
@@ -204,7 +204,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           </button>
         </nav>
       </footer>
-      
+
       {/* Logout confirmation modal */}
       {showLogoutConfirm && (
         <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
@@ -212,9 +212,9 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Confirmação</h5>
-                <button 
-                  type="button" 
-                  className="btn-close" 
+                <button
+                  type="button"
+                  className="btn-close"
                   onClick={() => setShowLogoutConfirm(false)}
                 ></button>
               </div>
@@ -230,16 +230,16 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
                 )}
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowLogoutConfirm(false)}
                 >
                   Cancelar
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-danger" 
+                <button
+                  type="button"
+                  className="btn btn-danger"
                   onClick={handleLogout}
                 >
                   Sair
@@ -250,7 +250,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           <div className="modal-backdrop fade show"></div>
         </div>
       )}
-      
+
       {/* Estilos do dispositivo */}
       <style jsx>{`
         .device-container {
@@ -266,7 +266,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           border-left: 1px solid #3d4257;
           border-right: 1px solid #3d4257;
         }
-        
+
         /* Parte superior - elementos físicos do dispositivo */
         .device-top {
           background: linear-gradient(180deg, #1e2334 0%, #252a3c 100%);
@@ -275,7 +275,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           z-index: 30;
           border-bottom: 1px solid #3d4257;
         }
-        
+
         .device-speaker {
           width: 80px;
           height: 5px;
@@ -285,7 +285,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           position: relative;
           overflow: hidden;
         }
-        
+
         .device-speaker:after {
           content: '';
           position: absolute;
@@ -297,7 +297,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           transform: translateX(-100%);
           animation: shimmer 2s infinite;
         }
-        
+
         .device-sensors {
           position: absolute;
           top: 12px;
@@ -306,41 +306,55 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           align-items: center;
           gap: 8px;
         }
-        
+
         .sensor-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
           background: #444;
         }
-        
+
         .sensor-dot.camera {
           width: 8px;
           height: 8px;
           background: #2a2d31;
         }
-        
-        /* Área do visor */
+
+        /* Área do visor - Altura padrão automática */
         .device-visor-area {
           z-index: 20;
-          background: #252830;
-          padding: 0 12px 20px;
-          height: 50vh; /* 50% da altura da viewport */
-          min-height: 50%; /* Garante tamanho mínimo */
+          /* background: #252830; */ /* Fundo removido para usar o do container */
+          padding: 0 12px 0px; /* Padding inferior removido */
+          height: auto; /* Altura padrão automática */
+          min-height: 0; /* Sem altura mínima por padrão */
           display: flex;
           flex-direction: column;
           justify-content: center;
           box-sizing: border-box;
+          transition: height 0.3s ease-in-out, min-height 0.3s ease-in-out, padding 0.3s ease-in-out;
         }
-        
+
+        /* Estilo quando HÁ visor customizado */
+        .device-visor-area.has-custom-visor {
+            height: 50vh !important; /* Altura fixa */
+            min-height: 50% !important; /* Altura mínima fixa */
+            padding-bottom: 20px !important; /* Padding inferior restaurado */
+            background: #252830 !important; /* Fundo específico restaurado */
+        }
+
         .device-header {
           background: linear-gradient(180deg, #2d3142 0%, #343b4f 100%);
           border-radius: 16px;
           color: #fff;
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
           border: 1px solid #3d4257;
+          /* Garantir margem inferior apenas quando NÃO há visor customizado */
         }
-        
+        .device-visor-area:not(.has-custom-visor) .device-header {
+             margin-bottom: 12px;
+        }
+
+
         /* Barra de status com tabs */
         .device-status-bar {
           display: flex;
@@ -351,11 +365,11 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           padding: 10px 0 0;
           font-size: 15px;
           color: #e0e0e0;
-          margin-top: 12px;
+          /* margin-top: 12px; */ /* Removido para colar no header/visor */
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           height: auto;
         }
-        
+
         .status-tabs {
           display: flex;
           align-items: center;
@@ -365,32 +379,32 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           gap: 16px;
           margin-bottom: 8px;
         }
-        
+
         .status-indicator {
           display: flex;
           align-items: center;
           gap: 6px;
           font-size: 14px;
         }
-        
+
         .status-indicator i {
           font-size: 16px;
         }
-        
+
         .status-indicator.online {
           color: ${isOnline ? '#00ff7b' : '#ff2d55'};
         }
-        
+
         .status-indicator.pending {
           color: #ffd600;
         }
-        
+
         .nav-tabs {
           display: flex;
           width: 100%;
           border-top: 1px solid rgba(255,255,255,0.1);
         }
-        
+
         .nav-tab {
           flex: 1;
           display: flex;
@@ -407,22 +421,22 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           gap: 4px;
           cursor: pointer;
         }
-        
+
         .nav-tab i {
           font-size: 16px;
         }
-        
+
         .nav-tab.active {
           color: #fff;
           border-bottom: 2px solid #00a3ff;
           background: rgba(0, 163, 255, 0.05);
         }
-        
+
         .nav-tab:hover:not(.active) {
           color: rgba(255,255,255,0.8);
           background: rgba(255,255,255,0.05);
         }
-        
+
         .toggle-camera {
           width: 38px;
           height: 38px;
@@ -437,14 +451,14 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           margin: 5px 10px;
         }
-        
+
         .toggle-camera:hover {
           background: linear-gradient(135deg, #4a526a, #3a4054);
           color: #fff;
           transform: translateY(-2px);
           box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
-        
+
         /* Área de conteúdo principal */
         .device-content-area {
           flex: 1;
@@ -455,7 +469,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           color: #fff;
           box-shadow: inset 0 5px 15px rgba(0,0,0,0.15);
         }
-        
+
         /* Rodapé */
         .device-footer {
           position: fixed;
@@ -470,12 +484,12 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           margin: 0 auto;
           box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
         }
-        
+
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
-        
+
         .device-nav-bar {
           display: flex;
           justify-content: space-around;
@@ -483,7 +497,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           height: 100%;
           padding: 0 16px;
         }
-        
+
         .nav-button {
           background: linear-gradient(135deg, #323748, #252b3d);
           border: 1px solid #3d4257;
@@ -499,25 +513,25 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           align-items: center;
           justify-content: center;
         }
-        
+
         .nav-button.active {
           color: #fff;
           background: linear-gradient(135deg, #3f4659, #2d3347);
           box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.1);
         }
-        
+
         .nav-button:hover {
           color: #fff;
           transform: translateY(-2px);
           box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
-        
+
         .nav-button-center {
           background: transparent;
           border: none;
           padding: 0;
         }
-        
+
         .scan-button {
           width: 64px;
           height: 64px;
@@ -533,7 +547,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           font-size: 24px;
           position: relative;
         }
-        
+
         .scan-button:after {
           content: '';
           position: absolute;
@@ -546,31 +560,31 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           opacity: 0.6;
           z-index: -1;
         }
-        
+
         .scan-button:active {
           transform: scale(0.95);
         }
-        
+
         .scan-button.active {
           background: linear-gradient(135deg, #0a2d44, #103756);
           box-shadow: 0 0 20px rgba(0, 163, 255, 0.6);
         }
-        
+
         .scan-button i {
           filter: drop-shadow(0 0 2px rgba(0, 163, 255, 0.8));
         }
-        
+
         @media (max-width: 480px) {
           .device-container {
             max-width: 100%;
             box-shadow: none;
           }
-          
+
           .scan-button {
             width: 54px;
             height: 54px;
           }
-          
+
           .nav-button {
             font-size: 22px;
           }

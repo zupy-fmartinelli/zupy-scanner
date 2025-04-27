@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useScanner } from '../../contexts/ScannerContext';
-import MainLayout from '../../components/layout/MainLayout';
-import styles from './HistoryPage.module.css'; // Criar este arquivo para estilos específicos
+import SimpleLayout from '../../components/layout/SimpleLayout'; // Importar SimpleLayout
+import styles from './HistoryPage.module.css';
 
 function HistoryPage() {
   const navigate = useNavigate();
@@ -156,11 +156,10 @@ function HistoryPage() {
   };
 
   return (
-    // Passar uma prop para indicar que não queremos o visor, ou criar um layout específico
-    // Por agora, vamos apenas não passar a prop 'visor' e ajustar o CSS
-    <MainLayout title="Histórico" activeMenu="history">
-      {/* Aplicar classe para ajustar padding/altura quando não há visor */}
-      <div className={`container py-4 ${styles.historyContainer}`}>
+    // Usar SimpleLayout em vez de MainLayout
+    <SimpleLayout title="Histórico" activeMenu="history">
+      {/* Não precisa mais da classe historyContainer aqui, pois o layout já é ajustado */}
+      <div className="container pt-2 pb-4"> {/* Ajustar padding se necessário */}
         <div className="row justify-content-center">
           <div className="col-12"> {/* Ocupar largura total */}
             {/* Header */}
@@ -289,7 +288,7 @@ function HistoryPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </SimpleLayout> // Fechar SimpleLayout
   );
 }
 
