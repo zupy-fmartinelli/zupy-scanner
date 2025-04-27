@@ -423,7 +423,17 @@ function ResultPage() {
       tabActive={activeTab}
       onTabChange={setActiveTab}
       visor={
-        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : 'idle')}>
+        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : (finalized ? 'success' : 'idle'))}>
+          {/* VISOR PRINCIPAL: ScannerDisplay sempre no topo, com feedback de pontos adicionados */}
+          <ScannerDisplay 
+            currentScan={currentScan} 
+            clientDetails={clientDetails} 
+            rfmSegment={rfmSegment} 
+            reward={clientDetails.next_reward_gap} 
+            coupon={clientDetails.coupon} 
+            finalized={finalized} 
+            addedPoints={finalized ? points : 0}
+          />
           <div className="client-visor-content">
             {/* Área de status principal - mais visível para feedback */}
             <div className="client-status-header">
@@ -1008,6 +1018,16 @@ function ResultPage() {
                     <span className="badge bg-primary">{Math.floor((1 - clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required) * 100)}%</span>
                   </div>
                 </div>
+                <ScannerDisplay 
+                  currentScan={currentScan} 
+                  clientDetails={clientDetails} 
+                  rfmSegment={rfmSegment} 
+                  reward={clientDetails.next_reward_gap} 
+                  coupon={clientDetails.coupon} 
+                  finalized={finalized} 
+                  addedPoints={finalized ? points : 0}
+                />
+/* ... */
                 <div className="progress" style={{height: '8px'}}>
                   <div 
                     className="progress-bar" 

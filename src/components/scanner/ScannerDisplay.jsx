@@ -7,7 +7,7 @@ import React from 'react';
  *   - clientDetails: detalhes do cliente
  *   - rfmSegment: segmento RFM calculado
  */
-function ScannerDisplay({ currentScan, clientDetails = {}, rfmSegment = {}, reward = {}, coupon = {} }) {
+function ScannerDisplay({ currentScan, clientDetails = {}, rfmSegment = {}, reward = {}, coupon = {}, finalized = false, addedPoints = 0 }) {
   if (!currentScan) return null;
   // Preferência para os campos novos da API
   const photoUrl = clientDetails.user_photo_url || clientDetails.photo_url;
@@ -21,6 +21,13 @@ function ScannerDisplay({ currentScan, clientDetails = {}, rfmSegment = {}, rewa
 
   return (
     <div className="zupy-scanner-display bg-dark text-white p-3 rounded shadow mb-3" style={{minHeight:180}}>
+      {/* Banner de sucesso após pontuação */}
+      {finalized && addedPoints > 0 && (
+        <span className="badge bg-success px-3 py-2 fs-6 d-inline-flex align-items-center mb-2" style={{fontWeight:600, fontSize:'1rem'}}>
+          <i className="bi bi-coin me-2" style={{fontSize:18, color:'#ffd700'}} />
+          +{addedPoints} pontos adicionados para <b className="ms-1">{clientName}</b>
+        </span>
+      )}
       <div className="d-flex align-items-center mb-3">
         {/* Foto do cliente */}
         {photoUrl ? (
