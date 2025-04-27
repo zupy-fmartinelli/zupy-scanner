@@ -94,19 +94,11 @@ function ScannerPage() {
     // Mensagem visual será exibida no visor, não toast.
     
     try {
-      const scanResult = await processScan(qrData);
-      console.log('Scan processado com sucesso:', scanResult);
-      
-      // Forçar redirecionamento para página de resultados
-      if (scanResult && scanResult.processed) {
-        // Pequeno timeout para dar tempo de atualizar o estado
-        setTimeout(() => {
-          navigate('/result');
-        }, 300);
-      } else if (!isOnline) {
-        toast.warning('Você está offline. O scan será processado quando estiver online.');
-        navigate('/result');
-      }
+      // Chama processScan para processar o QR code.
+      // A navegação será tratada pelo useEffect que observa currentScan.
+      await processScan(qrData);
+      console.log('Chamada a processScan concluída.');
+      // Não é mais necessário navegar daqui, o useEffect cuidará disso.
     } catch (error) {
       toast.error(error.message || 'Falha ao processar QR code');
       console.error('Erro no processamento:', error);

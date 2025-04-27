@@ -137,26 +137,59 @@ export function ScannerProvider({ children }) {
       // Persistir o histórico atualizado e o scan atual
       setItem('scan_history', updatedHistory);
       setItem('current_scan', scan);
-      
+
+      // Atualizar explicitamente o estado com uma nova referência de objeto
+      setCurrentScan({...scan}); 
+
       return scan;
     } catch (err) {
       console.error('Scan processing error:', err);
-      setError(err.message || 'Failed to process scan');
-      
-      // Create error scan record
-      const errorScan = {
-        qrData: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(qrCodeData),
-        scannerId: scannerData?.id,
-        timestamp: new Date().toISOString(),
-        processed: true,
-        status: 'error',
-        error: err.message || 'Unknown error'
-      };
-      
-      // Update scan history
-      setScanHistory(prev => [errorScan, ...prev].slice(0, 50));
-      
-      return errorScan;
+      // Use a mensagem de erro padronizada do api.js, se disponível
+      const errorMessage = err.message || 'Failed to process scan';
+      setError(errorMessage);
+
+      // Atualizar o scan atual com o status de erro e detalhes
+      // 'scan' deve estar acessível do bloco 'try' ou precisamos recuperá-lo
+      // Assumindo que 'scan' está acessível:
+      if (scan) {
+        scan.processed = true;
+        scan.status = 'error';
+        // Armazena o objeto de erro padronizado (com status, message, data)
+        scan.errorDetails = {
+          status: err.status,
+          message: err.message,
+          data: err.data
+        };
+        scan.error = errorMessage; // Mantém uma mensagem simples para compatibilidade
+
+        // Atualiza o estado principal
+        setCurrentScan(scan);
+
+        // Atualiza o histórico com o scan modificado
+        const updatedHistory = [scan, ...scanHistory].slice(0, 50);
+        setScanHistory(updatedHistory);
+
+        // Persiste o scan atual com erro e o histórico
+        setItem('scan_history', updatedHistory);
+        setItem('current_scan', scan);
+
+        return scan; // Retorna o scan atualizado com o erro
+      } else {
+        // Fallback: Se 'scan' não estiver acessível (improvável), cria um registro de erro
+        const fallbackErrorScan = {
+          qrData: typeof qrCodeData === 'string' ? qrCodeData : JSON.stringify(qrCodeData),
+          scannerId: scannerData?.id,
+          timestamp: new Date().toISOString(),
+          processed: true,
+          status: 'error',
+          error: errorMessage,
+          errorDetails: { status: err.status, message: err.message, data: err.data }
+        };
+        // Atualiza o histórico com o fallback
+        setScanHistory(prev => [fallbackErrorScan, ...prev].slice(0, 50));
+        // Não define currentScan neste fallback, pois não temos o objeto original
+        return fallbackErrorScan;
+      }
     } finally {
       setIsProcessing(false);
     }
