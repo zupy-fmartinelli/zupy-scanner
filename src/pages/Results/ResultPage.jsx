@@ -294,12 +294,27 @@ function ResultPage() {
     }, 3000);
   };
   
-  // Formatar data da última visita
-  const formatDate = (dateString) => {
+  // Formatar data da última visita (formato amigável)
+  const formatRelativeDate = (dateString) => {
     if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      return date.toLocaleString();
+      const now = new Date();
+      const diffMs = now - date;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffDays === 0) {
+        if (diffHours < 1) return 'agora há pouco';
+        if (diffHours === 1) return 'há 1 hora';
+        return `há ${diffHours} horas`;
+      }
+      if (diffDays === 1) return 'ontem';
+      if (diffDays < 7) return `há ${diffDays} dias`;
+      if (diffDays < 14) return 'há uma semana';
+      if (diffDays < 30) return `há ${Math.floor(diffDays / 7)} semanas`;
+      if (diffDays < 60) return 'há um mês';
+      if (diffDays < 365) return `há ${Math.floor(diffDays / 30)} meses`;
+      return `há ${Math.floor(diffDays / 365)} anos`;
     } catch (e) {
       return dateString;
     }
@@ -459,50 +474,50 @@ function ResultPage() {
                   <span className="points-value">{clientDetails.current_points || clientDetails.points || 0}</span>
                   <span className="points-label">pontos</span>
                 </div>
-                {/* Cartão */}
-                <div className="client-card-info">
-                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
+                {/* Classificação RFM - Destaque sem fundo */}
+                <div className="client-rfm-info" style={{display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 8}}>
+                  <span className="rfm-segment-emoji" style={{fontSize: 28}}>{rfmSegment.emoji || '🏆'}</span>
+                  <span className="rfm-segment-name" style={{fontWeight: 700, fontSize: 18, color: rfmSegment.color || '#2E8B57'}}>
+                    Campeões
+                  </span>
+                  <span className="rfm-scores" style={{marginLeft: 12, fontSize: 13, color: '#aaa'}}>R: {rfmData.recency || 0} | F: {rfmData.frequency || 0} | M: {rfmData.monetary || 0}</span>
                 </div>
               </div>
             </div>
             
+            {/* Data da última visita - destaque separado */}
+            <div className="client-last-visit-box" style={{marginBottom: 18, marginTop: 10, display: 'flex', alignItems: 'center', gap: 8}}>
+              <i className="bi bi-calendar-check"></i>
+              <span style={{fontWeight: 500, fontSize: 15}}>Última visita:</span>
+              <b style={{fontSize: 15}}>
+                {clientDetails.last_visit ? new Date(clientDetails.last_visit).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+              </b>
+              <span style={{fontSize: 13, color: '#aaa', marginLeft: 8}}>
+                ({formatRelativeDate(clientDetails.last_visit)})
+              </span>
+            </div>
+
             {/* Informações secundárias */}
             <div className="client-additional-info">
-              {/* Segmento RFM */}
-              <div className="client-segment-box">
-                <div className="segment-label">Segmento</div>
-                <div className={`segment-badge-large ${rfmSegment.class || 'bg-secondary'}`}> 
-                  <span className="segment-emoji">{rfmSegment.emoji || '👤'}</span>
-                  <span className="segment-name">{clientDetails.tier || 'Cliente'}</span>
-                </div>
-              </div>
-              
-              {/* Visita e progresso */}
-              <div className="client-visit-info">
-                <div className="visit-date">
-                  <i className="bi bi-calendar-check"></i>
-                  <span>Última visita: <b>{formatDate(clientDetails.last_visit)}</b></span>
-                </div>
-                {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
-                  <div className="progress-bar-container">
-                    <div className="progress-label">
-                      Próximo prêmio: <b>{clientDetails.next_reward_gap.name}</b>
-                    </div>
-                    <div className="progress-bar-wrapper">
-                      <div className="progress-bar" 
-                           style={{width: `${Math.min(100, 100 - (clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required * 100))}%`}}>
-                      </div>
-                    </div>
-                    <div className="progress-values">
-                      <span>Faltam {clientDetails.next_reward_gap.missing_points} pts</span>
-                      <span>{clientDetails.next_reward_gap.points_required} pts</span>
+              {/* Próximo prêmio e progresso - layout escuro com barra */}
+              {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+                <div className="progress-bar-container">
+                  <div className="progress-label">
+                    Próximo prêmio: <b>{clientDetails.next_reward_gap.name}</b>
+                  </div>
+                  <div className="progress-bar-wrapper">
+                    <div className="progress-bar" 
+                         style={{width: `${Math.min(100, 100 - (clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required * 100))}%`}}>
                     </div>
                   </div>
-                )}
-              </div>
-              
-              {/* Área de notificações importantes */}
-              {Array.isArray(clientDetails.available_rewards) && clientDetails.available_rewards.length > 0 && (
+                  <div className="progress-values">
+                    <span>Faltam {clientDetails.next_reward_gap.missing_points} pts</span>
+                    <span>{clientDetails.next_reward_gap.points_required} pts</span>
+                  </div>
+                </div>
+              )}
+              {/* Área de notificações importantes - outros prêmios */}
+              {Array.isArray(clientDetails.available_rewards) && clientDetails.available_rewards.length > 0 && !clientDetails.next_reward_gap && (
                 <div className="client-notification reward-notification">
                   <div className="notification-icon">
                     <i className="bi bi-gift-fill"></i>
@@ -521,10 +536,11 @@ function ResultPage() {
               display: flex;
               flex-direction: column;
               height: 100%;
-              padding: 14px;
+              padding: 32px 22px 24px 22px; /* padding maior para respiro */
               color: white;
               overflow-y: auto;
               scrollbar-width: none;
+              position: relative;
             }
             
             .client-visor-content::-webkit-scrollbar {
