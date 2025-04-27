@@ -474,14 +474,16 @@ function ResultPage() {
                   <span className="points-value">{clientDetails.current_points || clientDetails.points || 0}</span>
                   <span className="points-label">pontos</span>
                 </div>
-                {/* Classificação RFM - Destaque sem fundo */}
-                <div className="client-rfm-info" style={{display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 8}}>
-                  <span className="rfm-segment-emoji" style={{fontSize: 28}}>{rfmSegment.emoji || '🏆'}</span>
-                  <span className="rfm-segment-name" style={{fontWeight: 700, fontSize: 18, color: rfmSegment.color || '#2E8B57'}}>
-                    Campeões
-                  </span>
-                  <span className="rfm-scores" style={{marginLeft: 12, fontSize: 13, color: '#aaa'}}>R: {rfmData.recency || 0} | F: {rfmData.frequency || 0} | M: {rfmData.monetary || 0}</span>
-                </div>
+                {/* Exibe o segmento RFM apenas se houver valor válido */}
+                {clientDetails.rfm_segment && (
+                  <div className="client-rfm-info" style={{display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 8}}>
+                    <span className="rfm-segment-emoji" style={{fontSize: 28}}>{RFM_SEGMENTS[clientDetails.rfm_segment]?.emoji || '🏆'}</span>
+                    <span className="rfm-segment-name" style={{fontWeight: 700, fontSize: 18, color: RFM_SEGMENTS[clientDetails.rfm_segment]?.color || '#2E8B57'}}>
+                      {clientDetails.rfm_segment}
+                    </span>
+                    <span className="rfm-scores" style={{marginLeft: 12, fontSize: 13, color: '#aaa'}}>R: {rfmData.recency || 0} | F: {rfmData.frequency || 0} | M: {rfmData.monetary || 0}</span>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -536,11 +538,13 @@ function ResultPage() {
               display: flex;
               flex-direction: column;
               height: 100%;
-              padding: 32px 22px 24px 22px; /* padding maior para respiro */
+              padding: 38px 22px 38px 22px; /* padding maior para garantir visibilidade dos textos QR-Scanner e ZUPY-2025-REV1 */
               color: white;
               overflow-y: auto;
               scrollbar-width: none;
               position: relative;
+              box-sizing: border-box;
+              min-height: 420px;
             }
             
             .client-visor-content::-webkit-scrollbar {
