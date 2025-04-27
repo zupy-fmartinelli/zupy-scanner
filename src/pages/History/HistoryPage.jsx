@@ -126,24 +126,28 @@ function HistoryPage() {
       if (clientName) subtitle = clientName;
 
     } else if (resultData && resultData.success === true) {
-      colorClass = 'text-white'; // Alterado para branco
+      // Definir cores padrão de sucesso
+      colorClass = 'text-success'; // Verde padrão para sucesso genérico
       icon = 'bi-check-circle';
       title = 'Sucesso';
 
       if (resultData.scan_type === 'loyalty_card') {
         title = 'Pontos Adicionados';
         icon = 'bi-coin';
+        colorClass = 'text-success'; // Manter verde para pontos
         details = `${resultData.points_awarded || 'N/A'} pontos`;
-        subtitle = `${clientName || 'Cliente'} ${cardNumber ? `(${cardNumber})` : ''}`; // Adiciona cartão no subtítulo
+        subtitle = `${clientName || 'Cliente'} ${cardNumber ? `(${cardNumber})` : ''}`;
       } else if (resultData.scan_type === 'coupon') {
-         if (resultData.can_redeem === false && resultData.message?.toLowerCase().includes('resgatado')) { // Verifica se foi resgatado
+         if (resultData.can_redeem === false && resultData.message?.toLowerCase().includes('resgatado')) {
              title = 'Cupom Resgatado';
              icon = 'bi-gift-fill';
+             colorClass = 'text-info'; // Azul claro para resgate
              details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
              subtitle = `Resgatado por ${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
          } else {
-             title = 'Cupom Válido'; // Se não foi resgatado, era apenas uma validação
+             title = 'Cupom Válido';
              icon = 'bi-ticket-perforated';
+             colorClass = 'text-primary'; // Azul padrão para cupom válido (verificação)
              details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
              subtitle = `${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
          }

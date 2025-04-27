@@ -1,27 +1,30 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNetwork } from '../../contexts/NetworkContext';
 import { getApiUrl, setItem } from '../../utils/storage';
 import { isNative, getPlatform } from '../../utils/platform';
 import { syncPendingOperations, getPendingOperations } from '../../utils/offlineSync';
-import MainLayout from '../../components/layout/MainLayout';
+import SimpleLayout from '../../components/layout/SimpleLayout'; // Usar SimpleLayout
 
 function SettingsPage() {
+  const navigate = useNavigate(); // Adicionar useNavigate
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, pendingCount } = useNetwork();
-  
+
   const [apiUrl, setApiUrl] = useState('');
   const [showApiUrlForm, setShowApiUrlForm] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [platformInfo, setPlatformInfo] = useState({});
-  
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // Estado para o modal
+
   // Load API URL and platform info
   useEffect(() => {
     const loadSettings = async () => {
       const storedApiUrl = await getApiUrl();
       setApiUrl(storedApiUrl);
-      
+
       // Get platform info
       setPlatformInfo({
         platform: getPlatform(),
@@ -30,14 +33,14 @@ function SettingsPage() {
         onLine: navigator.onLine,
       });
     };
-    
+
     loadSettings();
   }, []);
-  
+
   // Handle API URL form submission
   const handleApiUrlSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       // Basic validation
       let url = apiUrl.trim();
@@ -45,13 +48,13 @@ function SettingsPage() {
         toast.error('URL não pode ser vazia');
         return;
       }
-      
+
       // Ensure URL has protocol
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
         setApiUrl(url);
       }
-      
+
       // Save API URL
       await setItem('api_url', url);
       setShowApiUrlForm(false);
@@ -61,18 +64,18 @@ function SettingsPage() {
       console.error('Error saving API URL:', error);
     }
   };
-  
+
   // Force sync all pending operations
   const handleForceSync = async () => {
     if (!isOnline) {
       toast.error('Você está offline. Não é possível sincronizar.');
       return;
     }
-    
+
     try {
       setIsSyncing(true);
       const result = await syncData();
-      
+
       if (result.synced > 0) {
         toast.success(`${result.synced} operações sincronizadas com sucesso`);
       } else if (result.pending === 0 && result.failed === 0) {
@@ -87,45 +90,54 @@ function SettingsPage() {
       setIsSyncing(false);
     }
   };
-  
+
+  // Função para lidar com o logout real
+  const handleLogoutConfirm = async () => {
+    await logout();
+    setShowLogoutModal(false); // Fechar modal após logout
+    navigate('/auth'); // Redirecionar para auth após logout
+  };
+
+
   return (
-    <MainLayout title="Configurações" activeMenu="settings">
+    <SimpleLayout title="Configurações" activeMenu="settings">
       <div className="container py-4">
         <div className="row justify-content-center">
-          <div className="col-md-8 col-lg-6">
+          {/* Usar col-12 para ocupar largura total */}
+          <div className="col-12">
             {/* Scanner info */}
-            <div className="card mb-4 bg-white border-0 shadow-sm">
-              <div className="card-body">
+            <div className="card mb-4 bg-dark border-secondary shadow-sm"> {/* Ajustado para tema escuro */}
+              <div className="card-body text-white"> {/* Ajustado para tema escuro */}
                 <h5 className="card-title mb-3">Informações do Scanner</h5>
-                
+
                 <div className="mb-3">
                   <label className="form-label text-muted small">Nome do Scanner</label>
-                  <div className="form-control-plaintext">
+                  <div className="form-control-plaintext text-white"> {/* Ajustado para tema escuro */}
                     {scannerData?.name || 'Scanner não identificado'}
                   </div>
                 </div>
-                
+
                 <div className="mb-3">
                   <label className="form-label text-muted small">ID do Scanner</label>
-                  <div className="form-control-plaintext font-monospace small">
+                  <div className="form-control-plaintext font-monospace small text-white-50"> {/* Ajustado para tema escuro */}
                     {scannerData?.id || 'N/A'}
                   </div>
                 </div>
-                
+
                 <div className="mb-0">
                   <label className="form-label text-muted small">Operador</label>
-                  <div className="form-control-plaintext">
+                  <div className="form-control-plaintext text-white"> {/* Ajustado para tema escuro */}
                     {userData?.name || 'Usuário não identificado'}
                   </div>
                 </div>
               </div>
             </div>
-            
+
             {/* Conexão com API */}
-            <div className="card mb-4 border-0 shadow-sm">
-              <div className="card-body">
+            <div className="card mb-4 bg-dark border-secondary shadow-sm"> {/* Ajustado para tema escuro */}
+              <div className="card-body text-white"> {/* Ajustado para tema escuro */}
                 <h5 className="card-title mb-3">Conexão de API</h5>
-                
+
                 <div className="mb-3">
                   <div className="d-flex align-items-center mb-2">
                     <span className={`badge me-2 ${isOnline ? 'bg-success' : 'bg-danger'}`}>
@@ -133,14 +145,14 @@ function SettingsPage() {
                     </span>
                     <span className="text-muted">Status da API</span>
                   </div>
-                  
+
                   <div className="alert alert-secondary">
                     <i className="bi bi-info-circle me-2"></i>
                     <small>Endpoint: <span className="font-monospace">{apiUrl || 'https://api.zupy.com'}</span></small>
                   </div>
                 </div>
-                
-                <button 
+
+                <button
                   className="btn btn-primary"
                   onClick={async () => {
                     try {
@@ -148,14 +160,14 @@ function SettingsPage() {
                         toast.warning('Você está offline. Não é possível testar a conexão.');
                         return;
                       }
-                      
+
                       toast.info('Testando conexão com a API...');
-                      
+
                       const response = await fetch(`${apiUrl}/scanner/api/v1/ping/`, {
                         method: 'GET',
                         headers: { 'Accept': 'application/json' }
                       });
-                      
+
                       if (response.ok) {
                         toast.success('Conexão com a API estabelecida com sucesso!');
                       } else {
@@ -171,12 +183,12 @@ function SettingsPage() {
                 </button>
               </div>
             </div>
-            
+
             {/* Sync settings */}
-            <div className="card mb-4 bg-white border-0 shadow-sm">
-              <div className="card-body">
+            <div className="card mb-4 bg-dark border-secondary shadow-sm"> {/* Ajustado para tema escuro */}
+              <div className="card-body text-white"> {/* Ajustado para tema escuro */}
                 <h5 className="card-title mb-3">Sincronização</h5>
-                
+
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
                     <div className="d-flex align-items-center">
@@ -187,7 +199,7 @@ function SettingsPage() {
                         Status da Conexão
                       </span>
                     </div>
-                    
+
                     {pendingCount > 0 && (
                       <div className="text-warning small mt-1">
                         <i className="bi bi-exclamation-triangle me-1"></i>
@@ -195,8 +207,8 @@ function SettingsPage() {
                       </div>
                     )}
                   </div>
-                  
-                  <button 
+
+                  <button
                     className="btn btn-primary"
                     onClick={handleForceSync}
                     disabled={!isOnline || isSyncing || pendingCount === 0}
@@ -214,19 +226,19 @@ function SettingsPage() {
                     )}
                   </button>
                 </div>
-                
-                <div className="form-text">
+
+                <div className="form-text text-white-50"> {/* Ajustado para tema escuro */}
                   A sincronização automática ocorre a cada 60 segundos quando você está online.
                 </div>
               </div>
             </div>
-            
+
             {/* API Debug */}
-            <div className="card mb-4 bg-white border-0 shadow-sm">
-              <div className="card-body">
+            <div className="card mb-4 bg-dark border-secondary shadow-sm"> {/* Ajustado para tema escuro */}
+              <div className="card-body text-white"> {/* Ajustado para tema escuro */}
                 <h5 className="card-title mb-3">Depuração de API</h5>
-                
-                <button 
+
+                <button
                   className="btn btn-sm btn-outline-secondary"
                   type="button"
                   data-bs-toggle="collapse"
@@ -234,51 +246,51 @@ function SettingsPage() {
                 >
                   Mostrar Endpoints
                 </button>
-                
+
                 <div className="collapse mt-3" id="apiDebug">
-                  <div className="card card-body bg-light">
+                  <div className="card card-body bg-light text-dark"> {/* Ajustado para tema claro interno */}
                     <h6 className="mb-3">Endpoints do Scanner</h6>
-                    
+
                     <div className="mb-3">
                       <label className="form-label text-muted small">Autenticação (POST)</label>
                       <div className="input-group mb-1">
                         <span className="input-group-text font-monospace small">{apiUrl}</span>
-                        <input 
-                          type="text" 
-                          className="form-control font-monospace small" 
-                          value="/scanner/api/v1/auth/" 
-                          readOnly 
+                        <input
+                          type="text"
+                          className="form-control font-monospace small"
+                          value="/scanner/api/v1/auth/"
+                          readOnly
                         />
                       </div>
                     </div>
-                    
+
                     <div className="mb-3">
                       <label className="form-label text-muted small">Validação de Token (GET)</label>
                       <div className="input-group mb-1">
                         <span className="input-group-text font-monospace small">{apiUrl}</span>
-                        <input 
-                          type="text" 
-                          className="form-control font-monospace small" 
-                          value="/scanner/api/v1/auth-token/" 
-                          readOnly 
+                        <input
+                          type="text"
+                          className="form-control font-monospace small"
+                          value="/scanner/api/v1/auth-token/"
+                          readOnly
                         />
                       </div>
                     </div>
-                    
+
                     <div className="mb-3">
                       <label className="form-label text-muted small">Logout (POST)</label>
                       <div className="input-group mb-1">
                         <span className="input-group-text font-monospace small">{apiUrl}</span>
-                        <input 
-                          type="text" 
-                          className="form-control font-monospace small" 
-                          value="/scanner/api/v1/logout/" 
-                          readOnly 
+                        <input
+                          type="text"
+                          className="form-control font-monospace small"
+                          value="/scanner/api/v1/logout/"
+                          readOnly
                         />
                       </div>
                     </div>
-                    
-                    <button 
+
+                    <button
                       className="btn btn-sm btn-primary"
                       onClick={async () => {
                         try {
@@ -298,24 +310,24 @@ function SettingsPage() {
             </div>
 
             {/* App info */}
-            <div className="card mb-4 bg-white border-0 shadow-sm">
-              <div className="card-body">
+            <div className="card mb-4 bg-dark border-secondary shadow-sm"> {/* Ajustado para tema escuro */}
+              <div className="card-body text-white"> {/* Ajustado para tema escuro */}
                 <h5 className="card-title mb-3">Informações do App</h5>
-                
+
                 <div className="mb-3">
                   <label className="form-label text-muted small">Versão</label>
-                  <div className="form-control-plaintext">1.0.0</div>
+                  <div className="form-control-plaintext text-white">1.0.0</div> {/* Ajustado para tema escuro */}
                 </div>
-                
+
                 <div className="mb-3">
                   <label className="form-label text-muted small">Plataforma</label>
-                  <div className="form-control-plaintext">
+                  <div className="form-control-plaintext text-white"> {/* Ajustado para tema escuro */}
                     {platformInfo.platform || 'Desconhecida'}
                   </div>
                 </div>
-                
+
                 <div className="mb-0">
-                  <button 
+                  <button
                     className="btn btn-sm btn-outline-secondary"
                     type="button"
                     data-bs-toggle="collapse"
@@ -323,9 +335,9 @@ function SettingsPage() {
                   >
                     Detalhes Técnicos
                   </button>
-                  
+
                   <div className="collapse mt-3" id="appDetails">
-                    <div className="card card-body bg-light">
+                    <div className="card card-body bg-light text-dark"> {/* Ajustado para tema claro interno */}
                       <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>
                         {JSON.stringify(platformInfo, null, 2)}
                       </pre>
@@ -334,16 +346,12 @@ function SettingsPage() {
                 </div>
               </div>
             </div>
-            
-            {/* Logout */}
-            <div className="d-grid gap-2 mb-4">
-              <button 
+
+            {/* Logout - Adicionar mb-5 para mais espaço antes do rodapé */}
+            <div className="d-grid gap-2 mb-5">
+              <button
                 className="btn btn-danger"
-                onClick={() => {
-                  if (confirm('Tem certeza que deseja sair do aplicativo?')) {
-                    logout();
-                  }
-                }}
+                onClick={() => setShowLogoutModal(true)} // Abrir o modal
               >
                 <i className="bi bi-box-arrow-right me-2"></i>
                 Sair do Aplicativo
@@ -352,7 +360,53 @@ function SettingsPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
+
+      {/* Modal de Confirmação de Logout */}
+      {showLogoutModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }} tabIndex="-1">
+          <div className="modal-dialog modal-dialog-centered">
+            {/* Ajustar cores do modal para tema escuro */}
+            <div className="modal-content bg-dark text-white border-secondary">
+              <div className="modal-header border-secondary">
+                <h5 className="modal-title">Confirmação</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white" // Botão de fechar branco
+                  onClick={() => setShowLogoutModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Tem certeza que deseja sair do aplicativo?</p>
+                {!isOnline && (
+                  <div className="alert alert-warning" role="alert">
+                    <small>
+                      <i className="bi bi-exclamation-triangle me-2"></i>
+                      Você está offline. Dados não sincronizados podem ser perdidos.
+                    </small>
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer border-secondary">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowLogoutModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleLogoutConfirm} // Chamar a função de logout confirmada
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </SimpleLayout>
   );
 }
 

@@ -16,8 +16,9 @@ import ZupyLogo from '../../assets/images/pwa-scanner-branco.svg';
  * @param {React.ReactNode} props.visor - Custom visor component
  * @param {string} props.tabActive - Active tab in navigation
  * @param {Function} props.onTabChange - Tab change handler
+ * @param {boolean} props.hideStatusInfo - Hide the top status info bar (Online, Operator, etc.)
  */
-function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange }) {
+function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange, hideStatusInfo = false }) { // Added hideStatusInfo prop
   const navigate = useNavigate();
   const { userData, scannerData, logout } = useAuth();
   const { isOnline, syncData, isSyncing, pendingCount } = useNetwork();
@@ -103,34 +104,38 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
 
       {/* Status bar com navegação em tabs */}
       <div className="device-status-bar">
-        <div className="status-tabs">
-          <div className="status-indicator online">
-            <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
-            <span>{isOnline ? 'Online' : 'Offline'}</span>
-          </div>
-
-          <div className="status-indicator user">
-            <i className="bi bi-person-badge"></i>
-            <span>{userData?.name || 'Operador'}</span>
-          </div>
-
-          {scannerData?.name && (
-            <div className="status-indicator device">
-              <i className="bi bi-qr-code-scan"></i>
-              <span>{scannerData.name}</span>
+        {/* Renderiza a barra de status superior apenas se hideStatusInfo for false */}
+        {!hideStatusInfo && (
+          <div className="status-tabs">
+            <div className="status-indicator online">
+              <i className={`bi ${isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
+              <span>{isOnline ? 'Online' : 'Offline'}</span>
             </div>
-          )}
 
-          {pendingCount > 0 && (
-            <div className="status-indicator pending">
-              <i className="bi bi-hourglass-split"></i>
-              <span>{pendingCount} pendente(s)</span>
+            <div className="status-indicator user">
+              <i className="bi bi-person-badge"></i>
+              <span>{userData?.name || 'Operador'}</span>
             </div>
-          )}
-        </div>
 
+            {scannerData?.name && (
+              <div className="status-indicator device">
+                <i className="bi bi-qr-code-scan"></i>
+                <span>{scannerData.name}</span>
+              </div>
+            )}
+
+            {pendingCount > 0 && (
+              <div className="status-indicator pending">
+                <i className="bi bi-hourglass-split"></i>
+                <span>{pendingCount} pendente(s)</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Renderiza as abas de navegação se onTabChange for fornecido */}
         {onTabChange && (
-          <div className="nav-tabs">
+          <div className={`nav-tabs ${hideStatusInfo ? 'no-top-border' : ''}`}> {/* Adiciona classe se status superior estiver oculto */}
             <button
               className={`nav-tab ${tabActive === 'details' ? 'active' : ''}`}
               data-tab="details"
@@ -362,13 +367,21 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           background: linear-gradient(180deg, #32384a 0%, #282c3d 100%);
           border-top: 1px solid #454c63;
           border-bottom: 1px solid #454c63;
-          padding: 10px 0 0;
+          padding: 10px 0 0; /* Padding inferior removido se não houver nav-tabs */
           font-size: 15px;
           color: #e0e0e0;
           /* margin-top: 12px; */ /* Removido para colar no header/visor */
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           height: auto;
         }
+        /* Adicionar padding inferior apenas se houver nav-tabs */
+        .device-status-bar:has(.nav-tabs) {
+            padding-bottom: 0;
+        }
+        .device-status-bar:not(:has(.nav-tabs)) {
+            padding-bottom: 10px;
+        }
+
 
         .status-tabs {
           display: flex;
@@ -377,8 +390,13 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           overflow-x: auto;
           white-space: nowrap;
           gap: 16px;
-          margin-bottom: 8px;
+          margin-bottom: 8px; /* Espaço antes das nav-tabs, se existirem */
         }
+        /* Remover margem inferior se não houver nav-tabs */
+         .device-status-bar:not(:has(.nav-tabs)) .status-tabs {
+            margin-bottom: 0;
+        }
+
 
         .status-indicator {
           display: flex;
@@ -404,6 +422,11 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
           width: 100%;
           border-top: 1px solid rgba(255,255,255,0.1);
         }
+        /* Remover borda superior se a barra de status superior estiver oculta */
+        .nav-tabs.no-top-border {
+            border-top: none;
+        }
+
 
         .nav-tab {
           flex: 1;
