@@ -438,7 +438,8 @@ function ResultPage() {
       tabActive={activeTab}
       onTabChange={setActiveTab}
       visor={
-        <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : (finalized ? 'success' : 'idle'))}>
+        // LED laranja no modo de resgate
+<Visor mode={drawerOpen && drawerType === 'resgate' ? 'processing' : (drawerOpen && drawerType === 'pontos' ? 'user_input' : (finalized ? 'success' : 'idle'))}>
           <div className="client-visor-content">
             {/* Status de pontos adicionados, quando aplicável */}
             {finalized && points > 0 && (
@@ -474,8 +475,8 @@ function ResultPage() {
                   <span className="points-value">{clientDetails.current_points || clientDetails.points || 0}</span>
                   <span className="points-label">pontos</span>
                 </div>
-                {/* Exibe o segmento RFM apenas se houver valor válido */}
-                {clientDetails.rfm_segment && (
+                {/* Exibe o segmento RFM apenas se houver valor válido e não for cupom */}
+                {!isCoupon && clientDetails.rfm_segment && (
                   <div className="client-rfm-info" style={{display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 8}}>
                     <span className="rfm-segment-emoji" style={{fontSize: 28}}>{RFM_SEGMENTS[clientDetails.rfm_segment]?.emoji || '🏆'}</span>
                     <span className="rfm-segment-name" style={{fontWeight: 700, fontSize: 18, color: RFM_SEGMENTS[clientDetails.rfm_segment]?.color || '#2E8B57'}}>
@@ -486,6 +487,27 @@ function ResultPage() {
                 )}
               </div>
             </div>
+            {/* Detalhes do prêmio/cupom em destaque quando for cupom para resgate - FORA do quadro escuro do perfil */}
+            {isCoupon && canRedeem && (
+              <div className="coupon-visor-highlight" style={{margin: '16px 0 0 0', background: 'rgba(255,153,0,0.15)', border: '1.5px solid #ff9900', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, width: '100%'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                  <i className="bi bi-gift" style={{fontSize: 24, color: '#ff9900'}}></i>
+                  <span style={{fontWeight: 700, fontSize: 19, color: '#ff9900'}}>Prêmio para Resgate</span>
+                </div>
+                <div style={{fontWeight: 600, fontSize: 17, color: '#fff'}}>{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
+                <div style={{fontSize: 15, color: '#fff', opacity: 0.87}}>{clientDetails.description || clientDetails.reward_description || ''}</div>
+                <div style={{fontSize: 14, color: '#ff9900', fontWeight: 500}}>
+                  {clientDetails.points_required ? `${clientDetails.points_required} pontos` : ''}
+                  {clientDetails.expiry_date ? ` · Válido até ${new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR')}` : ''}
+                </div>
+                {/* Código do cupom (se disponível) */}
+                {(clientDetails.code || clientDetails.coupon_code || clientDetails.barcode_value) && (
+                  <div style={{marginTop: 6, fontSize: 14, color: '#fff', background: '#ff9900', borderRadius: 7, padding: '4px 12px', fontWeight: 700, letterSpacing: 1}}>
+                    {String(clientDetails.code || clientDetails.coupon_code || (String(clientDetails.barcode_value).match(/\/([A-Z]{2}-[A-Z0-9]+)/i)?.[1] || '')).toUpperCase()}
+                  </div>
+                )}
+              </div>
+            )}
             
             {/* Data da última visita - destaque separado */}
             <div className="client-last-visit-box" style={{marginBottom: 18, marginTop: 10, display: 'flex', alignItems: 'center', gap: 8}}>
@@ -501,8 +523,8 @@ function ResultPage() {
 
             {/* Informações secundárias */}
             <div className="client-additional-info">
-              {/* Próximo prêmio e progresso - layout escuro com barra */}
-              {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
+              {/* Próximo prêmio e progresso - NÃO mostrar quando for cupom para resgate */}
+              {!isCoupon && clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
                 <div className="progress-bar-container">
                   <div className="progress-label">
                     Próximo prêmio: <b>{clientDetails.next_reward_gap.name}</b>
@@ -537,14 +559,15 @@ function ResultPage() {
             .client-visor-content {
               display: flex;
               flex-direction: column;
-              height: 100%;
-              padding: 38px 22px 38px 22px; /* padding maior para garantir visibilidade dos textos QR-Scanner e ZUPY-2025-REV1 */
+              height: auto;
+              padding: 24px 14px 24px 14px; /* padding ajustado para evitar scroll desnecessário */
               color: white;
-              overflow-y: auto;
+              overflow-y: visible;
               scrollbar-width: none;
               position: relative;
               box-sizing: border-box;
-              min-height: 420px;
+              min-height: 300px;
+              max-height: 100vh;
             }
             
             .client-visor-content::-webkit-scrollbar {
