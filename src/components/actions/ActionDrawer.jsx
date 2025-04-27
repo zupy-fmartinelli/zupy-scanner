@@ -208,19 +208,11 @@ function ActionDrawer({
                 {clientDetails.title || 'Cupom'}
               </h4>
               {/* Código do cupom destacado logo abaixo do título */}
-              {(() => {
-                let code = clientDetails.code || clientDetails.coupon_code;
-                if (!code && clientDetails.barcode_value) {
-                  // Formato: 'zuppy://coupon/1497f7a420c39eea0741c071128/CP-1497F7A4'
-                  const match = String(clientDetails.barcode_value).match(/\/([A-Z]{2}-[A-Z0-9]+)/i);
-                  if (match) code = match[1];
-                }
-                return code ? (
-                  <div className="coupon-code" style={{margin: '8px 0 10px 0', fontWeight: 700, fontSize: 16, color: '#ff9900', background: 'rgba(255,153,0,0.11)', borderRadius: 7, padding: '4px 14px', letterSpacing: 1}}>
-                    {String(code).toUpperCase()}
-                  </div>
-                ) : null;
-              })()}
+              {clientDetails.code || clientDetails.coupon_code ? (
+                <div className="coupon-code" style={{margin: '8px 0 10px 0', fontWeight: 700, fontSize: 16, color: '#ff9900', background: 'rgba(255,153,0,0.11)', borderRadius: 7, padding: '4px 14px', letterSpacing: 1}}>
+                  {(clientDetails.code || clientDetails.coupon_code).toUpperCase()}
+                </div>
+              ) : null}
               <p className="coupon-description">
                 {clientDetails.description || 'Descrição não disponível'}
               </p>

@@ -31,25 +31,7 @@ const RFM_SEGMENTS = {
   "default": { emoji: "⭐", color: "#808080", class: "bg-secondary-subtle text-secondary" }
 };
 
-// Função para formatar código de cartão - adaptada para KSUID
-const formatCardCode = (cardId) => {
-  if (!cardId) return "-";
-  
-  // Se for string KSUID (formato padrão: 27 caracteres alfanuméricos)
-  if (typeof cardId === 'string' && cardId.length >= 20) {
-    // Exibir o KSUID completo para referência exata
-    return cardId.toUpperCase();
-  }
-  
-  // Para códigos numéricos simples
-  if (typeof cardId === 'number' || /^\d+$/.test(cardId)) {
-    return `ZP-${cardId}`;
-  }
-  
-  // Em outros casos - manter comportamento padronizado
-  const clean = typeof cardId === 'string' ? cardId : String(cardId);
-  return clean.toUpperCase();
-};
+// O backend deve fornecer o card_number já formatado para exibição, sem necessidade de processamento no frontend.
 
 function ResultPage() {
   const navigate = useNavigate();
@@ -88,25 +70,6 @@ function ResultPage() {
     }, 200);
     // eslint-disable-next-line
   }, [finalized, currentScan, redeemed]);
-  // Calcula o segmento RFM - Implementado como useCallback para evitar recriações
-  const getRfmSegment = useCallback((rfm) => {
-    if (!rfm) return RFM_SEGMENTS.default;
-    
-    // Lógica simplificada para determinar o segmento com base nos valores RFM
-    const r = rfm.recency || 0;
-    const f = rfm.frequency || 0;
-    const m = rfm.monetary || 0;
-    
-    if (r >= 4 && f >= 4 && m >= 4) return RFM_SEGMENTS["Campeões"] || RFM_SEGMENTS.default;
-    if (r >= 4 && f >= 3 && m >= 3) return RFM_SEGMENTS["Clientes fiéis"] || RFM_SEGMENTS.default;
-    if (r >= 3 && f >= 2 && m >= 2) return RFM_SEGMENTS["Lealdade potencial"] || RFM_SEGMENTS.default;
-    if (r >= 4 && f <= 2 && m <= 2) return RFM_SEGMENTS["Clientes Recentes"] || RFM_SEGMENTS.default;
-    if (r <= 2 && f >= 3 && m >= 3) return RFM_SEGMENTS["Precisam de atenção"] || RFM_SEGMENTS.default;
-    if (r <= 2 && f <= 2 && m >= 3) return RFM_SEGMENTS["Em risco"] || RFM_SEGMENTS.default;
-    if (r <= 1 && f <= 1 && m <= 1) return RFM_SEGMENTS["Perdido"] || RFM_SEGMENTS.default;
-    
-    return RFM_SEGMENTS["Regular"] || RFM_SEGMENTS.default;
-  }, []);
   
   // Redirect if no current scan
   useEffect(() => {
@@ -121,8 +84,8 @@ function ResultPage() {
   
   // Compute client details once
   const clientDetails = currentScan.result?.details || {};
-  const rfmData = clientDetails.rfm || {};
-  const rfmSegment = getRfmSegment(rfmData);
+  // O backend deve fornecer o segmento RFM já classificado
+  const rfmSegment = clientDetails.rfm_segment;
   const isCoupon = currentScan.result?.scan_type === 'coupon';
   const isLoyaltyCard = currentScan.result?.scan_type === 'loyalty_card';
   const canRedeem = currentScan.result?.can_redeem === true;
@@ -482,7 +445,6 @@ function ResultPage() {
                     <span className="rfm-segment-name" style={{fontWeight: 700, fontSize: 18, color: RFM_SEGMENTS[clientDetails.rfm_segment]?.color || '#2E8B57'}}>
                       {clientDetails.rfm_segment}
                     </span>
-                    <span className="rfm-scores" style={{marginLeft: 12, fontSize: 13, color: '#aaa'}}>R: {rfmData.recency || 0} | F: {rfmData.frequency || 0} | M: {rfmData.monetary || 0}</span>
                   </div>
                 )}
               </div>
@@ -968,15 +930,15 @@ function ResultPage() {
               <div className={styles['device-info-row']}>
                 <div className={styles['device-info-label']}>Cartão</div>
                 <div className={styles['device-info-value']}>
-                  {formatCardCode(clientDetails.card_number)}
+                  {clientDetails.card_number} // O backend deve fornecer o card_number já formatado
                 </div>
               </div>
               
               <div className={styles['device-info-row']}>
                 <div className={styles['device-info-label']}>Segmento</div>
                 <div className={styles['device-info-value']}>
-                  <span className={`badge ${rfmSegment.class?.replace('text-', 'text-bg-')}`}>
-                    {rfmSegment.emoji} {rfmSegment.label || 'Cliente'}
+                  <span className={`badge ${RFM_SEGMENTS[clientDetails.rfm_segment]?.class?.replace('text-', 'text-bg-')}`}>
+                    {RFM_SEGMENTS[clientDetails.rfm_segment]?.emoji} {clientDetails.rfm_segment}
                   </span>
                 </div>
               </div>
