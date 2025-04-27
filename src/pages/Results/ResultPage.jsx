@@ -429,89 +429,38 @@ function ResultPage() {
             currentScan={currentScan} 
             clientDetails={clientDetails} 
             rfmSegment={rfmSegment} 
-            reward={clientDetails.next_reward_gap} 
-            coupon={clientDetails.coupon} 
-            finalized={finalized} 
-            addedPoints={finalized ? points : 0}
           />
           <div className="client-visor-content">
-            {/* Área de status principal - mais visível para feedback */}
-            <div className="client-status-header">
-              {showStatus ? (
-                <div className={`status-message ${statusType}`}>
-                  <i className={`bi ${
-                    statusType === 'success' ? 'bi-check-circle-fill' : 
-                    statusType === 'error' ? 'bi-exclamation-circle-fill' : 
-                    'bi-info-circle-fill'
-                  }`}></i>
-                  <span>{statusMessage}</span>
-                </div>
-              ) : (
-                <div className="status-message success">
-                  <i className="bi bi-check-circle-fill"></i>
-                  <span>Cliente identificado</span>
-                </div>
-              )}
-            </div>
-            
-            {/* Área principal com foto e nome em destaque */}
+            {/* Área principal do visor com layout antigo e dados atualizados */}
             <div className="client-info-header">
-              {/* Foto do cliente - maior e mais destacada */}
-              <div className="client-photo-area">
-                {clientDetails.photo_url ? (
-                  <img 
-                    src={clientDetails.photo_url} 
-                    alt="Foto" 
-                    className="client-photo"
-                  />
-                ) : (
-                  <div className="client-photo-placeholder">
-                    <i className="bi bi-person fs-2" />
-                  </div>
-                )}
-                
-                {/* Badge de válido integrado à foto */}
-                {isLoyaltyCard && (
-                  <div className="client-valid-indicator">
-                    <i className="bi bi-check-circle-fill"></i>
-                  </div>
-                )}
+              {/* Nome do cliente - maior e mais destacado */}
+              <div className="client-name-large">{clientDetails.client_name || '-'}</div>
+              {/* Pontos em destaque */}
+              <div className="client-points-large">
+                <span className="points-value">{clientDetails.points || 0}</span>
+                <span className="points-label">pontos</span>
               </div>
-              
-              <div className="client-details">
-                {/* Nome do cliente - maior e mais destacado */}
-                <div className="client-name-large">{clientDetails.client_name || '-'}</div>
-                
-                {/* Pontos em destaque */}
-                <div className="client-points-large">
-                  <span className="points-value">{clientDetails.points || 0}</span>
-                  <span className="points-label">pontos</span>
-                </div>
-                
-                <div className="client-card-info">
-                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
-                </div>
+              {/* Cartão */}
+              <div className="client-card-info">
+                <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
               </div>
             </div>
-            
-            {/* Informações secundárias - mais organizadas */}
+            {/* Informações secundárias */}
             <div className="client-additional-info">
-              {/* Segmento RFM com emoji e cores em destaque */}
+              {/* Segmento RFM */}
               <div className="client-segment-box">
                 <div className="segment-label">Segmento</div>
-                <div className={`segment-badge-large ${rfmSegment.class || 'bg-secondary'}`}>
+                <div className={`segment-badge-large ${rfmSegment.class || 'bg-secondary'}`}> 
                   <span className="segment-emoji">{rfmSegment.emoji || '👤'}</span>
                   <span className="segment-name">{rfmSegment.label || 'Cliente'}</span>
                 </div>
               </div>
-              
-              {/* Informações de visita e progresso */}
+              {/* Visita e progresso */}
               <div className="client-visit-info">
                 <div className="visit-date">
                   <i className="bi bi-calendar-check"></i>
                   <span>Última visita: <b>{formatDate(clientDetails.last_visit)}</b></span>
                 </div>
-                
                 {clientDetails.next_reward_gap && clientDetails.next_reward_gap.name && (
                   <div className="progress-bar-container">
                     <div className="progress-label">
