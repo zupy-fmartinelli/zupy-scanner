@@ -404,12 +404,34 @@ function ResultPage() {
         // LED laranja no modo de resgate
 <Visor mode={drawerOpen && drawerType === 'resgate' ? 'processing' : (drawerOpen && drawerType === 'pontos' ? 'user_input' : (finalized ? 'success' : 'idle'))}>
           <div className="client-visor-content">
-            {/* Status de pontos adicionados, quando aplicável */}
+            {/* Tela de sucesso após operação completa */}
             {finalized && points > 0 && (
-              <div className="client-status-header">
-                <div className="status-message success">
-                  <i className="bi bi-check-circle-fill"></i>
-                  +{points} pontos adicionados com sucesso!
+              <div className="operation-success-screen">
+                <div className="success-check-container">
+                  <div className="success-check-icon">
+                    <i className="bi bi-check-lg"></i>
+                  </div>
+                </div>
+                <div className="success-message">
+                  <div className="success-title">Operação Concluída!</div>
+                  <div className="success-points">+{points} pontos</div>
+                  <div className="success-detail">Total atual: {clientDetails.current_points || clientDetails.points || points} pontos</div>
+                </div>
+              </div>
+            )}
+            
+            {/* Tela de sucesso para resgates */}
+            {redeemed && (
+              <div className="operation-success-screen">
+                <div className="success-check-container redemption">
+                  <div className="success-check-icon redemption">
+                    <i className="bi bi-gift"></i>
+                  </div>
+                </div>
+                <div className="success-message">
+                  <div className="success-title">Prêmio Resgatado!</div>
+                  <div className="success-detail reward-name">{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
+                  <div className="success-points redemption">Resgate efetuado com sucesso</div>
                 </div>
               </div>
             )}
@@ -537,8 +559,114 @@ function ResultPage() {
             }
             
             /* Área de status/mensagens no topo para feedback */
-            .client-status-header {
+            /* Nova tela de sucesso de operação */
+            .operation-success-screen {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.85);
+              z-index: 100;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 20px;
+              animation: fade-in 0.3s ease-out;
+            }
+            
+            .success-check-container {
+              margin-bottom: 24px;
+              width: 110px;
+              height: 110px;
+              border-radius: 50%;
+              background: rgba(57, 255, 20, 0.15);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 0 30px rgba(57, 255, 20, 0.5);
+              animation: pulse-success 2s infinite ease-in-out;
+            }
+            
+            .success-check-container.redemption {
+              background: rgba(255, 153, 0, 0.15);
+              box-shadow: 0 0 30px rgba(255, 153, 0, 0.5);
+            }
+            
+            .success-check-icon {
+              width: 90px;
+              height: 90px;
+              border-radius: 50%;
+              background: #39FF14;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            }
+            
+            .success-check-icon.redemption {
+              background: #ff9900;
+            }
+            
+            .success-check-icon i {
+              font-size: 54px;
+              color: rgba(0, 0, 0, 0.8);
+              text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+            }
+            
+            .success-message {
+              text-align: center;
+              max-width: 280px;
+            }
+            
+            .success-title {
+              font-size: 24px;
+              font-weight: 700;
+              color: white;
+              margin-bottom: 8px;
+              text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            }
+            
+            .success-points {
+              font-size: 36px;
+              font-weight: 800;
+              color: #39FF14;
+              margin-bottom: 8px;
+              text-shadow: 0 0 12px rgba(57, 255, 20, 0.7);
+              letter-spacing: 0.5px;
+            }
+            
+            .success-points.redemption {
+              font-size: 18px;
+              font-weight: 600;
+              color: #ff9900;
+            }
+            
+            .success-detail {
+              font-size: 16px;
+              color: #ffffff;
+              font-weight: 500;
+              opacity: 0.8;
+            }
+            
+            .success-detail.reward-name {
+              font-size: 24px;
+              font-weight: 700;
+              color: #ff9900;
               margin-bottom: 10px;
+              text-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+            }
+            
+            @keyframes pulse-success {
+              0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+              }
+              50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+              }
             }
             
             .status-message {
@@ -803,6 +931,11 @@ function ResultPage() {
             /* Animações */
             @keyframes fade-in {
               from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes slide-up {
+              from { opacity: 0; transform: translateY(20px); }
               to { opacity: 1; transform: translateY(0); }
             }
             
