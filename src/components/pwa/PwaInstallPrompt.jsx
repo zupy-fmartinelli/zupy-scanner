@@ -5,6 +5,8 @@ import { isNative } from '../../utils/platform';
  * Componente que exibe um prompt para instalar o aplicativo como PWA
  */
 function PwaInstallPrompt() {
+  // Nunca renderiza nada em app nativo
+  if (isNative()) return null;
   const [showPrompt, setShowPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   

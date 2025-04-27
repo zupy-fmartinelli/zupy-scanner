@@ -7,7 +7,17 @@
  * @returns {boolean} True if running in Capacitor
  */
 export const isNative = () => {
-  return window.Capacitor && window.Capacitor.isNative;
+  // Detecta ambiente nativo de forma mais robusta
+  if (window.Capacitor) {
+    // Capacitor 3+ geralmente expõe isNative
+    if (window.Capacitor.isNative) return true;
+    // Fallback: se getPlatform existe e retorna android ou ios
+    if (typeof window.Capacitor.getPlatform === 'function') {
+      const platform = window.Capacitor.getPlatform();
+      if (platform === 'android' || platform === 'ios') return true;
+    }
+  }
+  return false;
 };
 
 /**
