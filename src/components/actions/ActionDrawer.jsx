@@ -71,6 +71,11 @@ function ActionDrawer({
     };
   }, [expanded]);
 
+  // Sempre expande o drawer ao abrir
+  useEffect(() => {
+    if (open) setExpanded(true);
+  }, [open]);
+
   if (!open) return null;
   
   const handlePointsSubmit = (e) => {
@@ -283,12 +288,26 @@ function ActionDrawer({
         
         /* Estado recolhido do drawer */
         .device-action-drawer.collapsed {
-          height: 180px; /* Altura reduzida para modo recolhido */
+          height: 80px; /* Área de toque confortável e visual equilibrado */
         }
         
         /* Estado expandido do drawer */
         .device-action-drawer.expanded {
-          height: calc(100vh - 280px); /* Altura ajustada para não ultrapassar a barra central */
+          max-height: 340px;
+          height: auto;
+          min-height: 220px;
+        }
+        
+        @media (min-width: 480px) {
+          .device-action-drawer.expanded {
+            max-height: 380px;
+          }
+        }
+        
+        @media (min-width: 700px) {
+          .device-action-drawer.expanded {
+            max-height: 420px;
+          }
         }
         
         /* Animação para a alça do drawer quando fechado */
