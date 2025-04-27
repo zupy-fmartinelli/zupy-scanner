@@ -68,8 +68,8 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
         </div>
       </div>
       
-      {/* Visor customizado, sempre no topo */}
-      <div className="device-visor-area" ref={visorRef}>
+      {/* Visor customizado, sempre no topo - Adicionar classe condicional */}
+      <div className={`device-visor-area ${visor ? 'has-custom-visor' : ''}`} ref={visorRef}>
         {visor ? (
           visor
         ) : (

@@ -1,0 +1,86 @@
+/* Estilos para HistoryPage.jsx */
+
+.historyContainer {
+  /* Ajusta o padding superior para compensar a ausência do visor
+     e garantir que o conteúdo não fique colado no header padrão */
+  padding-top: 1rem !important;
+  color: #e0e0e0; /* Cor de texto padrão clara */
+}
+
+.filterCard {
+  background-color: rgba(255, 255, 255, 0.05) !important; /* Fundo escuro translúcido */
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.inputGroupText {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #adb5bd;
+}
+
+.searchInput {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.searchInput::placeholder {
+  color: #adb5bd;
+  opacity: 0.7;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 163, 255, 0.25); /* Foco azul Zupy */
+  border-color: #00a3ff;
+}
+
+.emptyHistory {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: #adb5bd !important;
+}
+
+.historyList {
+  /* Remover estilos padrão do list-group */
+  --bs-list-group-color: inherit;
+  --bs-list-group-bg: transparent;
+  --bs-list-group-border-color: rgba(255, 255, 255, 0.1);
+  --bs-list-group-action-hover-color: inherit;
+  --bs-list-group-action-hover-bg: rgba(255, 255, 255, 0.05);
+  --bs-list-group-action-active-color: inherit;
+  --bs-list-group-action-active-bg: rgba(0, 163, 255, 0.1);
+  --bs-list-group-active-border-color: rgba(0, 163, 255, 0.3);
+}
+
+.historyItem {
+  background-color: rgba(255, 255, 255, 0.03); /* Fundo levemente transparente */
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem !important; /* Bordas arredondadas */
+  color: #e0e0e0;
+}
+
+.historyItemTitle {
+  font-weight: 600;
+}
+
+.historyItemDate {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.historyItemDetails {
+  color: #adb5bd;
+  word-break: break-word; /* Quebrar palavras longas se necessário */
+}
+
+/* Ajustes nos botões de filtro */
+.btn-outline-secondary {
+  color: #adb5bd;
+  border-color: #495057;
+}
+
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #495057;
+  border-color: #495057;
+}
