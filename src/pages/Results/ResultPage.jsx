@@ -311,7 +311,13 @@ function ResultPage() {
       const messageLower = data?.message?.toLowerCase() || '';
       const errorField = data?.error; // Campo 'error' específico do backend
 
-      if (status === 409 || errorField === 'INVALID_COUPON' || messageLower.includes('utilizado') || messageLower.includes('expirado') || messageLower.includes('inválido') || messageLower.includes('outra empresa')) {
+      // PRIORIZAR INVALID_QR_CODE
+      if (errorField === 'INVALID_QR_CODE') {
+          errorTitle = 'QR Code Inválido';
+          errorMessage = data?.message || 'Este QR Code não é reconhecido pelo sistema Zupy.';
+          errorIcon = 'bi-question-diamond'; // Ícone diferente para QR inválido
+          errorType = 'invalid-qr-code';
+      } else if (status === 409 || errorField === 'INVALID_COUPON' || messageLower.includes('utilizado') || messageLower.includes('expirado') || messageLower.includes('inválido') || messageLower.includes('outra empresa')) {
          if (messageLower.includes('used') || messageLower.includes('utilizado')) {
             errorTitle = 'CUPOM JÁ UTILIZADO!';
             errorMessage = 'Este cupom já foi utilizado anteriormente e não pode ser resgatado novamente.';
