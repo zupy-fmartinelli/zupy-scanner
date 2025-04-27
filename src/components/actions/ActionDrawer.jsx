@@ -187,7 +187,7 @@ function ActionDrawer({
           <div className="coupon-form">
             {/* Cabeçalho com status do cupom */}
             <div className="coupon-header">
-              <h3>Resgatar Cupom</h3>
+              <h3>Resgatar Cupom{clientDetails.redemption_code ? ` ${clientDetails.redemption_code}` : ''}</h3>
               
               {clientDetails.valid !== false ? (
                 <span className="coupon-valid-badge">
@@ -203,26 +203,18 @@ function ActionDrawer({
             </div>
             
             {/* Detalhes do cupom */}
-            <div className="coupon-details">
-              <h4 className="coupon-title">
+            <div className="coupon-details" style={{textAlign: 'center'}}>
+              <h4 className="coupon-title" style={{fontWeight: 700, fontSize: 20, marginBottom: 8}}>
                 {clientDetails.title || 'Cupom'}
               </h4>
-              {/* Código do cupom destacado logo abaixo do título */}
-              {clientDetails.code || clientDetails.coupon_code ? (
-                <div className="coupon-code" style={{margin: '8px 0 10px 0', fontWeight: 700, fontSize: 16, color: '#ff9900', background: 'rgba(255,153,0,0.11)', borderRadius: 7, padding: '4px 14px', letterSpacing: 1}}>
-                  {(clientDetails.code || clientDetails.coupon_code).toUpperCase()}
+              {clientDetails.redemption_date && (
+                <div className="coupon-redemption-date" style={{fontSize: 13, color: '#aaa'}}>
+                  Resgatado em: {new Date(clientDetails.redemption_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
                 </div>
-              ) : null}
-              <p className="coupon-description">
-                {clientDetails.description || 'Descrição não disponível'}
-              </p>
-              {clientDetails.expiration && (
-                <div className="coupon-expiration">
-                  Válido até {new Date(clientDetails.expiration).toLocaleDateString('pt-BR', {
-                    day: '2-digit', 
-                    month: '2-digit', 
-                    year: 'numeric'
-                  })}
+              )}
+              {clientDetails.expiry_date && (
+                <div className="coupon-expiration" style={{fontSize: 13, color: '#aaa'}}>
+                  Válido até: {new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
                 </div>
               )}
             </div>
