@@ -290,12 +290,13 @@ function ActionDrawer({
             max-height: 420px;
           }
         }
-        
-        /* Animação para a alça do drawer quando fechado */
+
+        /* Animação para a alça do drawer quando fechado - Ajustar translateY */
         .device-action-drawer:not(.open) {
-          transform: translateY(calc(100% - 20px)); /* Mostra apenas a alça e a barra quando fechado */
+          /* Manter uma parte maior visível, talvez 40px */
+          transform: translateY(calc(100% - 40px));
         }
-        
+
         /* Ocultar barra de rolagem */
         .device-action-drawer::-webkit-scrollbar {
           display: none;
