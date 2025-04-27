@@ -18,6 +18,9 @@
   },
   "server": {
     "cleartext": true,
-    "allowNavigation": ["zupy.com", "*.zupy.com"]
+    "allowNavigation": [
+      "zupy.com",
+      "*.zupy.com"
+    ]
   }
 }
