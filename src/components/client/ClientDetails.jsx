@@ -15,11 +15,11 @@ function ClientDetails({ clientDetails, currentScan }) {
         <div>{clientDetails.phone || 'Não informado'}</div>
         <div>{clientDetails.email || ''}</div>
       </div>
-      {clientDetails.rewards && clientDetails.rewards.length > 0 && (
+      {clientDetails.available_rewards && clientDetails.available_rewards.length > 0 && (
         <div className="mb-2">
           <div className="fw-bold">Prêmios Disponíveis:</div>
           <ul className="list-group list-group-flush">
-            {clientDetails.rewards.map((reward, idx) => (
+            {clientDetails.available_rewards.map((reward, idx) => (
               <li key={idx} className="list-group-item bg-transparent px-0 py-1">
                 <span className="badge bg-primary me-2">{reward.points_required} pts</span>
                 {reward.name}

@@ -424,27 +424,48 @@ function ResultPage() {
       onTabChange={setActiveTab}
       visor={
         <Visor mode={drawerOpen && drawerType === 'pontos' ? 'user_input' : (drawerOpen && drawerType === 'resgate' ? 'success' : (finalized ? 'success' : 'idle'))}>
-          {/* VISOR PRINCIPAL: ScannerDisplay sempre no topo, com feedback de pontos adicionados */}
-          <ScannerDisplay 
-            currentScan={currentScan} 
-            clientDetails={clientDetails} 
-            rfmSegment={rfmSegment} 
-          />
           <div className="client-visor-content">
-            {/* Área principal do visor com layout antigo e dados atualizados */}
-            <div className="client-info-header">
-              {/* Nome do cliente - maior e mais destacado */}
-              <div className="client-name-large">{clientDetails.client_name || '-'}</div>
-              {/* Pontos em destaque */}
-              <div className="client-points-large">
-                <span className="points-value">{clientDetails.points || 0}</span>
-                <span className="points-label">pontos</span>
+            {/* Status de pontos adicionados, quando aplicável */}
+            {finalized && points > 0 && (
+              <div className="client-status-header">
+                <div className="status-message success">
+                  <i className="bi bi-check-circle-fill"></i>
+                  +{points} pontos adicionados com sucesso!
+                </div>
               </div>
-              {/* Cartão */}
-              <div className="client-card-info">
-                <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
+            )}
+            
+            {/* Área principal do visor com layout verde brilhante */}
+            <div className="client-info-header">
+              {/* Foto do cliente (da API) */}
+              {clientDetails.user_photo_url && (
+                <div className="client-photo-area">
+                  <img 
+                    src={clientDetails.user_photo_url} 
+                    alt={clientDetails.client_name} 
+                    className="client-photo" 
+                  />
+                  <div className="client-valid-indicator">
+                    <i className="bi bi-check-lg"></i>
+                  </div>
+                </div>
+              )}
+              
+              <div className="client-details">
+                {/* Nome do cliente - maior e mais destacado */}
+                <div className="client-name-large">{clientDetails.client_name || '-'}</div>
+                {/* Pontos em destaque */}
+                <div className="client-points-large">
+                  <span className="points-value">{clientDetails.current_points || clientDetails.points || 0}</span>
+                  <span className="points-label">pontos</span>
+                </div>
+                {/* Cartão */}
+                <div className="client-card-info">
+                  <div className="card-number">Cartão: <span>{formatCardCode(clientDetails.card_number)}</span></div>
+                </div>
               </div>
             </div>
+            
             {/* Informações secundárias */}
             <div className="client-additional-info">
               {/* Segmento RFM */}
@@ -452,9 +473,10 @@ function ResultPage() {
                 <div className="segment-label">Segmento</div>
                 <div className={`segment-badge-large ${rfmSegment.class || 'bg-secondary'}`}> 
                   <span className="segment-emoji">{rfmSegment.emoji || '👤'}</span>
-                  <span className="segment-name">{rfmSegment.label || 'Cliente'}</span>
+                  <span className="segment-name">{clientDetails.tier || 'Cliente'}</span>
                 </div>
               </div>
+              
               {/* Visita e progresso */}
               <div className="client-visit-info">
                 <div className="visit-date">
@@ -480,14 +502,14 @@ function ResultPage() {
               </div>
               
               {/* Área de notificações importantes */}
-              {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 && (
+              {Array.isArray(clientDetails.available_rewards) && clientDetails.available_rewards.length > 0 && (
                 <div className="client-notification reward-notification">
                   <div className="notification-icon">
                     <i className="bi bi-gift-fill"></i>
                   </div>
                   <div className="notification-content">
                     <div className="notification-title">Prêmios Disponíveis!</div>
-                    <div className="notification-text">Cliente tem {clientDetails.rewards.length} prêmio(s) para resgate</div>
+                    <div className="notification-text">Cliente tem {clientDetails.available_rewards.length} prêmio(s) para resgate</div>
                   </div>
                 </div>
               )}
@@ -967,16 +989,7 @@ function ResultPage() {
                     <span className="badge bg-primary">{Math.floor((1 - clientDetails.next_reward_gap.missing_points / clientDetails.next_reward_gap.points_required) * 100)}%</span>
                   </div>
                 </div>
-                <ScannerDisplay 
-                  currentScan={currentScan} 
-                  clientDetails={clientDetails} 
-                  rfmSegment={rfmSegment} 
-                  reward={clientDetails.next_reward_gap} 
-                  coupon={clientDetails.coupon} 
-                  finalized={finalized} 
-                  addedPoints={finalized ? points : 0}
-                />
-/* ... */
+                {/* Removido o ScannerDisplay redundante */}
                 <div className="progress" style={{height: '8px'}}>
                   <div 
                     className="progress-bar" 
@@ -991,10 +1004,10 @@ function ResultPage() {
             )}
             
             {/* Prêmios disponíveis */}
-            {Array.isArray(clientDetails.rewards) && clientDetails.rewards.length > 0 ? (
+            {Array.isArray(clientDetails.available_rewards) && clientDetails.available_rewards.length > 0 ? (
               <div className={styles['device-info-card']}>
                 <h5 className="mb-3">Prêmios Disponíveis</h5>
-                {clientDetails.rewards.map((reward, index) => (
+                {clientDetails.available_rewards.map((reward, index) => (
                   <div key={index} className="card mb-2" style={{background: 'rgba(57, 255, 20, 0.1)', border: '1px solid rgba(57, 255, 20, 0.3)'}}>
                     <div className="card-body p-3">
                       <div className="d-flex">

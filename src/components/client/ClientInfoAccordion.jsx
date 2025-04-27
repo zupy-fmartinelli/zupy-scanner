@@ -48,7 +48,7 @@ function ClientInfoAccordion({ clientDetails, rfmSegment, expanded, onToggle }) 
               <div>
                 <h4 className="mb-2">{clientDetails.client_name || '-'}</h4>
                 <span className={`${styles['device-badge']} ${styles['device-badge-primary']}`}>
-                  {rfmSegment.emoji} {clientDetails.rfm_segment || clientDetails.tier || 'Regular'}
+                  {rfmSegment.emoji} {clientDetails.tier || 'Regular'}
                 </span>
               </div>
               
