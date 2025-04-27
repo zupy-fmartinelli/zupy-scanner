@@ -169,34 +169,35 @@ function Visor({ children, mode = 'idle', onToggleScanner }) {
         
         /* Textos de status originais - removidos */
         
-        /* Versões menores e mais discretas dos textos de status */
-        .screen-status-text-small {
+        /* Versões menores e mais discretas dos textos de status - Reposicionadas */
+        .screen-status-text-small { /* QR-Scanner */
           position: absolute;
-          top: 6px;
-          right: 10px;
-          color: rgba(255,255,255,0.5);
+          top: 8px; /* Um pouco mais para baixo */
+          left: 50%;
+          transform: translateX(-50%); /* Centralizado */
+          color: rgba(255,255,255,0.65); /* Um pouco mais visível */
           font-weight: 500;
           letter-spacing: 1px;
-          font-size: 12px;
-          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-          padding: 2px 6px;
+          font-size: 11px; /* Levemente menor */
+          text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+          padding: 2px 8px;
           border-radius: 4px;
-          background: rgba(0,0,0,0.15);
+          background: rgba(0,0,0,0.2);
           z-index: 10;
         }
-        
-        .screen-model-text-small {
+
+        .screen-model-text-small { /* ZUPY-2025-REV1 */
           position: absolute;
-          bottom: 6px;
-          left: 10px;
-          color: rgba(255,255,255,0.4);
+          bottom: 10px; /* Ajustado para subir um pouco */
+          left: 10px; /* Voltando para a esquerda */
+          color: rgba(255,255,255,0.6); /* Aumentando um pouco a opacidade */
           font-size: 10px;
-          font-weight: 400;
+          font-weight: 500;
           letter-spacing: 0.5px;
-          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.6);
           padding: 2px 6px;
           border-radius: 3px;
-          background: rgba(0,0,0,0.15);
+          background: rgba(0,0,0,0.2);
           z-index: 10;
         }
         

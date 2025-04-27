@@ -514,13 +514,27 @@ function ResultPage() {
                    <div className="coupon-visor-highlight" style={{margin: '16px 0 0 0', background: 'rgba(255,153,0,0.15)', border: '1.5px solid #ff9900', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, width: '100%'}}>
                      <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
                       <i className="bi bi-gift" style={{fontSize: 24, color: '#ff9900'}}></i>
-                      <span style={{fontWeight: 700, fontSize: 19, color: '#ff9900'}}>Prêmio para Resgate</span>
-                    </div>
-                    <div style={{fontWeight: 600, fontSize: 17, color: '#fff'}}>{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
-                    <div style={{fontSize: 15, color: '#fff', opacity: 0.87}}>{clientDetails.description || clientDetails.reward_description || ''}</div>
-                    <div style={{fontSize: 14, color: '#ff9900', fontWeight: 500}}>
-                      {clientDetails.points_required ? `${clientDetails.points_required} pontos` : ''}
-                      {clientDetails.expiry_date ? ` · Válido até ${new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR')}` : ''}
+                  <span style={{fontWeight: 700, fontSize: 19, color: '#ff9900'}}>Prêmio para Resgate</span>
+                </div>
+                <div style={{fontWeight: 600, fontSize: 17, color: '#fff'}}>{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
+                {/* Aplicar estilos para truncar a descrição */}
+                <div style={{
+                  fontSize: 15,
+                  color: '#fff',
+                  opacity: 0.87,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxHeight: '2.4em', /* Aproximadamente 2 linhas (ajustar se necessário) */
+                  lineHeight: '1.2em' /* Ajustar se necessário */
+                }}>
+                  {clientDetails.description || clientDetails.reward_description || ''}
+                </div>
+                <div style={{fontSize: 14, color: '#ff9900', fontWeight: 500}}>
+                  {clientDetails.points_required ? `${clientDetails.points_required} pontos` : ''}
+                  {clientDetails.expiry_date ? ` · Válido até ${new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR')}` : ''}
                     </div>
                     {/* Código do cupom (se disponível) */}
                     {(clientDetails.code || clientDetails.coupon_code || clientDetails.barcode_value) && (
@@ -778,7 +792,7 @@ function ResultPage() {
               position: absolute;
               bottom: 0;
               right: 0;
-              width: 24px;
+width: 24px;
               height: 24px;
               border-radius: 50%;
               background: #39FF14;
