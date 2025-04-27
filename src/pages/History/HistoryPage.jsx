@@ -10,7 +10,7 @@ function HistoryPage() {
   const { scanHistory, clearScanHistory } = useScanner();
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all'); // all, success, error, pending
+  const [filter, setFilter] = useState('all'); // all, points, rewards, error
 
   // Apply filters
   useEffect(() => {
@@ -41,12 +41,16 @@ function HistoryPage() {
       filtered = filtered.filter(scan => {
         const isError = scan.status === 'error' || (scan.result && scan.result.success === false);
         const isSuccess = scan.processed && !isError;
-        const isPending = !scan.processed;
+        // Verifica se é um scan de sucesso do tipo cartão de fidelidade (adição de pontos)
+        const isPoints = isSuccess && scan.result?.scan_type === 'loyalty_card';
+        // Verifica se é um scan de sucesso do tipo cupom E que foi resgatado
+        const isReward = isSuccess && scan.result?.scan_type === 'coupon' && scan.result?.can_redeem === false && scan.result?.message?.toLowerCase().includes('resgatado');
 
-        if (filter === 'success') return isSuccess;
+        if (filter === 'points') return isPoints;
+        if (filter === 'rewards') return isReward;
         if (filter === 'error') return isError;
-        if (filter === 'pending') return isPending;
-        return true;
+        // Se o filtro não for 'all' e não corresponder a nenhum dos casos acima, não incluir o item.
+        return false;
       });
     }
 
@@ -132,13 +136,13 @@ function HistoryPage() {
         details = `${resultData.points_awarded || 'N/A'} pontos`;
         subtitle = `${clientName || 'Cliente'} ${cardNumber ? `(${cardNumber})` : ''}`; // Adiciona cartão no subtítulo
       } else if (resultData.scan_type === 'coupon') {
-         if (resultData.can_redeem === false && resultData.message?.includes('resgatado')) {
+         if (resultData.can_redeem === false && resultData.message?.toLowerCase().includes('resgatado')) { // Verifica se foi resgatado
              title = 'Cupom Resgatado';
              icon = 'bi-gift-fill';
              details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
              subtitle = `Resgatado por ${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
          } else {
-             title = 'Cupom Válido';
+             title = 'Cupom Válido'; // Se não foi resgatado, era apenas uma validação
              icon = 'bi-ticket-perforated';
              details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
              subtitle = `${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
