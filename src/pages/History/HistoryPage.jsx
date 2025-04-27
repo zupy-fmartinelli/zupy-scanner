@@ -70,13 +70,16 @@ function HistoryPage() {
   // Get display info for each scan item
   const getScanDisplayInfo = (scan) => {
     let icon = 'bi-question-circle';
-    let colorClass = 'text-secondary';
+    let colorClass = 'text-secondary'; // Cor padrão
     let title = 'Scan';
     let details = scan.qrData; // Default detail is the QR data
+    let subtitle = ''; // Nova linha para cliente/cartão/cupom
 
     const resultData = scan.result;
     const errorDetails = scan.errorDetails;
     const clientName = resultData?.details?.client_name;
+    const cardNumber = resultData?.details?.card_number; // Assumindo que o backend retorna formatado
+    const couponCode = resultData?.details?.code || resultData?.details?.coupon_code; // Código do cupom
 
     if (!scan.processed) {
       icon = 'bi-hourglass-split';
@@ -84,14 +87,13 @@ function HistoryPage() {
       title = 'Pendente';
       details = 'Aguardando sincronização';
     } else if (scan.status === 'error' || (resultData && resultData.success === false)) {
-      // Use error info from getResultStatus logic (adapt slightly)
       const errorData = errorDetails?.data || resultData;
       const status = errorDetails?.status;
       const errorField = errorData?.error;
       const messageLower = errorData?.message?.toLowerCase() || '';
 
       colorClass = 'text-danger';
-      icon = 'bi-exclamation-triangle'; // Default error icon
+      icon = 'bi-exclamation-triangle';
       title = 'Falha';
       details = errorData?.message || 'Erro desconhecido';
 
@@ -116,34 +118,38 @@ function HistoryPage() {
           title = 'Pontos Insuficientes';
           icon = 'bi-coin';
       }
-      // Add more specific error titles/icons if needed
+      // Subtítulo pode mostrar o cliente se disponível, mesmo no erro
+      if (clientName) subtitle = clientName;
+
     } else if (resultData && resultData.success === true) {
-      colorClass = 'text-success';
+      colorClass = 'text-white'; // Alterado para branco
       icon = 'bi-check-circle';
       title = 'Sucesso';
 
       if (resultData.scan_type === 'loyalty_card') {
         title = 'Pontos Adicionados';
-        icon = 'bi-trophy';
-        details = `${resultData.points_awarded || 'N/A'} pontos para ${clientName || 'Cliente'}`;
+        icon = 'bi-coin';
+        details = `${resultData.points_awarded || 'N/A'} pontos`;
+        subtitle = `${clientName || 'Cliente'} ${cardNumber ? `(${cardNumber})` : ''}`; // Adiciona cartão no subtítulo
       } else if (resultData.scan_type === 'coupon') {
-         // Check if it was a redemption (can_redeem is now false)
          if (resultData.can_redeem === false && resultData.message?.includes('resgatado')) {
              title = 'Cupom Resgatado';
-             icon = 'bi-gift-fill'; // Icon for redeemed
-             details = `Cupom "${resultData.details?.title || 'Promocional'}" resgatado por ${clientName || 'Cliente'}`;
+             icon = 'bi-gift-fill';
+             details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
+             subtitle = `Resgatado por ${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
          } else {
-             // Could be just viewing a valid coupon, not redemption
              title = 'Cupom Válido';
              icon = 'bi-ticket-perforated';
              details = `Cupom "${resultData.details?.title || 'Promocional'}"`;
+             subtitle = `${clientName || 'Cliente'} ${couponCode ? `(${couponCode})` : ''}`;
          }
       } else {
         details = resultData.message || 'Operação bem-sucedida';
+        if (clientName) subtitle = clientName;
       }
     }
 
-    return { icon, colorClass, title, details };
+    return { icon, colorClass, title, details, subtitle };
   };
 
   // Format date for display
@@ -208,19 +214,19 @@ function HistoryPage() {
                     </button>
                     <button
                       type="button"
-                      className={`btn ${filter === 'success' ? 'btn-success' : 'btn-outline-secondary'}`}
-                      onClick={() => handleFilterChange('success')}
+                      className={`btn ${filter === 'points' ? 'btn-success' : 'btn-outline-secondary'}`}
+                      onClick={() => handleFilterChange('points')}
                     >
-                      <i className="bi bi-check-lg me-1"></i>
-                      Sucesso
+                      <i className="bi bi-coin me-1"></i> {/* Ícone de moeda */}
+                      Pontos
                     </button>
                     <button
                       type="button"
-                      className={`btn ${filter === 'pending' ? 'btn-warning' : 'btn-outline-secondary'}`}
-                      onClick={() => handleFilterChange('pending')}
+                      className={`btn ${filter === 'rewards' ? 'btn-info' : 'btn-outline-secondary'}`} /* Usar btn-info para prêmios */
+                      onClick={() => handleFilterChange('rewards')}
                     >
-                      <i className="bi bi-hourglass-split me-1"></i>
-                      Pendentes
+                      <i className="bi bi-gift-fill me-1"></i> {/* Ícone de presente */}
+                      Prêmios
                     </button>
                     <button
                       type="button"
@@ -249,11 +255,10 @@ function HistoryPage() {
               <div className={`list-group mb-4 mx-2 ${styles.historyList}`}>
                 {filteredHistory.map((scan, index) => {
                   const displayInfo = getScanDisplayInfo(scan);
-                  const clientName = scan.result?.details?.client_name;
 
                   return (
                     <div
-                      key={scan.timestamp + index} // Usar algo mais único se possível, como scan.scan_id
+                      key={scan.scan_id || scan.timestamp + index} // Usar scan_id se disponível
                       className={`list-group-item list-group-item-action ${styles.historyItem}`}
                     >
                       <div className="d-flex w-100 align-items-center">
@@ -262,22 +267,25 @@ function HistoryPage() {
                         </div>
 
                         <div className="flex-grow-1">
-                          <div className="d-flex w-100 justify-content-between">
-                            <h6 className={`mb-1 ${styles.historyItemTitle} ${displayInfo.colorClass}`}>
-                              {displayInfo.title} {clientName ? `- ${clientName}` : ''}
-                            </h6>
-                            <small className={`text-muted ${styles.historyItemDate}`}>
+                          <div className="d-flex w-100 justify-content-between align-items-start"> {/* Align items start */}
+                            <div> {/* Container para título e subtítulo */}
+                              <h6 className={`mb-0 ${styles.historyItemTitle} ${displayInfo.colorClass}`}> {/* mb-0 */}
+                                {displayInfo.title}
+                              </h6>
+                              {displayInfo.subtitle && (
+                                <small className={`d-block ${styles.historyItemSubtitle}`}> {/* Subtítulo em nova linha */}
+                                  {displayInfo.subtitle}
+                                </small>
+                              )}
+                            </div>
+                            <small className={`text-muted ${styles.historyItemDate} ms-2`}> {/* Adiciona margem */}
                               {formatDate(scan.timestamp)}
                             </small>
                           </div>
 
-                          <p className={`mb-0 small ${styles.historyItemDetails}`}>
+                          <p className={`mt-1 mb-0 small ${styles.historyItemDetails}`}> {/* mt-1 */}
                             {displayInfo.details}
                           </p>
-                          {/* Opcional: Mostrar QR Data original (talvez truncado) */}
-                          {/* <small className="text-muted d-block mt-1" style={{ wordBreak: 'break-all' }}>
-                            QR: {scan.qrData.substring(0, 50)}{scan.qrData.length > 50 ? '...' : ''}
-                          </small> */}
                         </div>
                       </div>
                     </div>
