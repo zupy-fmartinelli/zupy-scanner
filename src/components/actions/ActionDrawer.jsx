@@ -217,12 +217,12 @@ function ActionDrawer({
               )}
             </div>
             
-            {/* Botão de resgate */}
+            {/* Botão de resgate - margens ajustadas */}
             <button 
               className="redeem-btn"
               onClick={onSubmit} 
               disabled={loading}
-              style={{marginBottom: 18, marginTop: 8}} // margem inferior para não encostar no rodapé
+              style={{marginBottom: 10, marginTop: 10}} // Margens ajustadas para subir o botão
             >
               {loading ? (
                 <span className="loading-spinner"></span>
@@ -395,7 +395,7 @@ function ActionDrawer({
         
         /* Conteúdo do drawer */
         .drawer-content {
-          padding: 0 4px;
+          padding: 0 4px 10px; /* Adiciona padding inferior para garantir espaço */
           flex: 1;
           overflow-y: auto;
         }

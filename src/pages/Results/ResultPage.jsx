@@ -473,7 +473,10 @@ function ResultPage() {
                 <div className="success-message">
                   <div className="success-title">Prêmio Resgatado!</div>
                   <div className="success-detail reward-name">{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
-                  <div className="success-points redemption">Resgate efetuado com sucesso</div>
+                  {/* Mensagem de resgate - ajustada para garantir visibilidade */}
+                  <div className="success-points redemption" style={{fontSize: '16px', fontWeight: '600', color: '#ff9900', whiteSpace: 'normal', lineHeight: '1.4em'}}>
+                    Resgate efetuado com sucesso
+                  </div>
                 </div>
               </div>
             ) :
@@ -718,9 +721,10 @@ function ResultPage() {
             }
 
             .success-points.redemption {
-              font-size: 18px;
-              font-weight: 600;
-              color: #ff9900;
+              /* Estilos movidos inline para ajuste específico */
+              /* font-size: 18px; */
+              /* font-weight: 600; */
+              /* color: #ff9900; */
             }
 
             .success-detail {
