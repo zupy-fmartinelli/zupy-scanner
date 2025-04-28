@@ -15,6 +15,20 @@ import RewardsAccordion from '../../components/client/RewardsAccordion';
 import ErrorMessageDisplay from '../../components/common/ErrorMessageDisplay'; // Importar o novo componente de erro
 import styles from './ResultPage.module.css';
 
+// Função utilitária para formatar data (dd/mm/yyyy)
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return dateString; // Retorna a string original em caso de erro
+  }
+};
+
 // Mapeamento de RFM para emojis, cores e classes (memoizado para evitar recriações)
 const RFM_SEGMENTS = {
   "Campeões": { emoji: "🏆", color: "#2E8B57", class: "bg-success-subtle text-success" },
