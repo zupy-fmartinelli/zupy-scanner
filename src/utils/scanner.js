@@ -2,53 +2,52 @@
  * Scanner utility for handling QR code scanning
  */
 import { CapacitorBarcodeScanner } from '@capacitor/barcode-scanner';
+import { Camera } from '@capacitor/camera'; // Import Camera plugin
 import jsQR from 'jsqr';
 import { isNative } from './platform';
 
 /**
- * Check if camera permissions are granted
+ * Check if camera permissions are granted using the correct Capacitor API
  * @returns {Promise<boolean>} Whether permissions are granted
  */
 export const checkPermissions = async () => {
   if (!isNative()) {
     // Web doesn't have the same permission model
+    console.log('checkPermissions: Not native, returning true');
     return true;
   }
   
   try {
-    const result = await CapacitorBarcodeScanner.scanBarcode({
-      scanInstructions: '',
-      scanButton: false,
-      cancelText: 'Cancel',
-    });
-    
-    // If we reached this point, we have permissions
-    return true;
+    console.log('checkPermissions: Checking native camera permissions...');
+    const status = await Camera.checkPermissions();
+    console.log('checkPermissions: Status:', status.camera);
+    // Possible states: 'prompt', 'prompt-with-rationale', 'granted', 'denied'
+    return status.camera === 'granted';
   } catch (error) {
-    // If permission denied error
-    if (error.message && error.message.includes('permission')) {
-      return false;
-    }
-    
-    // If it's another error, assume we have permission
-    return true;
+    console.error('checkPermissions: Error checking camera permissions:', error);
+    return false; // Assume no permission on error
   }
 };
 
 /**
- * Request camera permissions
+ * Request camera permissions using the correct Capacitor API
  * @returns {Promise<boolean>} Whether permissions were granted
  */
 export const requestPermissions = async () => {
   if (!isNative()) {
     // Web handles permissions differently
+    console.log('requestPermissions: Not native, returning true');
     return true;
   }
   
   try {
-    const result = await checkPermissions();
-    return result;
+    console.log('requestPermissions: Requesting native camera permissions...');
+    const status = await Camera.requestPermissions({ permissions: ['camera'] });
+    console.log('requestPermissions: Status after request:', status.camera);
+    // Check if granted after request
+    return status.camera === 'granted';
   } catch (error) {
+    console.error('requestPermissions: Error requesting camera permissions:', error);
     return false;
   }
 };
