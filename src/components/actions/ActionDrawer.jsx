@@ -283,13 +283,13 @@ function ActionDrawer({
         
         @media (min-width: 480px) {
           .device-action-drawer.expanded {
-            max-height: 380px; /* Aumenta limite em telas maiores */
+            max-height: 450px; /* Aumenta limite em telas maiores */
           }
         }
         
         @media (min-width: 700px) {
           .device-action-drawer.expanded {
-            max-height: 420px; /* Aumenta limite em telas maiores */
+            max-height: 500px; /* Aumenta limite em telas maiores */
           }
         }
 

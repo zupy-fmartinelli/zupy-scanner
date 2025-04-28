@@ -530,7 +530,18 @@ function ResultPage() {
                       <i className="bi bi-gift" style={{fontSize: 24, color: '#ff9900'}}></i>
                   <span style={{fontWeight: 700, fontSize: 19, color: '#ff9900'}}>Prêmio para Resgate</span>
                 </div>
-                <div style={{fontWeight: 600, fontSize: 17, color: '#fff'}}>{clientDetails.title || clientDetails.reward_name || 'Cupom'}</div>
+                {/* Título do prêmio - ajustado para não quebrar linha */}
+                <div style={{
+                  fontWeight: 600,
+                  fontSize: 17,
+                  color: '#fff',
+                  whiteSpace: 'nowrap', /* Impede a quebra de linha */
+                  overflow: 'hidden', /* Esconde o texto que excede o contêiner */
+                  textOverflow: 'ellipsis', /* Adiciona reticências (...) ao texto truncado */
+                  width: '100%' /* Garante que o div ocupe a largura total para o ellipsis funcionar */
+                }}>
+                  {clientDetails.title || clientDetails.reward_name || 'Cupom'}
+                </div>
                 {/* Aplicar estilos para truncar a descrição */}
                 <div style={{
                   fontSize: 15,
