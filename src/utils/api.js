@@ -80,22 +80,39 @@ export const apiRequest = async ({
           try {
             // Get device ID from storage (using getItem might not work in native context)
             const deviceId = await getItem('device_id');
-            if (deviceId) {
-              headers['X-Device-ID'] = deviceId;
+            if (!deviceId) {
+              console.error('[AUTH] device_id ausente no storage nativo!');
+              throw new Error('device_id ausente. Refaça a autenticação.');
             }
-            
+            headers['X-Device-ID'] = deviceId;
+
             // Get scanner ID from storage
             const scannerData = await getItem('scanner_data');
-            if (scannerData && scannerData.id) {
-              headers['X-Scanner-ID'] = scannerData.id;
+            if (!scannerData || !scannerData.id) {
+              console.error('[AUTH] scanner_id ausente no storage nativo!');
+              throw new Error('scanner_id ausente. Refaça a autenticação.');
             }
+            headers['X-Scanner-ID'] = scannerData.id;
+
+            // Log para depuração
+            console.log('[AUTH] device_id:', deviceId);
+            console.log('[AUTH] scanner_id:', scannerData.id);
           } catch (err) {
-            console.warn('Could not add device identification headers:', err);
+            console.warn('Erro ao adicionar device/scanner headers:', err);
+            throw err;
           }
         }
       }
       
-      console.log('Native request headers:', headers);
+      // Log detalhado antes da request
+      console.log('[AUTH DEBUG] Native Request - Preparing Headers...');
+      console.log('[AUTH DEBUG] Retrieved Token:', token ? token.substring(0, 10) + '...' : 'NULL');
+      const retrievedDeviceId = await getItem('device_id');
+      console.log('[AUTH DEBUG] Retrieved Device ID:', retrievedDeviceId);
+      const retrievedScannerData = await getItem('scanner_data');
+      console.log('[AUTH DEBUG] Retrieved Scanner Data:', retrievedScannerData);
+      console.log('[AUTH DEBUG] Scanner Data ID:', retrievedScannerData ? retrievedScannerData.id : 'N/A');
+      console.log('[AUTH DEBUG] Final Headers to be sent:', headers);
       
       response = await CapacitorHttp.request({
         method,
