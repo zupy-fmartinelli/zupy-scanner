@@ -93,11 +93,11 @@ function ActionDrawer({
       ref={drawerRef}
       className={`device-action-drawer ${open ? 'open' : ''} ${expanded ? 'expanded' : 'collapsed'}`}
     >
-      {/* Alça do drawer - aumentar para facilitar deslizamento */}
+      {/* Alça do drawer - Interação apenas por toque/deslize */}
       <div 
         className="drawer-handle" 
-        onClick={() => setExpanded(!expanded)}
-        onTouchStart={handleTouchStart}
+        onTouchStart={handleTouchStart} 
+        style={{ cursor: 'grab' }} // Indica visualmente que é arrastável
       >
         <div className="drawer-handle-icon">
           <i className={`bi ${expanded ? 'bi-chevron-compact-down' : 'bi-chevron-compact-up'}`}></i>
@@ -202,19 +202,17 @@ function ActionDrawer({
               )}
             </div>
             
-            {/* Detalhes do cupom */}
+            {/* Detalhes do cupom - Título removido */}
             <div className="coupon-details" style={{textAlign: 'center'}}>
-              <h4 className="coupon-title" style={{fontWeight: 700, fontSize: 20, marginBottom: 8}}>
-                {clientDetails.title || 'Cupom'}
-              </h4>
+              {/* Título removido a pedido */}
               {clientDetails.redemption_date && (
-                <div className="coupon-redemption-date" style={{fontSize: 13, color: '#aaa'}}>
-                  Resgatado em: {new Date(clientDetails.redemption_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+                <div className="coupon-redemption-date" style={{fontSize: 13, color: '#aaa', marginBottom: '4px'}}>
+                  <i className="bi bi-calendar-check me-1"></i> Resgatado em: {new Date(clientDetails.redemption_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
                 </div>
               )}
               {clientDetails.expiry_date && (
-                <div className="coupon-expiration" style={{fontSize: 13, color: '#aaa'}}>
-                  Válido até: {new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+                <div className="coupon-expiration" style={{fontSize: 14, color: '#eee', fontWeight: '500'}}>
+                  <i className="bi bi-calendar-event me-1"></i> Válido até: {new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
                 </div>
               )}
             </div>
@@ -259,35 +257,39 @@ function ActionDrawer({
           border-top: 1px solid rgba(255,255,255,0.2);
           border-left: 1px solid rgba(255,255,255,0.1);
           border-right: 1px solid rgba(255,255,255,0.1);
-          overflow-y: auto;
+          overflow-y: hidden; /* Esconde o scroll vertical inicialmente */
           display: flex;
           flex-direction: column;
-          height: 180px; /* Altura reduzida ainda mais para modo recolhido */
+          min-height: 80px; /* Altura mínima garantida (recolhido) */
+          max-height: 80vh; /* Altura máxima para evitar cobrir a tela toda */
+          height: auto; /* Altura baseada no conteúdo */
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* IE/Edge */
         }
         
         /* Estado recolhido do drawer */
         .device-action-drawer.collapsed {
-          height: 80px; /* Área de toque confortável e visual equilibrado */
+          height: 80px; /* Altura fixa quando recolhido */
+          overflow-y: hidden;
         }
         
         /* Estado expandido do drawer */
         .device-action-drawer.expanded {
-          max-height: 340px;
-          height: auto;
-          min-height: 220px;
+          height: auto; /* Altura automática baseada no conteúdo */
+          min-height: 220px; /* Altura mínima quando expandido */
+          max-height: 340px; /* Limite máximo de altura */
+          overflow-y: auto; /* Permite scroll se o conteúdo for maior */
         }
         
         @media (min-width: 480px) {
           .device-action-drawer.expanded {
-            max-height: 380px;
+            max-height: 380px; /* Aumenta limite em telas maiores */
           }
         }
         
         @media (min-width: 700px) {
           .device-action-drawer.expanded {
-            max-height: 420px;
+            max-height: 420px; /* Aumenta limite em telas maiores */
           }
         }
 
