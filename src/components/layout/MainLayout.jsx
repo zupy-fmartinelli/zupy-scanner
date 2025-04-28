@@ -160,13 +160,7 @@ function MainLayout({ title, children, activeMenu, visor, tabActive, onTabChange
               <i className="bi bi-gift"></i>
               <span>Prêmios</span>
             </button>
-            <button
-              className="toggle-camera"
-              onClick={handleSync}
-              title="Alternar câmera"
-            >
-              <i className="bi bi-camera2"></i>
-            </button>
+            {/* Botão de alternar câmera removido a pedido */}
           </div>
         )}
       </div>
