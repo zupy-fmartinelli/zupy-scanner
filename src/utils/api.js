@@ -11,7 +11,9 @@ import { CapacitorHttp } from '@capacitor/core';
  * @returns {Promise<string|null>} The auth token or null
  */
 export const getAuthToken = async () => {
-  return await getItem('auth_token', null);
+  const token = await getItem('auth_token', null);
+  console.log('[AUTH DEBUG] getAuthToken() →', token ? token.substring(0, 20) + '...' : 'NULL');
+  return token;
 };
 
 /**
@@ -65,10 +67,14 @@ export const apiRequest = async ({
     let response;
     
     if (isNative()) {
-      // Use Capacitor HTTP plugin for native apps
+      // Sempre usar Capacitor HTTP plugin para todas requisições autenticadas no app nativo
       const headers = { 
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json' // Adicionado Accept para garantir resposta JSON
+      };
+      // LOG: início preparação headers
+      console.log('[AUTH DEBUG] [NATIVE] Preparando headers para request:', method, url);
+
       };
       
       if (token) {
@@ -79,14 +85,20 @@ export const apiRequest = async ({
         if (endpoint.includes('/scanner/api/v1/') && endpoint !== '/scanner/api/v1/auth/') {
           try {
             // Get device ID from storage (using getItem might not work in native context)
-            const deviceId = await getItem('device_id');
-            if (!deviceId) {
-              console.error('[AUTH] device_id ausente no storage nativo!');
+            const { value } = await Preferences.get({ key: 'device_id' });
+            if (value === null) {
+              console.log('[AUTH DEBUG] [NATIVE] getItem(device_id) → NULL');
               throw new Error('device_id ausente. Refaça a autenticação.');
             }
+            console.log('[AUTH DEBUG] [NATIVE] getItem(device_id) →', value.substring(0, 40) + (value.length > 40 ? '...' : ''));
+            const deviceId = JSON.parse(value);
             headers['X-Device-ID'] = deviceId;
 
             // Get scanner ID from storage
+            const { value: scannerValue } = await Preferences.get({ key: 'scanner_data' });
+            if (scannerValue === null) {
+              console.log('[AUTH DEBUG] [NATIVE] getItem(scanner_data) → NULL');
+              throw new Error('scanner_data ausente. Refaça a autenticação.');
             const scannerData = await getItem('scanner_data');
             if (!scannerData || !scannerData.id) {
               console.error('[AUTH] scanner_id ausente no storage nativo!');
