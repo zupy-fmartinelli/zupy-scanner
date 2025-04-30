@@ -14,11 +14,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   
   // Start camera and scanning
   useEffect(() => {
-    if (isNative()) {
-      onClose();
-      return;
-    }
-    
+    // Permitir scanner web em todos os ambientes (inclusive nativo)
     const startScanning = async () => {
       try {
         setError(null);

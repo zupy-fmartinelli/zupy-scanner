@@ -75,7 +75,6 @@ export const apiRequest = async ({
       // LOG: início preparação headers
       console.log('[AUTH DEBUG] [NATIVE] Preparando headers para request:', method, url);
 
-      };
       
       if (token) {
         // Use Bearer token for authorization
@@ -84,30 +83,28 @@ export const apiRequest = async ({
         // For scanner endpoints, add device identification headers
         if (endpoint.includes('/scanner/api/v1/') && endpoint !== '/scanner/api/v1/auth/') {
           try {
-            // Get device ID from storage (using getItem might not work in native context)
-            const { value } = await Preferences.get({ key: 'device_id' });
-            if (value === null) {
+            // Get device ID do storage nativo
+            const { value: deviceValue } = await Preferences.get({ key: 'zupy_scanner_device_id' });
+            if (!deviceValue) {
               console.log('[AUTH DEBUG] [NATIVE] getItem(device_id) → NULL');
               throw new Error('device_id ausente. Refaça a autenticação.');
             }
-            console.log('[AUTH DEBUG] [NATIVE] getItem(device_id) →', value.substring(0, 40) + (value.length > 40 ? '...' : ''));
-            const deviceId = JSON.parse(value);
+            const deviceId = JSON.parse(deviceValue);
             headers['X-Device-ID'] = deviceId;
+            console.log('[AUTH] device_id:', deviceId);
 
-            // Get scanner ID from storage
-            const { value: scannerValue } = await Preferences.get({ key: 'scanner_data' });
-            if (scannerValue === null) {
+            // Get scanner_data do storage nativo
+            const { value: scannerValue } = await Preferences.get({ key: 'zupy_scanner_scanner_data' });
+            if (!scannerValue) {
               console.log('[AUTH DEBUG] [NATIVE] getItem(scanner_data) → NULL');
               throw new Error('scanner_data ausente. Refaça a autenticação.');
-            const scannerData = await getItem('scanner_data');
-            if (!scannerData || !scannerData.id) {
+            }
+            const scannerData = JSON.parse(scannerValue);
+            if (!scannerData.id) {
               console.error('[AUTH] scanner_id ausente no storage nativo!');
               throw new Error('scanner_id ausente. Refaça a autenticação.');
             }
             headers['X-Scanner-ID'] = scannerData.id;
-
-            // Log para depuração
-            console.log('[AUTH] device_id:', deviceId);
             console.log('[AUTH] scanner_id:', scannerData.id);
           } catch (err) {
             console.warn('Erro ao adicionar device/scanner headers:', err);

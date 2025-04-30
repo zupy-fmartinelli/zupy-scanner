@@ -92,28 +92,8 @@ function AuthPage() {
   
   const handleStartScan = async () => {
     try {
-      if (isNative()) {
-        // Check and request camera permissions for native apps
-        const hasPermission = await checkPermissions();
-        if (!hasPermission) {
-          const granted = await requestPermissions();
-          if (!granted) {
-            toast.error('Camera permission is required for scanning');
-            return;
-          }
-        }
-        
-        // Use native scanner
-        setProcessingQR(true);
-        const qrData = await scanQRCode();
-        
-        if (qrData) {
-          await handleAuth(qrData);
-        }
-      } else {
-        // Show web scanner component
-        setShowScanner(true);
-      }
+      // Sempre usar scanner web, independente do ambiente
+      setShowScanner(true);
     } catch (error) {
       toast.error(error.message || 'Failed to start scanner');
       console.error('Scanner error:', error);

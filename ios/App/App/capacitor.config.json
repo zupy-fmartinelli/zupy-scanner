@@ -17,7 +17,6 @@
 		}
 	},
 	"server": {
-		"cleartext": true,
 		"allowNavigation": [
 			"zupy.com",
 			"*.zupy.com"
