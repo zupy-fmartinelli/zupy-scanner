@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { processVideoFrame, startCamera, stopCamera } from '../../utils/scanner';
-import { isNative } from '../../utils/platform';
 
 function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   const videoRef = useRef(null);
@@ -14,7 +13,7 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
   
   // Start camera and scanning
   useEffect(() => {
-    // Permitir scanner web em todos os ambientes (inclusive nativo)
+    // Sempre permitir scanner web (inclusive nativo)
     const startScanning = async () => {
       try {
         setError(null);
@@ -37,19 +36,21 @@ function ScannerComponent({ onQrScanned, onClose, autoClose = true }) {
         toast.error('Could not access camera. Please allow camera permissions.');
       }
     };
-    
+
+    // Sempre inicie o scanner web
     startScanning();
-    
+
     return () => {
-      // Clean up resources
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      // Stop camera and clean up
       if (streamRef.current) {
         stopCamera(streamRef.current);
       }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoClose]);
   
   // Function to scan each video frame
   const scanFrame = () => {

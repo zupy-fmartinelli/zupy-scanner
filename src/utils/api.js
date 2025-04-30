@@ -5,6 +5,7 @@ import axios from 'axios';
 import { isNative } from './platform';
 import { getItem, getApiUrl } from './storage';
 import { CapacitorHttp } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 
 /**
  * Get the auth token from storage

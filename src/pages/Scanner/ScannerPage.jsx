@@ -52,49 +52,24 @@ function ScannerPage() {
   const handleStartScan = async () => {
     setShowScanner(true);
     setScanningStatus('scanning');
-    try {
-      if (isNative()) {
-        // Check and request camera permissions for native apps
-        const hasPermission = await checkPermissions();
-        if (!hasPermission) {
-          const granted = await requestPermissions();
-          if (!granted) {
-            toast.error('Camera permission is required for scanning');
-            return;
-          }
-        }
-        
-        // Use native scanner
-        setScanningStatus('scanning');
-        const qrData = await scanQRCode();
-        
-        if (qrData) {
-          setScanningStatus('processing');
-          await processScan(qrData);
-        } else {
-          setScanningStatus('idle');
-        }
-      } else {
-        // Show web scanner component
-        setShowScanner(true);
-        setScanningStatus('scanning');
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to start scanner');
-      console.error('Scanner error:', error);
-      setScanningStatus('idle');
-    }
+    // Não há mais lógica para câmera nativa ou permissões.
   };
   
   const handleQRScanned = async (qrData) => {
     setShowScanner(false);
     setScanningStatus('processing');
 
-    // Sempre envie um objeto para processScan
-    const scanObj = typeof qrData === 'object' ? qrData : { qrData };
+    // Sempre envie uma string para processScan
+    let qrString = qrData;
+    if (typeof qrData === 'object' && qrData !== null) {
+      qrString = qrData.qrData || qrData.code || JSON.stringify(qrData);
+    }
+    if (typeof qrString !== 'string') {
+      qrString = String(qrString);
+    }
 
     try {
-      await processScan(scanObj);
+      await processScan(qrString);
       console.log('Chamada a processScan concluída.');
     } catch (error) {
       toast.error(error.message || 'Falha ao processar QR code');
@@ -102,6 +77,7 @@ function ScannerPage() {
       setScanningStatus('idle');
     }
   };
+
   
   const handleHistoryClick = () => {
     navigate('/history');
