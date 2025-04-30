@@ -187,42 +187,34 @@ function ActionDrawer({
           <div className="coupon-form">
             {/* Cabeçalho com status do cupom */}
             <div className="coupon-header">
-              <h3>Resgatar Cupom{clientDetails.redemption_code ? ` ${clientDetails.redemption_code}` : ''}</h3>
-              
-              {clientDetails.valid !== false ? (
-                <span className="coupon-valid-badge">
-                  <i className="bi bi-patch-check-fill"></i> 
-                  Válido
-                </span>
-              ) : (
-                <span className="coupon-invalid-badge">
-                  <i className="bi bi-x-circle-fill"></i> 
-                  Inválido
-                </span>
-              )}
-            </div>
+  <h3>Resgatar Cupom{clientDetails.redemption_code ? ` ${clientDetails.redemption_code}` : ''}</h3>
+  {clientDetails.valid !== false ? (
+    <span className="coupon-valid-badge">
+      <i className="bi bi-patch-check-fill"></i> 
+      Válido
+    </span>
+  ) : (
+    <span className="coupon-invalid-badge">
+      <i className="bi bi-x-circle-fill"></i> 
+      Inválido
+    </span>
+  )}
+</div>
+
             
             {/* Detalhes do cupom - Título removido */}
-            <div className="coupon-details" style={{textAlign: 'center'}}>
-              {/* Título removido a pedido */}
-              {clientDetails.redemption_date && (
-                <div className="coupon-redemption-date" style={{fontSize: 13, color: '#aaa', marginBottom: '4px'}}>
-                  <i className="bi bi-calendar-check me-1"></i> Resgatado em: {new Date(clientDetails.redemption_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
-                </div>
-              )}
-              {clientDetails.expiry_date && (
-                <div className="coupon-expiration" style={{fontSize: 14, color: '#eee', fontWeight: '500'}}>
-                  <i className="bi bi-calendar-event me-1"></i> Válido até: {new Date(clientDetails.expiry_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
-                </div>
-              )}
-            </div>
+            {clientDetails.redemption_date && (
+  <div className="coupon-redemption-date" style={{fontSize: 13, color: '#aaa', marginBottom: '4px', textAlign: 'center'}}>
+    <i className="bi bi-calendar-check me-1"></i> Resgatado em: {new Date(clientDetails.redemption_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+  </div>
+) }
             
             {/* Botão de resgate - margens ajustadas */}
             <button 
               className="redeem-btn"
               onClick={onSubmit} 
               disabled={loading}
-              style={{marginBottom: 10, marginTop: 10}} // Margens ajustadas para subir o botão
+              style={{marginTop: 8, marginBottom: 0}} // Botão elevado, ocupa o espaço do campo removido
             >
               {loading ? (
                 <span className="loading-spinner"></span>
@@ -242,14 +234,14 @@ function ActionDrawer({
           left: 0;
           right: 0;
           bottom: 0;
-          z-index: 40; /* Menor que o rodapé (z-index: 50) e maior que o visor (z-index: 20) */
+          z-index: 40;
           max-width: 480px;
           width: 100%;
           margin: 0 auto;
           background: linear-gradient(180deg, #3d1a68 0%, #2b1047 100%);
           border-radius: 24px 24px 0 0;
           box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-          padding: 12px 20px 80px; /* Padding reduzido no topo e mantido no fundo para o rodapé */
+          padding: 12px 20px 180px; /* Padding inferior mínimo para o botão ficar acima do rodapé */
           color: #fff;
           transform: translateY(100%);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -257,33 +249,33 @@ function ActionDrawer({
           border-top: 1px solid rgba(255,255,255,0.2);
           border-left: 1px solid rgba(255,255,255,0.1);
           border-right: 1px solid rgba(255,255,255,0.1);
-          overflow-y: hidden; /* Esconde o scroll vertical inicialmente */
+          overflow-y: hidden;
           display: flex;
           flex-direction: column;
-          min-height: 80px; /* Altura mínima garantida (recolhido) */
-          max-height: 80vh; /* Altura máxima para evitar cobrir a tela toda */
-          height: auto; /* Altura baseada no conteúdo */
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE/Edge */
+          min-height: 180px;
+          max-height: 98vh; /* Drawer cobre quase toda a parte inferior, mas deixa o botão sempre visível */
+          height: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         
         /* Estado recolhido do drawer */
         .device-action-drawer.collapsed {
-          height: 80px; /* Altura fixa quando recolhido */
+          height: 150px; /* Altura fixa quando recolhido */
           overflow-y: hidden;
         }
         
         /* Estado expandido do drawer */
         .device-action-drawer.expanded {
-          height: auto; /* Altura automática baseada no conteúdo */
-          min-height: 220px; /* Altura mínima quando expandido */
-          max-height: 340px; /* Limite máximo de altura */
-          overflow-y: auto; /* Permite scroll se o conteúdo for maior */
+          height: auto;
+          min-height: 240px;
+          max-height: 150vh; /* Drawer cobre quase toda a parte inferior */
+          overflow-y: auto;
         }
         
         @media (min-width: 480px) {
           .device-action-drawer.expanded {
-            max-height: 450px; /* Aumenta limite em telas maiores */
+            max-height: 90vh; /* Em telas maiores, cobre mais da tela e garante botão visível */
           }
         }
         
@@ -296,7 +288,7 @@ function ActionDrawer({
         /* Animação para a alça do drawer quando fechado - Ajustar translateY */
         .device-action-drawer:not(.open) {
           /* Manter uma parte maior visível, talvez 40px */
-          transform: translateY(calc(100% - 40px));
+          transform: translateY(calc(100% - 120px));
         }
 
         /* Ocultar barra de rolagem */
