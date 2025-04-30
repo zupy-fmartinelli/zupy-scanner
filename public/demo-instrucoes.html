@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instruções para Revisores - Zupy Scanner</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 750px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #333; }
+    h1, h2 { color: #4B0082; }
+    .qr-row { display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: center; margin: 2.5rem 0 1.5rem 0; }
+    .qr-block { display: flex; flex-direction: column; align-items: center; background: #fafaff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 1.5rem 1.5rem 1rem 1.5rem; }
+    .qr-block img { width: 180px; height: 180px; border-radius: 10px; border: 2px solid #eee; background: #fff; }
+    .qr-label { margin-top: 1rem; font-weight: bold; color: #333; }
+    .qr-desc { font-size: 0.98em; color: #666; margin-top: 0.25rem; text-align: center; }
+    .alert { background: #f8f7ff; border-left: 4px solid #4B0082; padding: 1rem; margin: 2rem 0; border-radius: 8px; }
+    ul { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Instruções para Revisores</h1>
+  <p>Esta página apresenta os QR Codes de demonstração para testar o app Zupy Scanner em ambiente seguro e isolado.</p>
+  <h2>QR Codes de Demonstração</h2>
+  <div class="qr-row">
+    <div class="qr-block">
+      <img src="/qr-codes/qr-code-user-fabinho-demo.png" alt="QR Code Usuário Demo" />
+      <div class="qr-label">Usuário Demo (Fabinho)</div>
+      <div class="qr-desc">Use este QR para simular um cliente demo.<br>ID: <b>14a0264ec8ba1c6b6a8f4d3b91d</b></div>
+    </div>
+    <div class="qr-block">
+      <img src="/qr-codes/qr-code-welcome-reward-demo.png" alt="QR Code Prêmio Boas-Vindas Demo" />
+      <div class="qr-label">Prêmio Boas-Vindas Demo</div>
+      <div class="qr-desc">Simule o resgate do prêmio de boas-vindas ilimitadamente.<br>ID: <b>146b4b9b46456b5082415c66588</b></div>
+    </div>
+  </div>
+  <div class="alert">
+    <b>Como testar:</b>
+    <ul>
+      <li>Autentique o app como <b>Scanner Demo</b> (<a href="/demo-auth.html">clique aqui para autenticar</a>).</li>
+      <li>Escaneie os QR Codes acima para simular operações de cliente e resgate de prêmio.</li>
+      <li>O fluxo demo é totalmente isolado e não afeta dados reais.</li>
+      <li>Você pode repetir o teste quantas vezes quiser.</li>
+    </ul>
+  </div>
+  <h2>Dúvidas?</h2>
+  <p style="color:#888;font-size:0.97em;">Em caso de dúvidas ou problemas, entre em contato com o suporte Zupy.</p>
+</body>
+</html>
