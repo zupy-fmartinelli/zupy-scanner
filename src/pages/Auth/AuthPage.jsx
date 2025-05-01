@@ -14,6 +14,7 @@ function AuthPage() {
   const [searchParams] = useSearchParams();
   const [showScanner, setShowScanner] = useState(false);
   const [processingQR, setProcessingQR] = useState(false);
+  const [authSuccess, setAuthSuccess] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
   const [apiUrl, setApiUrl] = useState('');
   const [debugLog, setDebugLog] = useState([]);
@@ -138,12 +139,15 @@ function AuthPage() {
       }
       
       await authenticateWithQR(tokenToUse);
-      
+      setAuthSuccess(true);
       if (debugMode) {
         addDebugLog('Authentication successful');
       }
-      
-      navigate('/scanner');
+      // Pequeno delay para o usuário ver a confirmação
+      setTimeout(() => {
+        setAuthSuccess(false);
+        navigate('/scanner');
+      }, 1200);
     } catch (error) {
       toast.error(error.message || 'Authentication failed');
       console.error('Auth error:', error);
@@ -246,18 +250,21 @@ function AuthPage() {
                 {error}
               </div>
             )}
-            
-            {showScanner ? (
+                       {showScanner ? (
               <div className="scanner-fullscreen">
                 <ScannerComponent 
                   onQrScanned={handleQRScanned}
                   onClose={() => setShowScanner(false)}
                 />
-
               </div>
             ) : (
               <div className="text-center">
-
+                {authSuccess && (
+                  <div className="alert alert-success mb-3" role="alert">
+                    <i className="bi bi-check-circle me-2"></i>
+                    Scanner autenticado com sucesso!
+                  </div>
+                )}
                 <button 
                   className="btn btn-primary btn-lg px-5 py-3 mb-3"
                   onClick={handleStartScan}
