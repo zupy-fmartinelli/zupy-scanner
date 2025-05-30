@@ -19,26 +19,72 @@
 <body>
   <h1>Instruções para Revisores</h1>
   <p>Esta página apresenta os QR Codes de demonstração para testar o app Zupy Scanner em ambiente seguro e isolado.</p>
-  <h2>QR Codes de Demonstração</h2>
+
+  <hr style="margin:2.5rem 0 1.5rem 0;">
+  <h1 style="color:#4B0082; font-size:1.25em;">Instructions for Reviewers (English)</h1>
+  <p>This page provides demo QR Codes to test the Zupy Scanner app in a safe and isolated environment.</p>
+  <h2>Exemplo de Cartão de Fidelidade (Wallet)</h2>
+  <div class="qr-row">
+    <div class="qr-block" style="border: 2px solid #4B0082;">
+      <img src="/qr-codes/cartao-de-fidelidade-demo-fabinho.png" alt="Exemplo Cartão de Fidelidade Wallet" style="width:220px;height:140px;" />
+      <div class="qr-label">Print do Cartão de Fidelidade Demo</div>
+      <div class="qr-desc">Este cartão de fidelidade foi criado exclusivamente para demonstração.<br><b>O revisor não precisa adicionar o cartão à Wallet</b>.<br>O QR Code abaixo serve apenas para simular a pontuação.<br><i>Observação: Os pontos não serão refletidos neste print, apenas em cartões reais de usuários.</i></div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:3rem; color:#4B0082;">Demo Loyalty Card Example (Wallet)</h2>
+  <div class="qr-row">
+    <div class="qr-block" style="border: 2px solid #4B0082;">
+      <img src="/qr-codes/cartao-de-fidelidade-demo-fabinho.png" alt="Demo Loyalty Card Wallet Example" style="width:220px;height:140px;" />
+      <div class="qr-label">Demo Loyalty Card Print</div>
+      <div class="qr-desc">This loyalty card was created exclusively for demonstration.<br><b>The reviewer does not need to add the card to the Wallet</b>.<br>The QR Code below is only for simulating point addition.<br><i>Note: Points will not be reflected in this print, only in real user cards added to the Wallet.</i></div>
+    </div>
+  </div>
+
+  <h2>QR Codes para Teste</h2>
+  <h2 style="color:#4B0082;">QR Codes for Testing</h2>
   <div class="qr-row">
     <div class="qr-block">
-      <img src="/qr-codes/qr-code-user-fabinho-demo.png" alt="QR Code Usuário Demo" />
-      <div class="qr-label">Usuário Demo</div>
-      <div class="qr-desc">Use este QR para simular um cliente demo.<br>ID: <b>14a0469f93d479df8a1b22dac24</b></div>
+      <img src="/qr-codes/qr-code-cartao-de-fidelidade-fabinho-demo.png" alt="QR Code Pontuar Cartão de Fidelidade Demo" />
+      <div class="qr-label">Pontuar Cartão de Fidelidade</div>
+      <div class="qr-desc">Escaneie este QR Code com o app Zupy Scanner para simular a adição de pontos ao cartão de fidelidade demo.<br><i>Os pontos não serão exibidos neste print, apenas em cartões reais adicionados à Wallet.</i></div>
     </div>
     <div class="qr-block">
-      <img src="/qr-codes/qr-code-welcome-reward-demo.png" alt="QR Code Prêmio Boas-Vindas Demo" />
-      <div class="qr-label">Prêmio Boas-Vindas Demo</div>
-      <div class="qr-desc">Simule o resgate do prêmio de boas-vindas ilimitadamente.<br>ID: <b>146b4b9b46456b5082415c66588</b></div>
+      <img src="/qr-codes/qr-code-cupon-demo-voltelogo-fabinho.png" alt="QR Code Cupom Demo VolteLogo" />
+      <div class="qr-label">Resgatar Cupom/Recompensa</div>
+      <div class="qr-desc">Escaneie este QR Code para simular o resgate de uma recompensa ou cupom demo.<br>Este é um cartão no formato cupom, criado apenas para demonstração.</div>
+    </div>
+  </div>
+
+  <div class="qr-row">
+    <div class="qr-block">
+      <img src="/qr-codes/qr-code-cartao-de-fidelidade-fabinho-demo.png" alt="QR Code Add Points to Demo Loyalty Card" />
+      <div class="qr-label">Add Points to Demo Loyalty Card</div>
+      <div class="qr-desc">Scan this QR Code with the Zupy Scanner app to simulate adding points to the demo loyalty card.<br><i>Points will not be shown in this print, only in real cards added to the Wallet.</i></div>
+    </div>
+    <div class="qr-block">
+      <img src="/qr-codes/qr-code-cupon-demo-voltelogo-fabinho.png" alt="QR Code Demo Coupon VolteLogo" />
+      <div class="qr-label">Redeem Demo Coupon/Reward</div>
+      <div class="qr-desc">Scan this QR Code to simulate redeeming a demo reward or coupon.<br>This is a coupon-format card created for demonstration only.</div>
     </div>
   </div>
   <div class="alert">
-    <b>Como testar:</b>
+    <b>Passo a passo para o revisor:</b>
     <ul>
-      <li>Autentique o app como <b>Scanner Demo</b> (<a href="/demo-auth.html">clique aqui para autenticar</a>).</li>
-      <li>Escaneie os QR Codes acima para simular operações de cliente e resgate de prêmio.</li>
-      <li>O fluxo demo é totalmente isolado e não afeta dados reais.</li>
-      <li>Você pode repetir o teste quantas vezes quiser.</li>
+      <li>1. <b>Autentique o app como Scanner Demo</b> (<a href="/demo-auth.html">clique aqui para autenticar</a>).</li>
+      <li>2. <b>Para testar a pontuação do cartão de fidelidade</b>: basta escanear o QR Code "Pontuar Cartão de Fidelidade" abaixo.<br><i>Não é necessário criar conta nem adicionar o cartão à Wallet.</i></li>
+      <li>3. <b>Para testar o resgate de uma recompensa/cupom</b>: escaneie o QR Code "Resgatar Cupom/Recompensa" abaixo.</li>
+      <li>O cartão de fidelidade e o cupom foram criados exclusivamente para demonstração. O fluxo demo é totalmente isolado e não afeta dados reais. Você pode repetir o teste quantas vezes quiser.</li>
+    </ul>
+  </div>
+
+  <div class="alert">
+    <b>Step-by-step for the reviewer:</b>
+    <ul>
+      <li>1. <b>Authenticate the app as Scanner Demo</b> (<a href="/demo-auth.html">click here to authenticate</a>).</li>
+      <li>2. <b>To test adding points to the loyalty card</b>: simply scan the "Add Points to Demo Loyalty Card" QR Code below.<br><i>No account creation or adding the card to the Wallet is required.</i></li>
+      <li>3. <b>To test redeeming a reward/coupon</b>: scan the "Redeem Demo Coupon/Reward" QR Code below.</li>
+      <li>The loyalty card and coupon were created exclusively for demonstration. The demo flow is fully isolated and does not affect real data. You can repeat the test as many times as you wish.</li>
     </ul>
   </div>
   <h2>Dúvidas?</h2>
