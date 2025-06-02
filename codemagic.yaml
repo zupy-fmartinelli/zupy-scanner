@@ -15,35 +15,48 @@ workflows:
       cocoapods: default
     scripts:
       - name: Instalar dependências npm do projeto Capacitor
-        script: | 
+        script: |
           npm install
+
       - name: Instalar dependências Cocoapods
-        script: | 
-          cd ios/App && pod install
+        script: |
+          cd ios/App
+          pod install
+          cd ../../
+
+      - name: Verificar se App.xcworkspace existe
+        script: |
+          ls -la ios/App/*.xcworkspace
+
       - name: Compilar código web para a pasta 'build'
         script: npm run build
+
       - name: Atualizar dependências nativas e copiar assets web
-        script: | 
+        script: |
           npx cap sync
+
       - name: Configurar assinatura no Xcode
-        script: | 
+        script: |
           xcode-project use-profiles
+
       - name: Incrementar build number
-        script: | 
+        script: |
           cd $CM_BUILD_DIR/ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+
       - name: Build ipa para distribuição
-        script: | 
-          cd $CM_BUILD_DIR/ios/App
+        script: |
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME"
+
     artifacts:
       - ios/App/build/ios/ipa/App.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
     publishing:
       email:
         recipients:
