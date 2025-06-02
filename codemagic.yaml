@@ -36,32 +36,35 @@ workflows:
         script: |
           npx cap sync
 
-      - name: Configurar assinatura automática no Xcode
-        script: |
-          xcode-project configure-signing \
-            --project ios/App/App.xcodeproj \
-            --target App \
-            --signing-style automatic \
-            --team-id $APPLE_TEAM_IDENTIFIER
-
-      - name: Configurar assinatura no Xcode (use-profiles)
-        script: |
-          xcode-project use-profiles
-
       - name: Incrementar build number
         script: |
           cd $CM_BUILD_DIR/ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
 
-      - name: Build ipa para distribuição
+      - name: Build e export .ipa com xcodebuild
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          cd ios/App
+
+          # Archive
+          xcodebuild archive \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -archivePath $CM_BUILD_DIR/build/App.xcarchive \
+            -allowProvisioningUpdates \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=$APPLE_TEAM_IDENTIFIER \
+            PRODUCT_BUNDLE_IDENTIFIER=com.zupy.scanner
+
+          # Export IPA
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/App.xcarchive \
+            -exportOptionsPlist ../../exportOptions.plist \
+            -exportPath $CM_BUILD_DIR/build/ios/ipa
 
     artifacts:
-      - ios/App/build/ios/ipa/App.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
