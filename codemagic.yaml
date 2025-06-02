@@ -39,13 +39,17 @@ workflows:
         script: |
           npx cap sync
 
+      - name: Definir versão do app (CFBundleShortVersionString)
+        script: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" ios/App/Info.plist
+
       - name: Configurar assinatura com certificados conectados
         script: |
           xcode-project use-profiles
 
       - name: Incrementar build number
         script: |
-          cd $CM_BUILD_DIR/ios/App
+          cd ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
 
@@ -57,7 +61,7 @@ workflows:
             --scheme "$XCODE_SCHEME"
 
     artifacts:
-      - ios/App/build/ios/ipa/*.ipa  # ✅ Corrigido: aponta para o caminho real do IPA
+      - ios/App/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
