@@ -36,7 +36,15 @@ workflows:
         script: |
           npx cap sync
 
-      - name: Configurar assinatura no Xcode
+      - name: Configurar assinatura automática no Xcode
+        script: |
+          xcode-project configure-signing \
+            --project ios/App/App.xcodeproj \
+            --target App \
+            --signing-style automatic \
+            --team-id $APPLE_TEAM_IDENTIFIER
+
+      - name: Configurar assinatura no Xcode (use-profiles)
         script: |
           xcode-project use-profiles
 
@@ -50,8 +58,7 @@ workflows:
         script: |
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME" \
-            --export-xcargs "CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=$APPLE_TEAM_IDENTIFIER"
+            --scheme "$XCODE_SCHEME"
 
     artifacts:
       - ios/App/build/ios/ipa/App.ipa
