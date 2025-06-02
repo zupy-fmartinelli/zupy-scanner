@@ -45,18 +45,37 @@ workflows:
 
       - name: Incrementar build number (CFBundleVersion)
         script: |
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
+          set -e  # Stop on any error
+          
+          # Tentar obter o último build number, com fallback
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "1")
           NEXT_BUILD_NUMBER=$(($LATEST_BUILD_NUMBER + 1))
 
+          echo "APP_STORE_APPLE_ID: $APP_STORE_APPLE_ID"
           echo "Último build: $LATEST_BUILD_NUMBER"
           echo "Novo build: $NEXT_BUILD_NUMBER"
 
+          # Verificar se conseguimos um número válido
+          if [ "$NEXT_BUILD_NUMBER" -le "1" ]; then
+            echo "Fallback: usando build number baseado no timestamp"
+            NEXT_BUILD_NUMBER=$(date +%Y%m%d%H%M | cut -c3-)  # Remove os 2 primeiros dígitos do ano
+          fi
+          
+          echo "Build number final: $NEXT_BUILD_NUMBER"
+
           # Atualizar Info.plist
-          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $NEXT_BUILD_NUMBER" ios/App/App/Info.plist || \
+          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $NEXT_BUILD_NUMBER" ios/App/App/Info.plist 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEXT_BUILD_NUMBER" ios/App/App/Info.plist
 
           # Atualizar project.pbxproj com o novo build number
-          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]\+;/CURRENT_PROJECT_VERSION = $NEXT_BUILD_NUMBER;/g" ios/App/App.xcodeproj/project.pbxproj
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $NEXT_BUILD_NUMBER;/g" ios/App/App.xcodeproj/project.pbxproj
+          
+          # Verificar se as mudanças foram aplicadas
+          echo "Verificando Info.plist:"
+          /usr/libexec/PlistBuddy -c "Print CFBundleVersion" ios/App/App/Info.plist
+          
+          echo "Verificando project.pbxproj:"
+          grep "CURRENT_PROJECT_VERSION" ios/App/App.xcodeproj/project.pbxproj | head -2
 
       - name: Configurar assinatura com certificados conectados
         script: |
