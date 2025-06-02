@@ -40,8 +40,8 @@ workflows:
 
       - name: Definir versão do app (CFBundleShortVersionString)
         script: |
-          /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $APP_VERSION" ios/App/Info.plist || \
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" ios/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $APP_VERSION" ios/App/App/Info.plist || \
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" ios/App/App/Info.plist
 
       - name: Incrementar build number (CFBundleVersion)
         script: |
@@ -51,8 +51,12 @@ workflows:
           echo "Último build: $LATEST_BUILD_NUMBER"
           echo "Novo build: $NEXT_BUILD_NUMBER"
 
-          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $NEXT_BUILD_NUMBER" ios/App/Info.plist || \
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEXT_BUILD_NUMBER" ios/App/Info.plist
+          # Atualizar Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $NEXT_BUILD_NUMBER" ios/App/App/Info.plist || \
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEXT_BUILD_NUMBER" ios/App/App/Info.plist
+
+          # Atualizar project.pbxproj com o novo build number
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]\+;/CURRENT_PROJECT_VERSION = $NEXT_BUILD_NUMBER;/g" ios/App/App.xcodeproj/project.pbxproj
 
       - name: Configurar assinatura com certificados conectados
         script: |
