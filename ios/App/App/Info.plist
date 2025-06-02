@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Este app precisa acessar a câmera para escanear códigos QR e códigos de barras dos produtos e cupons de desconto.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Este app precisa acessar a biblioteca de fotos para permitir o upload de imagens de códigos QR salvos na galeria.</string>
 </dict>
 </plist>
