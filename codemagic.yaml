@@ -41,6 +41,7 @@ workflows:
 
       - name: Definir versão do app (CFBundleShortVersionString)
         script: |
+          /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $APP_VERSION" ios/App/Info.plist || \
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" ios/App/Info.plist
 
       - name: Configurar assinatura com certificados conectados
