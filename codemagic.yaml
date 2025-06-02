@@ -1,32 +1,60 @@
 # Codemagic configuration for Capacitor iOS build
 workflows:
-  capacitor-ios:
-    name: Build iOS App (Capacitor)
-    max_build_duration: 60
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    integrations:
+      app_store_connect: codemagic
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: "com.zupy.scanner"
+      vars:
+        APP_STORE_APPLE_ID: "6746722127"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
       node: latest
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Instalar dependências
-        script: |
+      - name: Instalar dependências npm do projeto Capacitor
+        script: | 
           npm install
-      - name: Build web app
-        script: |
-          npm run build
-      - name: Sincronizar Capacitor
-        script: |
-          npx cap sync ios
-          cd ios
-          pod install
-      - name: Build iOS
-        script: |
-          cd ios
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $CM_BUILD_DIR/Build/App.xcarchive archive
-          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR/Build
+      - name: Instalar dependências Cocoapods
+        script: | 
+          cd ios/App && pod install
+      - name: Compilar código web para a pasta 'build'
+        script: npm run build
+      - name: Atualizar dependências nativas e copiar assets web
+        script: | 
+          npx cap sync
+      - name: Configurar assinatura no Xcode
+        script: | 
+          xcode-project use-profiles
+      - name: Incrementar build number
+        script: | 
+          cd $CM_BUILD_DIR/ios/App
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+      - name: Build ipa para distribuição
+        script: | 
+          cd $CM_BUILD_DIR/ios/App
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
     artifacts:
-      - ios/build/**/*.ipa
+      - ios/App/build/ios/ipa/App.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
     publishing:
       email:
         recipients:
           - webmaster@zupy.com.br
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
