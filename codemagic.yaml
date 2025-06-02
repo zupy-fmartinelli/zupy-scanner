@@ -1,24 +1,32 @@
-# Codemagic configuration for React (Node.js) project
+# Codemagic configuration for Capacitor iOS build
 workflows:
-  react-app:
-    name: React Build and Test
+  capacitor-ios:
+    name: Build iOS App (Capacitor)
     max_build_duration: 60
     environment:
       node: latest
+      xcode: latest
+      cocoapods: default
     scripts:
-      - name: Install dependencies
+      - name: Instalar dependências
         script: |
           npm install
-      - name: Run tests
-        script: |
-          npm test -- --watchAll=false || true
-      - name: Build app
+      - name: Build web app
         script: |
           npm run build
+      - name: Sincronizar Capacitor
+        script: |
+          npx cap sync ios
+          cd ios
+          pod install
+      - name: Build iOS
+        script: |
+          cd ios
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $CM_BUILD_DIR/Build/App.xcarchive archive
+          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR/Build
     artifacts:
-      - build/**
+      - ios/build/**/*.ipa
     publishing:
       email:
         recipients:
           - webmaster@zupy.com.br
-        notify_on_build_status: true
