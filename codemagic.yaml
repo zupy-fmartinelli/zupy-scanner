@@ -1,14 +1,16 @@
-# Codemagic configuration for Capacitor iOS build
+# Codemagic configuration for iOS build with manual signing
 workflows:
   ios-workflow:
     name: iOS Workflow
     max_build_duration: 120
     integrations:
-      app_store_connect: codemagic
+      app_store_connect: CodeMagic
     environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: "com.zupy.scanner"
+        certificate: "zupy_scanner_p12"
+        provisioning_profile: "ZupyScanner_Production_2025"
       vars:
         APP_STORE_APPLE_ID: "6746722127"
         XCODE_WORKSPACE: "App.xcworkspace"
@@ -38,13 +40,17 @@ workflows:
         script: |
           npx cap sync
 
+      - name: Configurar perfil de assinatura
+        script: |
+          xcode-project use-profiles
+
       - name: Incrementar build number
         script: |
           cd $CM_BUILD_DIR/ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
 
-      - name: Build ipa para distribuição
+      - name: Build IPA assinado para distribuição
         script: |
           cd ios/App
           xcode-project build-ipa \
