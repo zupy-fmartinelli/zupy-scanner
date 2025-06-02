@@ -3,14 +3,15 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     max_build_duration: 120
-    integrations:
-      app_store_connect: CodeMagic
+    ios_signing:
+      distribution_type: app_store
+      bundle_identifier: "com.zupy.scanner"
+      automatic_code_signing: true
     environment:
       vars:
         APP_STORE_APPLE_ID: "6746722127"
-        XCODE_WORKSPACE: "App.xcworkspace"  # ✅ Caminho local corrigido
+        XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
-        APPLE_TEAM_IDENTIFIER: "63XTPV8435"
       node: latest
       xcode: latest
       cocoapods: default
@@ -42,26 +43,12 @@ workflows:
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
 
-      - name: Build e export .ipa com xcodebuild
+      - name: Build ipa para distribuição
         script: |
           cd ios/App
-
-          # Archive
-          xcodebuild archive \
-            -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -archivePath $CM_BUILD_DIR/build/App.xcarchive \
-            -allowProvisioningUpdates \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM=$APPLE_TEAM_IDENTIFIER \
-            PRODUCT_BUNDLE_IDENTIFIER=com.zupy.scanner
-
-          # Export IPA
-          xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/build/App.xcarchive \
-            -exportOptionsPlist ../../exportOptions.plist \
-            -exportPath $CM_BUILD_DIR/build/ios/ipa
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
 
     artifacts:
       - build/ios/ipa/*.ipa
