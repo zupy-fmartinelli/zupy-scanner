@@ -13,6 +13,7 @@ workflows:
         APP_STORE_APPLE_ID: "6746722127"
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
+        APP_VERSION: "1.1.0"
       node: latest
       xcode: latest
       cocoapods: default
@@ -71,4 +72,4 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        submit_to_app_store: false
+        submit_to_app_store: true
