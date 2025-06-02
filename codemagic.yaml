@@ -1,4 +1,4 @@
-# Codemagic configuration for iOS build with manual signing
+# Codemagic configuration for iOS build with manual signing via UI
 workflows:
   ios-workflow:
     name: iOS Workflow
@@ -9,8 +9,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: "com.zupy.scanner"
-        certificate: "zupy_scanner_p12"
-        provisioning_profile: "ZupyScanner_Production_2025"
       vars:
         APP_STORE_APPLE_ID: "6746722127"
         XCODE_WORKSPACE: "App.xcworkspace"
@@ -40,7 +38,7 @@ workflows:
         script: |
           npx cap sync
 
-      - name: Configurar perfil de assinatura
+      - name: Configurar assinatura com certificados conectados
         script: |
           xcode-project use-profiles
 
