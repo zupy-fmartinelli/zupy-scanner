@@ -1,4 +1,3 @@
-# Codemagic configuration for iOS build with manual signing via UI
 workflows:
   ios-workflow:
     name: iOS Workflow
@@ -44,10 +43,6 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $APP_VERSION" ios/App/Info.plist || \
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" ios/App/Info.plist
 
-      - name: Configurar assinatura com certificados conectados
-        script: |
-          xcode-project use-profiles
-
       - name: Incrementar build number (CFBundleVersion)
         script: |
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
@@ -58,6 +53,10 @@ workflows:
 
           /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $NEXT_BUILD_NUMBER" ios/App/Info.plist || \
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEXT_BUILD_NUMBER" ios/App/Info.plist
+
+      - name: Configurar assinatura com certificados conectados
+        script: |
+          xcode-project use-profiles
 
       - name: Build IPA assinado para distribuição
         script: |
